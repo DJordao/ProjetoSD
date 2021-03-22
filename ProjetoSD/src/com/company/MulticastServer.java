@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.util.Iterator;
 import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -38,7 +37,8 @@ public class MulticastServer extends Thread{
 
                 // Tem que se ir buscar ao RMI
                 CopyOnWriteArrayList<Pessoa> p = new CopyOnWriteArrayList<>();
-                p.add(new Pessoa("Diogo Filipe", "1234", "estudante", "DEI", 1234, "Leiria", "1234", null));
+                p.add(new Pessoa("Diogo Filipe", "1234", "1234", "estudante", "DEI", 1234, "Leiria", "1234", null));
+
                 for(int i = 0; i < p.size(); i++) {
                     if(p.get(i).getNum_cc().equals(input)) {
                         byte[] buffer = input.getBytes();

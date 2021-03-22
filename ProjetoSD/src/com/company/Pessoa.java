@@ -5,6 +5,7 @@ import java.util.Date;
 
 public class Pessoa implements Serializable{
     private String nome;
+    private String username;
     private String password;
     private String funcao;
     private String departamento;
@@ -14,8 +15,9 @@ public class Pessoa implements Serializable{
     private Date data_validade_cc;
 
 
-    public Pessoa(String nome, String password, String funcao, String departamento, int num_telefone, String morada, String num_cc, Date data_validade_cc) {
+    public Pessoa(String nome, String username, String password, String funcao, String departamento, int num_telefone, String morada, String num_cc, Date data_validade_cc) {
         this.nome = nome;
+        this.username = username;
         this.password = password;
         this.funcao = funcao;
         this.departamento = departamento;
@@ -31,6 +33,14 @@ public class Pessoa implements Serializable{
 
     public void setNome(String nome) {
         this.nome = nome;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPassword() {
@@ -93,6 +103,7 @@ public class Pessoa implements Serializable{
     public String toString() {
         return "Pessoa{" +
                 "nome='" + nome + '\'' +
+                "username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", funcao='" + funcao + '\'' +
                 ", departamento='" + departamento + '\'' +
