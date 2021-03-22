@@ -49,30 +49,6 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	}
 
 
-	// RMI FICHA 3
-	public String sayHello() throws RemoteException {
-		System.out.println("Printing on server...");
-		return "ACK";
-	}
-
-	public void remote_print(String s) throws RemoteException {
-		System.out.println("Server:" + s);
-	}
-
-	public void remote_print(Message m) throws RemoteException {
-		System.out.println("Server:" + m);
-	}
-
-	public void publish(Package p) throws RemoteException{
-		System.out.println(p.toString());
-
-	}
-	public Message ping_pong(Message m) throws RemoteException {
-		Message m1 = new Message("");
-		m1.text = m.text + "....";
-		return m1;
-	}
-
 	// =======================================================
 
 	public static void main(String args[]) {
