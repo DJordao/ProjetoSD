@@ -1,4 +1,4 @@
-package com.company.RMIFiles;
+/*package com.company.RMIFiles;
 
 import com.company.Message;
 
@@ -31,4 +31,4 @@ public class AdminConsole {
 
 	}
 
-}
+}*/

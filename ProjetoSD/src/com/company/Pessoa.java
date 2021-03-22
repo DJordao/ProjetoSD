@@ -10,11 +10,11 @@ public class Pessoa implements Serializable{
     private String departamento;
     private int num_telefone;
     private String morada;
-    private int num_cc;
+    private String num_cc;
     private Date data_validade_cc;
 
 
-    public Pessoa(String nome, String password, String funcao, String departamento, int num_telefone, String morada, int num_cc, Date data_validade_cc) {
+    public Pessoa(String nome, String password, String funcao, String departamento, int num_telefone, String morada, String num_cc, Date data_validade_cc) {
         this.nome = nome;
         this.password = password;
         this.funcao = funcao;
@@ -73,11 +73,11 @@ public class Pessoa implements Serializable{
         this.morada = morada;
     }
 
-    public int getNum_cc() {
+    public String getNum_cc() {
         return num_cc;
     }
 
-    public void setNum_cc(int num_cc) {
+    public void setNum_cc(String num_cc) {
         this.num_cc = num_cc;
     }
 
