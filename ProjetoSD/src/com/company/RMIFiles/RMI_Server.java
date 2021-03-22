@@ -1,6 +1,7 @@
 package com.company.RMIFiles;
 
 import com.company.Eleicao;
+import com.company.Message;
 import com.company.Pessoa;
 
 import java.net.MalformedURLException;
@@ -9,14 +10,16 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
 public class RMI_Server extends UnicastRemoteObject implements RMInterface {
+	static AdminConsoleInterface client;
+
 
 	public RMI_Server() throws RemoteException {
 		super();
 	}
 
-
 	@Override
 	public Pessoa registaPessoa(Pessoa p) throws RemoteException {
+		client.print_on_client("Server: Registo feito com sucesso");
 		return null;
 	}
 
@@ -45,6 +48,30 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 
 	}
 
+
+	// RMI FICHA 3
+	public String sayHello() throws RemoteException {
+		System.out.println("Printing on server...");
+		return "ACK";
+	}
+
+	public void remote_print(String s) throws RemoteException {
+		System.out.println("Server:" + s);
+	}
+
+	public void remote_print(Message m) throws RemoteException {
+		System.out.println("Server:" + m);
+	}
+
+	public void publish(Package p) throws RemoteException{
+		System.out.println(p.toString());
+
+	}
+	public Message ping_pong(Message m) throws RemoteException {
+		Message m1 = new Message("");
+		m1.text = m.text + "....";
+		return m1;
+	}
 
 	// =======================================================
 
