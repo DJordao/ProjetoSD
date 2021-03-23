@@ -61,15 +61,12 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 
 			System.out.println("Hello Server ready.");
 
-			//PostgreSQLJDBC db = new PostgreSQLJDBC();
-			//db.ConectDatabase();
+
 		} catch (RemoteException re) {
 			System.out.println("Exception in HelloImpl.main: " + re);
 		} catch (MalformedURLException e) {
 			System.out.println("MalformedURLException in HelloImpl.main: " + e);
-		} /*catch (SQLException throwables) {
-			throwables.printStackTrace();
-		}*/
+		}
 
 	}
 
