@@ -1,5 +1,8 @@
 package com.company;
 
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
+import java.io.StreamCorruptedException;
 import java.net.MulticastSocket;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -13,53 +16,75 @@ public class VotingTerminal extends Thread {
     private VotingThread vt;
 
     public static void main(String[] args) {
-        VotingTerminal term = new VotingTerminal();
+        VotingTerminal term = new VotingTerminal(args[0]);
         term.start();
     }
 
-    public VotingTerminal() {
-        super("Terminal de voto");
-        this.vt = new VotingThread();
-    }
-
-    public VotingThread getVt() {
-        return this.vt;
+    public VotingTerminal(String id) {
+        super(id);
+        this.vt = new VotingThread(id);
     }
 
     public void run() {
         MulticastSocket socket = null;
 
         try {
-            socket = new MulticastSocket(PORT);  // create socket and bind it
+            socket = new MulticastSocket(PORT);  // Socket para comunicar com o servidor
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_TERM);
             socket.joinGroup(group);
+
             while (true) {
                 byte[] buffer = new byte[256];
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);
 
-                System.out.println("Received packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + " with message:");
                 String message = new String(packet.getData(), 0, packet.getLength());
-                System.out.println(message);
+                if(message.equals("get_term")) {
+                    if(!this.vt.isAlive()) {
+                        buffer = getName().getBytes();
+                        socket.send(new DatagramPacket(buffer, buffer.length, group, PORT));
 
-                if(!getVt().isAlive()) {
+                        System.out.println("Terminal de voto " + getName());
+
+                        Pessoa p = null;
+                        while (p == null) {
+                            byte[] obj_buffer = new byte[100000];
+                            socket.receive(new DatagramPacket(obj_buffer, obj_buffer.length, group, PORT));
+
+                            try {
+                                ByteArrayInputStream bais = new ByteArrayInputStream(obj_buffer);
+                                ObjectInputStream ois = new ObjectInputStream(bais);
+                                Object read_object = ois.readObject();
+                                if (read_object instanceof Pessoa) {
+                                    p = (Pessoa) read_object;
+                                }
+                            }catch (StreamCorruptedException | ClassNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        while(true) {
+                            Scanner keyboard_scanner = new Scanner(System.in);
+                            System.out.println("Introduza o seu username: ");
+                            String username = keyboard_scanner.nextLine();
+                            System.out.println("Introduza a sua password: ");
+                            String password = keyboard_scanner.nextLine();
+
+                            if(p.getUsername().equals(username) && p.getPassword().equals(password)) {
+                                System.out.println("Autenticação bem sucedida.");
+                                this.vt.start();
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        String occupied = "occupied";
+                        buffer = occupied.getBytes();
+                        socket.send(new DatagramPacket(buffer, buffer.length, group, PORT));
+                    }
+
 
                 }
-                Scanner keyboard_scanner = new Scanner(System.in);
-                //String username = keyboard_scanner.nextLine();
-                String password = keyboard_scanner.nextLine();
-
-                // Tem que receber do servidor
-                Pessoa p = new Pessoa("Diogo Filipe", "df", "1234", "estudante", "DEI", 1234, "Leiria", "1234", null);
-
-                if(/*p.getUsername().equals(username) && */p.getPassword().equals(password)) {
-                    System.out.println("Autenticado com sucesso.");
-
-                }
-                else {
-                    System.out.println("Dado(s) de autenticação errado(s).");
-                }
-
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -73,13 +98,15 @@ class VotingThread extends Thread {
     private String MULTICAST_ADDRESS_VOTE = "224.3.2.2";
     private int PORT = 4321;
 
-    public VotingThread() {
-        super("Terminal");
+    public VotingThread(String id) {
+        super(id);
     }
 
     public void run() {
+        System.out.println("Terminal de voto " + getName());
+
         MulticastSocket socket = null;
-        System.out.println(this.getName() + " online...");
+
         try {
             socket = new MulticastSocket();  // create socket without binding it (only for sending)
             Scanner keyboard_scanner = new Scanner(System.in);
@@ -90,9 +117,9 @@ class VotingThread extends Thread {
                 InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_VOTE);
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, PORT);
                 socket.send(packet);
-                this.join();
+                return;
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         } finally {
             socket.close();
