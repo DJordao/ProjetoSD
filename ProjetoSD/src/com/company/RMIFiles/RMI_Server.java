@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.sql.SQLException;
 
 public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	static AdminConsoleInterface client;
@@ -56,12 +57,19 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		try {
 			RMI_Server h = new RMI_Server();
 			Naming.rebind("hello", h);
+
+
 			System.out.println("Hello Server ready.");
+
+			//PostgreSQLJDBC db = new PostgreSQLJDBC();
+			//db.ConectDatabase();
 		} catch (RemoteException re) {
 			System.out.println("Exception in HelloImpl.main: " + re);
 		} catch (MalformedURLException e) {
 			System.out.println("MalformedURLException in HelloImpl.main: " + e);
-		}
+		} /*catch (SQLException throwables) {
+			throwables.printStackTrace();
+		}*/
 
 	}
 

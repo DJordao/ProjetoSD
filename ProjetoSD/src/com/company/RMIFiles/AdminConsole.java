@@ -5,13 +5,18 @@ import com.company.Pessoa;
 
 import java.rmi.Naming;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.text.SimpleDateFormat;
 
-public class AdminConsole {
+public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInterface{
+
+	protected AdminConsole() throws RemoteException {
+		super();
+	}
 
 	public void print_on_client(String s) throws RemoteException {
 		System.out.println("> " + s);

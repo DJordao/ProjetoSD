@@ -2,7 +2,8 @@ package com.company.RMIFiles;
 import java.sql.*;
 
 public class PostgreSQLJDBC {
-    public static void main(String args[]) throws SQLException {
+
+    public void ConectDatabase() throws SQLException {
         Connection c = null;
         Statement st = null;
         try {
@@ -40,7 +41,6 @@ public class PostgreSQLJDBC {
             System.err.println(e.getClass().getName()+": "+e.getMessage());
             System.exit(0);
         }
-
 
     }
 }
