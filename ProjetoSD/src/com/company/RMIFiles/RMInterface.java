@@ -23,7 +23,7 @@ public interface RMInterface extends Remote {
 
     void print_on_server(String s) throws RemoteException;
 
-    void subscribe(AdminConsole c) throws RemoteException;
+    void subscribe(AdminConsoleInterface c) throws RemoteException;
 
 
 

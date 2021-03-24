@@ -5,8 +5,12 @@ import com.company.Message;
 import com.company.Pessoa;
 
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.rmi.Naming;
+import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.SQLClientInfoException;
 
@@ -19,7 +23,7 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	}
 
 	@Override
-	public void subscribe(AdminConsole c) throws RemoteException {
+	public void subscribe(AdminConsoleInterface c) throws RemoteException {
 		client = c;
 		System.out.println("Entrei");
 	}
@@ -71,11 +75,12 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	public static void main(String args[]) {
 
 		try {
-			System.out.println("Hello Server ready.");
 
 			RMI_Server h = new RMI_Server();
-			Naming.rebind("RMIConnect", h);
+			Registry r = LocateRegistry.createRegistry(6000);
+			r.rebind("RMIConnect", h);
 
+			System.out.println("Hello Server ready.");
 
 
 			PostgreSQLJDBC db = new PostgreSQLJDBC();
@@ -85,8 +90,6 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 
 		} catch (RemoteException re) {
 			System.out.println("Exception in HelloImpl.main: " + re);
-		} catch (MalformedURLException e) {
-			System.out.println("MalformedURLException in HelloImpl.main: " + e);
 		} catch (SQLClientInfoException throwables) {
 			throwables.printStackTrace();
 		}

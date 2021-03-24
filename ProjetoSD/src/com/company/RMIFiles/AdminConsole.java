@@ -3,7 +3,9 @@ package com.company.RMIFiles;
 import com.company.Pessoa;
 
 import java.rmi.Naming;
+import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.text.ParseException;
 import java.util.InputMismatchException;
@@ -206,11 +208,12 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		//System.setSecurityManager(new RMISecurityManager());
 
 		try {
-			RMInterface h = (RMInterface) Naming.lookup("RMIConnect");
+			RMInterface h = (RMInterface) LocateRegistry.getRegistry(6000).lookup("RMIConnect");
 			AdminConsole admin = new AdminConsole();
 
-			System.out.println("Client sent subscription to server->" + admin.toString());
-			//h.subscribe(admin);
+			//System.out.println("Client sent subscription to server->" + admin.toString());
+			h.subscribe(admin);
+
 
 
 			while(true){

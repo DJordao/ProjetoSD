@@ -35,7 +35,6 @@ public class PostgreSQLJDBC {
         Connection c = connectDB();
         Statement stmt = null;
         PreparedStatement myStmt;
-        System.out.println("Entrei");
         try {
 
             stmt = c.createStatement();
