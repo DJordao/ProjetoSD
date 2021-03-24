@@ -60,16 +60,11 @@ public class Communication {
             byte[] obj_buffer = Arrays.copyOfRange(buffer, 6, buffer.length);
 
             ByteArrayInputStream bais = new ByteArrayInputStream(obj_buffer);
-            try {
-                ObjectInputStream ois = new ObjectInputStream(bais);
-                Object read_object = ois.readObject();
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            Object read_object = ois.readObject();
 
-                if (read_object instanceof Pessoa) {
-                    return read_object;
-                }
-
-            } catch (StreamCorruptedException e) {
-                e.printStackTrace();
+            if (read_object instanceof Pessoa) {
+                return read_object;
             }
         }
 
