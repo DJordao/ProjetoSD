@@ -7,6 +7,7 @@ import java.net.MulticastSocket;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.io.IOException;
+import java.sql.SQLOutput;
 import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -14,6 +15,7 @@ public class VotingTerminal extends Thread {
     private String MULTICAST_ADDRESS_TERM = "224.3.2.1";
     private int PORT = 4321;
     private VotingThread vt;
+    private boolean busy = false;
 
     public static void main(String[] args) {
         VotingTerminal term = new VotingTerminal(args[0]);
@@ -22,7 +24,6 @@ public class VotingTerminal extends Thread {
 
     public VotingTerminal(String id) {
         super(id);
-        this.vt = new VotingThread(id);
     }
 
     public void run() {
@@ -32,20 +33,20 @@ public class VotingTerminal extends Thread {
             socket = new MulticastSocket(PORT);  // Socket para comunicar com o servidor
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_TERM);
             socket.joinGroup(group);
+
             Communication c = new Communication(socket, group);
 
             while (true) {
-                String message = c.ReceiveOperation();
-
+                String message = c.receiveOperation();
+                this.vt = new VotingThread(getName());
                 if(message.equals("get_term")) {
-                    if(!this.vt.isAlive()) {
-                        c.SendOperation(getName());
+                        c.sendOperation(getName());
 
                         System.out.println("Terminal de voto " + getName());
 
                         Pessoa p = null;
                         while (p == null) {
-                            p = (Pessoa) c.ReceiveObject();
+                            p = (Pessoa) c.receiveObject();
                         }
 
                         while(true) {
@@ -61,15 +62,11 @@ public class VotingTerminal extends Thread {
                                 break;
                             }
                         }
-                    }
-                    else {
-                        c.SendOperation("occupied");
-                    }
 
-
+                    this.vt.join();
                 }
             }
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException | InterruptedException e) {
             e.printStackTrace();
         } finally {
             socket.close();
@@ -91,17 +88,17 @@ class VotingThread extends Thread {
         MulticastSocket socket = null;
 
         try {
-            socket = new MulticastSocket();  // create socket without binding it (only for sending)
-            Scanner keyboard_scanner = new Scanner(System.in);
-            while (true) {
-                String readKeyboard = keyboard_scanner.nextLine();
-                byte[] buffer = readKeyboard.getBytes();
+            socket = new MulticastSocket();  // Socket para enviar os votos
+            InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_VOTE);
+            Communication c = new Communication(socket, group);
 
-                InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_VOTE);
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, PORT);
-                socket.send(packet);
-                return;
-            }
+            Scanner keyboard_scanner = new Scanner(System.in);
+            String readKeyboard = keyboard_scanner.nextLine();
+            c.sendOperation(readKeyboard);
+            System.out.println("Voto enviado.");
+
+            return;
+
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

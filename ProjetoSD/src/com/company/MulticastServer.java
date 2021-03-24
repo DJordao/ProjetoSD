@@ -1,7 +1,6 @@
 package com.company;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.Scanner;
@@ -10,7 +9,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class MulticastServer extends Thread{
     private String MULTICAST_ADDRESS_TERM = "224.3.2.1";
     private int PORT = 4321;
-    private VoteReceiver collector;
 
     public static void main(String[] args) {
         MulticastServer server = new MulticastServer(args[0]);
@@ -32,13 +30,16 @@ public class MulticastServer extends Thread{
             socket = new MulticastSocket(PORT);  // Socket para comunicar com os terminais
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_TERM);
             socket.joinGroup(group);
+
             Communication c = new Communication(socket, group);
 
-            this.collector = new VoteReceiver(new MulticastSocket(PORT)); // Thread que recebe os votos dos terminais
+            VoteReceiver vr = new VoteReceiver(); // Thread que recebe os votos dos terminais
+            vr.start();
+
             Scanner keyboard_scanner = new Scanner(System.in);
 
             while (true) {
-                while (!id) {
+                while (!id) { // Enquanto o ulilizador não estiver identificado
                     System.out.println("Indique o seu nª do cc:");
                     String input = keyboard_scanner.nextLine();
 
@@ -51,9 +52,7 @@ public class MulticastServer extends Thread{
                         if(p.getNum_cc().equals(input)) {
                             id = true;
                             System.out.println("Identificação bem sucedida.");
-                            System.out.println("A procurar um terminal de voto...");
 
-                            c.SendOperation("get_term");
                             break;
                         }
                     }
@@ -63,14 +62,17 @@ public class MulticastServer extends Thread{
                     }
                 }
 
+                System.out.println("A procurar um terminal de voto...");
                 while (true) {
-                    String op = c.ReceiveOperation();
+                    c.sendOperation("get_term");
+                    String op = c.receiveOperation();
+
                     if(op.equals("1")) {
                         System.out.println("Pode votar no terminal " + op);
 
-                        c.SendObject(p);
-
+                        c.sendObject(p);
                         id = false;
+
                         break;
                     }
                 }
@@ -86,26 +88,26 @@ public class MulticastServer extends Thread{
 
 
 class VoteReceiver extends Thread {
-    MulticastSocket socket;
     private String MULTICAST_ADDRESS_VOTE = "224.3.2.2";
+    private int PORT = 4321;
 
-    public VoteReceiver(MulticastSocket socket) {
-        this.socket = socket;
-        this.start();
+    public VoteReceiver() {
+        super();
     }
 
     public void run() {
-        try {
-            InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_VOTE);
-            this.socket.joinGroup(group);
-            while (true) {
-                byte[] buffer = new byte[256];
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                this.socket.receive(packet);
+        MulticastSocket socket = null;
 
-                System.out.println("Receiving packet from " + packet.getAddress() + ':' + packet.getPort() + " with message: ");
-                String message = new String(packet.getData(), 0, packet.getLength());
-                System.out.println(message);
+        try {
+            socket = new MulticastSocket(PORT);  // Socket para receber os votos
+            InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_VOTE);
+            socket.joinGroup(group);
+            Communication c = new Communication(socket, group);
+
+            while (true) {
+                String op = c.receiveOperation();
+
+                System.out.println(op);
             }
         } catch (IOException e) {
             e.printStackTrace();
