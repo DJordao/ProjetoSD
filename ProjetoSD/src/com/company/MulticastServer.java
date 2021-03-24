@@ -1,8 +1,6 @@
 package com.company;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
@@ -25,8 +23,8 @@ public class MulticastServer extends Thread{
 
     public void run() {
         boolean id = false;
-        MulticastSocket socket = null;
         Pessoa p = null;
+        MulticastSocket socket = null;
 
         System.out.println(this.getName() + " online...");
 
@@ -34,6 +32,8 @@ public class MulticastServer extends Thread{
             socket = new MulticastSocket(PORT);  // Socket para comunicar com os terminais
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_TERM);
             socket.joinGroup(group);
+            Communication c = new Communication(socket, group);
+
             this.collector = new VoteReceiver(new MulticastSocket(PORT)); // Thread que recebe os votos dos terminais
             Scanner keyboard_scanner = new Scanner(System.in);
 
@@ -53,10 +53,7 @@ public class MulticastServer extends Thread{
                             System.out.println("Identificação bem sucedida.");
                             System.out.println("A procurar um terminal de voto...");
 
-                            String get_term = "get_term";
-                            byte[] buffer = get_term.getBytes();
-                            socket.send(new DatagramPacket(buffer, buffer.length, group, PORT));
-
+                            c.SendOperation("get_term");
                             break;
                         }
                     }
@@ -67,21 +64,11 @@ public class MulticastServer extends Thread{
                 }
 
                 while (true) {
-                    byte[] buffer = new byte[256];
-                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                    socket.receive(packet);
+                    String op = c.ReceiveOperation();
+                    if(op.equals("1")) {
+                        System.out.println("Pode votar no terminal " + op);
 
-                    String message = new String(packet.getData(), 0, packet.getLength());
-                    if(message.equals("1")) {
-                        System.out.println("Pode votar no terminal " + message);
-
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        ObjectOutputStream oos = new ObjectOutputStream(baos);
-
-                        oos.writeObject(p);
-                        oos.flush();
-                        byte[] obj_buffer = baos.toByteArray();
-                        socket.send(new DatagramPacket(obj_buffer, obj_buffer.length, group, PORT));
+                        c.SendObject(p);
 
                         id = false;
                         break;

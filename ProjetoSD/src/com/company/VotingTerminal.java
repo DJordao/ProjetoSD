@@ -32,35 +32,20 @@ public class VotingTerminal extends Thread {
             socket = new MulticastSocket(PORT);  // Socket para comunicar com o servidor
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_TERM);
             socket.joinGroup(group);
+            Communication c = new Communication(socket, group);
 
             while (true) {
-                byte[] buffer = new byte[256];
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                socket.receive(packet);
+                String message = c.ReceiveOperation();
 
-                String message = new String(packet.getData(), 0, packet.getLength());
                 if(message.equals("get_term")) {
                     if(!this.vt.isAlive()) {
-                        buffer = getName().getBytes();
-                        socket.send(new DatagramPacket(buffer, buffer.length, group, PORT));
+                        c.SendOperation(getName());
 
                         System.out.println("Terminal de voto " + getName());
 
                         Pessoa p = null;
                         while (p == null) {
-                            byte[] obj_buffer = new byte[100000];
-                            socket.receive(new DatagramPacket(obj_buffer, obj_buffer.length, group, PORT));
-
-                            try {
-                                ByteArrayInputStream bais = new ByteArrayInputStream(obj_buffer);
-                                ObjectInputStream ois = new ObjectInputStream(bais);
-                                Object read_object = ois.readObject();
-                                if (read_object instanceof Pessoa) {
-                                    p = (Pessoa) read_object;
-                                }
-                            }catch (StreamCorruptedException | ClassNotFoundException e) {
-                                e.printStackTrace();
-                            }
+                            p = (Pessoa) c.ReceiveObject();
                         }
 
                         while(true) {
@@ -78,15 +63,13 @@ public class VotingTerminal extends Thread {
                         }
                     }
                     else {
-                        String occupied = "occupied";
-                        buffer = occupied.getBytes();
-                        socket.send(new DatagramPacket(buffer, buffer.length, group, PORT));
+                        c.SendOperation("occupied");
                     }
 
 
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         } finally {
             socket.close();
