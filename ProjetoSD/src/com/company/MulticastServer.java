@@ -64,16 +64,37 @@ public class MulticastServer extends Thread{
 
                 System.out.println("A procurar um terminal de voto...");
                 while (true) {
-                    c.sendOperation("get_term");
-                    String op = c.receiveOperation();
+                    c.sendOperation("type|term_fetch");
+                    System.out.println("term_fetch");
+                    String[] message = c.receiveOperation().split(";");
+                    String message_type = c.getMessageType(message[0]);
 
-                    if(op.equals("1")) {
-                        System.out.println("Pode votar no terminal " + op);
+                    if(message_type.equals("term_ready")) {
+                        String term = message[1].split("\\|")[1];
+                        System.out.println("Pode votar no terminal " + term);
 
-                        c.sendObject(p);
+                        c.sendOperation("type|term_unlock;term|" + term);
                         id = false;
 
                         break;
+                    }
+                }
+
+                while (true) {
+                    String[] message = c.receiveOperation().split(";");
+                    String message_type = c.getMessageType(message[0]);
+
+                    if(message_type.equals("login_request")) {
+                        String username = message[1].split("\\|")[1];
+                        String password = message[2].split("\\|")[1];
+
+                        if(p.getUsername().equals(username) && p.getPassword().equals(password)) {
+                            c.sendOperation("type|login_accept");
+                            break;
+                        }
+                        else {
+                            c.sendOperation("type|login_deny");
+                        }
                     }
                 }
             }

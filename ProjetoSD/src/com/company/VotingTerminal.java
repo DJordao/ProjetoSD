@@ -37,36 +37,40 @@ public class VotingTerminal extends Thread {
             Communication c = new Communication(socket, group);
 
             while (true) {
-                String message = c.receiveOperation();
                 this.vt = new VotingThread(getName());
-                if(message.equals("get_term")) {
-                        c.sendOperation(getName());
 
+                String[] message = c.receiveOperation().split(";");
+                String message_type = c.getMessageType(message[0]);
+
+                if(message_type.equals("term_fetch")) {
+                    c.sendOperation("type|term_ready;term|" + getName());
+                }
+                else if(message_type.equals("term_unlock")) {
+                    String term = message[1].split("\\|")[1];
+
+                    if (term.equals(getName())) {
                         System.out.println("Terminal de voto " + getName());
 
-                        Pessoa p = null;
-                        while (p == null) {
-                            p = (Pessoa) c.receiveObject();
-                        }
+                        Scanner keyboard_scanner = new Scanner(System.in);
+                        System.out.println("Introduza o seu username: ");
+                        String username = keyboard_scanner.nextLine();
+                        System.out.println("Introduza a sua password: ");
+                        String password = keyboard_scanner.nextLine();
 
-                        while(true) {
-                            Scanner keyboard_scanner = new Scanner(System.in);
-                            System.out.println("Introduza o seu username: ");
-                            String username = keyboard_scanner.nextLine();
-                            System.out.println("Introduza a sua password: ");
-                            String password = keyboard_scanner.nextLine();
+                        c.sendOperation("type|login_request;username|" + username + ";passowrd|" + password);
+                    }
+                }
 
-                            if(p.getUsername().equals(username) && p.getPassword().equals(password)) {
-                                System.out.println("Autenticação bem sucedida.");
-                                this.vt.start();
-                                break;
-                            }
-                        }
-
+                else if(message_type.equals("login_accept")) {
+                    System.out.println("Autenticação bem sucedida.");
+                    this.vt.start();
                     this.vt.join();
                 }
+                else if(message_type.equals("login_deny")){
+                    System.out.println("Dados incorretos.");
+                }
             }
-        } catch (IOException | ClassNotFoundException | InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         } finally {
             socket.close();
@@ -96,8 +100,6 @@ class VotingThread extends Thread {
             String readKeyboard = keyboard_scanner.nextLine();
             c.sendOperation(readKeyboard);
             System.out.println("Voto enviado.");
-
-            return;
 
         } catch (IOException e) {
             e.printStackTrace();

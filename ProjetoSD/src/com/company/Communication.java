@@ -36,46 +36,11 @@ public class Communication {
         }
     }
 
-    public void sendObject(Object o) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-
-        oos.writeObject(o);
-        oos.flush();
-        byte[] obj_buffer = baos.toByteArray();
-
-        String id = "object";
-        byte[] id_buffer = id.getBytes();
-
-        baos = new ByteArrayOutputStream();
-        baos.write(id_buffer);
-        baos.write(obj_buffer);
-
-        byte buffer[] = baos.toByteArray();
-
-        socket.send(new DatagramPacket(buffer, buffer.length, group, PORT));
-    }
-
-    public Object receiveObject() throws IOException, ClassNotFoundException {
-        socket.setSoTimeout(5000);
-        byte[] buffer = new byte[100000];
-        socket.receive(new DatagramPacket(buffer, buffer.length, group, PORT));
-
-        byte[] id_buffer = Arrays.copyOfRange(buffer, 0, 6);
-        String id = new String(id_buffer, 0, id_buffer.length);
-
-        if(id.equals("object")) {
-            byte[] obj_buffer = Arrays.copyOfRange(buffer, 6, buffer.length);
-
-            ByteArrayInputStream bais = new ByteArrayInputStream(obj_buffer);
-            ObjectInputStream ois = new ObjectInputStream(bais);
-            Object read_object = ois.readObject();
-
-            if (read_object instanceof Pessoa) {
-                return read_object;
-            }
+    public String getMessageType(String message) {
+        if(message.length() > 0) {
+            return message.split("\\|")[1];
         }
 
-        return null;
+        return "";
     }
 }
