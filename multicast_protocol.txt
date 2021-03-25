@@ -1,0 +1,4 @@
+type | term_fetch (Enviado pelos servidores multicast para encontrar um terminal disponível)
+type | term_accept; term | term_id (Enviado pelos terminais disponíveis para os servidores multicast)
+type | 
+type | send_vote; vote | user_vote (Enviado pelos terminais quando um utilizador subemeter o seu voto)
