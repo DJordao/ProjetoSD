@@ -33,6 +33,9 @@ public class MulticastServer extends Thread{
 
             Communication c = new Communication(socket, group);
 
+            LoginHandler lt = new LoginHandler(); // Thread que recebe os pedidos de login dos terminais
+            lt.start();
+
             VoteReceiver vr = new VoteReceiver(); // Thread que recebe os votos dos terminais
             vr.start();
 
@@ -65,7 +68,7 @@ public class MulticastServer extends Thread{
                 System.out.println("A procurar um terminal de voto...");
                 while (true) {
                     c.sendOperation("type|term_fetch");
-                    System.out.println("term_fetch");
+
                     String[] message = c.receiveOperation().split(";");
                     String message_type = c.getMessageType(message[0]);
 
@@ -79,24 +82,6 @@ public class MulticastServer extends Thread{
                         break;
                     }
                 }
-
-                while (true) {
-                    String[] message = c.receiveOperation().split(";");
-                    String message_type = c.getMessageType(message[0]);
-
-                    if(message_type.equals("login_request")) {
-                        String username = message[1].split("\\|")[1];
-                        String password = message[2].split("\\|")[1];
-
-                        if(p.getUsername().equals(username) && p.getPassword().equals(password)) {
-                            c.sendOperation("type|login_accept");
-                            break;
-                        }
-                        else {
-                            c.sendOperation("type|login_deny");
-                        }
-                    }
-                }
             }
 
         } catch (IOException e) {
@@ -107,9 +92,56 @@ public class MulticastServer extends Thread{
     }
 }
 
+class LoginHandler extends Thread {
+    private String MULTICAST_ADDRESS_LOGIN = "224.3.2.2";
+    private int PORT = 4321;
+
+    public LoginHandler() {
+        super();
+    }
+
+    public void run() {
+        MulticastSocket socket = null;
+
+        try {
+            socket = new MulticastSocket(PORT);  // Socket para receber os votos
+            InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_LOGIN);
+            socket.joinGroup(group);
+            Communication c = new Communication(socket, group);
+
+            // Tem que se ir buscar ao RMI
+            CopyOnWriteArrayList<Pessoa> l = new CopyOnWriteArrayList<>();
+            Pessoa p = new Pessoa("Diogo Filipe", "1234", "1234", "estudante", "DEI", 1234, "Leiria", "1234", null);
+            l.add(p);
+
+            while (true) {
+                String[] message = c.receiveOperation().split(";");
+                String message_type = c.getMessageType(message[0]);
+
+                if(message_type.equals("login_request")) {
+                    String term = message[1].split("\\|")[1];
+                    String username = message[2].split("\\|")[1];
+                    String password = message[3].split("\\|")[1];
+                    System.out.println(username + " " + p.getUsername() + " " + password + " " + p.getPassword());
+                    if(p.getUsername().equals(username) && p.getPassword().equals(password)) {
+                        c.sendOperation("type|login_accept;term|" + term);
+                    }
+                    else {
+                        c.sendOperation("type|login_deny;term|" + term);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+          socket.close();
+        }
+
+    }
+}
 
 class VoteReceiver extends Thread {
-    private String MULTICAST_ADDRESS_VOTE = "224.3.2.2";
+    private String MULTICAST_ADDRESS_VOTE = "224.3.2.3";
     private int PORT = 4321;
 
     public VoteReceiver() {
@@ -128,10 +160,12 @@ class VoteReceiver extends Thread {
             while (true) {
                 String op = c.receiveOperation();
 
-                System.out.println(op);
+                //System.out.println(op);
             }
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            socket.close();
         }
     }
 }
