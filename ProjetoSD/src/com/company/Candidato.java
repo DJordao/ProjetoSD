@@ -3,7 +3,7 @@ package com.company;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-class Candidato implements Serializable{
+public class Candidato implements Serializable{
     private String nome;
     private String categoria;
     private ArrayList<Pessoa> lista_pessoas;

@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class Eleicao implements Serializable{
-    private Date data_inicio;
-    private Date data_fim;
+    private String data_inicio;
+    private String data_fim;
     private String titulo;
     private String descricao;
     private String tipoEleicao;
@@ -14,7 +14,7 @@ public class Eleicao implements Serializable{
     private ArrayList<Candidato> listaCandidatos;
     private int resultado;
 
-    public Eleicao(Date data_inicio, Date data_fim, String titulo, String descricao, String tipoEleicao, String departamento, ArrayList<Candidato> listaCandidatos, int resultado) {
+    public Eleicao(String data_inicio, String data_fim, String titulo, String descricao, String tipoEleicao, String departamento, ArrayList<Candidato> listaCandidatos, int resultado) {
         this.data_inicio = data_inicio;
         this.data_fim = data_fim;
         this.titulo = titulo;
@@ -25,19 +25,19 @@ public class Eleicao implements Serializable{
         this.resultado = resultado;
     }
 
-    public Date getData_inicio() {
+    public String getData_inicio() {
         return data_inicio;
     }
 
-    public void setData_inicio(Date data_inicio) {
+    public void setData_inicio(String data_inicio) {
         this.data_inicio = data_inicio;
     }
 
-    public Date getData_fim() {
+    public String getData_fim() {
         return data_fim;
     }
 
-    public void setData_fim(Date data_fim) {
+    public void setData_fim(String data_fim) {
         this.data_fim = data_fim;
     }
 

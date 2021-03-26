@@ -1,13 +1,17 @@
 package com.company.RMIFiles;
 
+import com.company.Candidato;
+import com.company.Eleicao;
 import com.company.Pessoa;
 
-import java.rmi.Naming;
-import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
+import java.sql.SQLClientInfoException;
+import java.sql.SQLException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -20,6 +24,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 	public void print_on_client(String s) throws RemoteException {
 		System.out.println("> " + s);
 	}
+
 
 	public static void displayFuncionalidade(){
 		System.out.println("=========================");
@@ -94,7 +99,10 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 					input = new Scanner(System.in);
 					funcao = input.nextLine();
 
-					if(!funcao.matches(".*\\d.*") && funcao.matches("[a-zA-Z]+")){ //O input não tem numeros
+					//if(!funcao.matches(".*\\d.*") && funcao.matches("[a-zA-Z]+")){ //O input não tem numeros
+					if(funcao.equalsIgnoreCase("estudante")
+							|| funcao.equalsIgnoreCase("docente")
+							|| funcao.equalsIgnoreCase("funcionario")){
 						break;
 					}else{
 						System.out.println("A categoria função não pode conter números");
@@ -201,6 +209,189 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 	}
 
 
+	public static Eleicao criaEleicao(){
+
+		String data_inicio;
+		String data_fim;
+		String titulo;
+		String descricao;
+		String tipoEleicao;
+		String departamento;
+
+		Scanner input;
+
+
+		//data inicio
+		while (true){
+			try{
+				System.out.printf("Data de Início da Eleicao (dd-MM-yyyy HH:mm):");
+				input = new Scanner(System.in);
+				String dataInput = input.nextLine();
+				Date dataError = new SimpleDateFormat("dd-MM-yyyy HH:mm").parse(dataInput);
+				data_inicio = dataInput;
+				break;
+			}catch (ParseException e) {
+				System.out.println("Insira uma data válida");
+			}
+		}
+		//data fim
+		while (true){
+			try{
+				System.out.printf("Data de Fim da Eleicao (dd-MM-yyyy HH:mm):");
+				input = new Scanner(System.in);
+				String dataInput = input.nextLine();
+				Date dataError = new SimpleDateFormat("dd-MM-yyyy HH:mm").parse(dataInput);
+				data_fim = dataInput;
+				break;
+			}catch (ParseException e) {
+				System.out.println("Insira uma data válida");
+			}
+		}
+
+		//titulo eleicao
+		while (true){
+			System.out.printf("Titulo: ");
+			input = new Scanner(System.in);
+			titulo = input.nextLine();
+			try {
+
+				if (String.valueOf(titulo).length() != 0 && !titulo.isBlank()) {
+					break;
+				} else {
+					System.out.println("Insira um título para a Eleição");
+				}
+
+			}catch (InputMismatchException e){
+				System.out.println("Insira um título para a Eleição");
+			}
+		}
+
+		//descricao eleicao
+		while (true){
+			System.out.printf("Descrição: ");
+			input = new Scanner(System.in);
+			descricao = input.nextLine();
+			try {
+
+				if (String.valueOf(descricao).length() != 0 && !descricao.isBlank()) {
+					break;
+				} else {
+					System.out.println("Insira uma descrição para a Eleição");
+				}
+
+			}catch (InputMismatchException e){
+				System.out.println("Insira uma descrição para a Eleição");
+			}
+		}
+
+		//tipo eleicao
+		while (true){
+			System.out.printf("Tipo Eleição: ");
+			input = new Scanner(System.in);
+			tipoEleicao = input.nextLine();
+			try {
+
+				if (String.valueOf(descricao).length() != 0 && !descricao.isBlank() &&
+						(tipoEleicao.equalsIgnoreCase("estudante")
+						|| tipoEleicao.equalsIgnoreCase("docente")
+						|| tipoEleicao.equalsIgnoreCase("funcionario"))) {
+					break;
+				} else {
+					System.out.println("Insira um tipo de Eleição (Estudante/Docente/Funcionario)");
+				}
+
+			}catch (InputMismatchException e){
+				System.out.println("Insira um tipo de Eleição (Estudante/Docente/Funcionario)");
+			}
+		}
+
+		//local eleicao
+		while (true){
+			System.out.printf("Departamento: ");
+			input = new Scanner(System.in);
+			departamento = input.nextLine();
+			try {
+
+				if (String.valueOf(departamento).length() != 0 && !departamento.isBlank()) {
+					break;
+				} else {
+					System.out.println("Insira um departamento para a realiação da Eleição");
+				}
+
+			}catch (InputMismatchException e){
+				System.out.println("Insira um departamento para a realiação da Eleição");
+			}
+		}
+
+
+		Eleicao e = new Eleicao(data_inicio, data_fim, titulo, descricao, tipoEleicao, departamento, null, 0);
+
+		return e;
+		}
+
+	@Override
+	public void displayEleicoes(String id, String titulo, String tipo, String departamento, String data_inicio) throws RemoteException {
+		System.out.println("ID ->" + id);
+		System.out.println("Título -> " + titulo);
+		System.out.println("Tipo -> " + tipo);
+		System.out.println("Departamento -> " + departamento);
+		System.out.println("Data de Início -> " + data_inicio);
+		System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
+	}
+
+	@Override
+	public void displayCandidatura(String id, String nomeCandidato, String categoria, String numEleicao) throws RemoteException{
+		System.out.println(" -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-");
+		System.out.println("ID -> " + id);
+		System.out.println("Nome Candidato -> " + nomeCandidato);
+		System.out.println("Categoria -> " + categoria);
+		System.out.println("Número de Eleição -> " + numEleicao);
+		System.out.println(" -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-");
+	}
+
+	public static void gereCandidato(RMInterface h) throws RemoteException, SQLException {
+		//TODO
+		//Listar as eleições a decorrer - DONE
+		//1-> Buscar a lista de candidaturas para uma determinada eleição. - DONE
+		//2-> Para o tipo de eleicao mostrar a todas as pessoas que estão na tabela das pessoas
+		//3-> Adicionar uma certa pessoa a uma determinada candidatura
+		//4-> Remover uma pessoa de uma certa lista se ela lá estiver
+		System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
+		System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
+		h.ListaEleicoes();
+
+		int maxEleicoes, opcaoEleicao;
+		maxEleicoes = h.maxEleicoes();
+
+		Scanner input;
+
+		//Eleição a ver
+		while (true){
+			try{
+				System.out.printf("Indique a eleição a visualizar: ");
+				input = new Scanner(System.in);
+				String eleicao = input.nextLine();
+				opcaoEleicao = Integer.parseInt(eleicao);
+				if(!(opcaoEleicao < 1 || opcaoEleicao > maxEleicoes)) { //Ele selecionou uma eleicao valida
+					//Fazer o display das candidaturas dessa eleicao
+					System.out.println("\n");
+					h.ListaCandidaturas(opcaoEleicao);
+					System.out.println("\n\n\nSAI\n\n\n");
+					break;
+				}else{
+					System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
+				}
+			}catch (NumberFormatException ex){
+				System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
+			}
+		}
+
+
+
+
+
+
+	}
 
 	public static void main(String args[]) {
 
@@ -211,7 +402,6 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 			RMInterface h = (RMInterface) LocateRegistry.getRegistry(6000).lookup("RMIConnect");
 			AdminConsole admin = new AdminConsole();
 
-			//System.out.println("Client sent subscription to server->" + admin.toString());
 			h.subscribe(admin);
 
 
@@ -232,9 +422,11 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 								h.registaPessoa(registaPessoa());
 								break;
 							case "2":
+								h.criaEleicao(criaEleicao());
 								// Criar Eleição
 								break;
 							case "3":
+								gereCandidato(h);
 								// Gerir listas de candidatos a uma eleição
 								break;
 							case "4":

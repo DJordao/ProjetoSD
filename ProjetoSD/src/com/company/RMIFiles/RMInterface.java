@@ -6,12 +6,13 @@ import com.company.Pessoa;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.sql.SQLClientInfoException;
+import java.sql.SQLException;
 
 public interface RMInterface extends Remote {
 
     Pessoa registaPessoa(Pessoa p) throws RemoteException, SQLClientInfoException;
 
-    Eleicao criaEleicao(Eleicao e) throws RemoteException;
+    Eleicao criaEleicao(Eleicao e) throws RemoteException, SQLClientInfoException;
 
      void tableAndTerminalState() throws RemoteException;
 
@@ -25,6 +26,9 @@ public interface RMInterface extends Remote {
 
     void subscribe(AdminConsoleInterface c) throws RemoteException;
 
+    void ListaEleicoes() throws RemoteException, SQLException;
 
+    int maxEleicoes() throws RemoteException, SQLException;
 
+    void ListaCandidaturas(int opcaoEleicao) throws SQLException, RemoteException;
 }
