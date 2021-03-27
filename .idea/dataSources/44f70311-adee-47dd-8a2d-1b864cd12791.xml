@@ -295,9 +295,9 @@ false Asia/Dili
 false Asia/Dubai
 false Asia/Dushanbe
 false Asia/Famagusta
-false Asia/Gaza
+true Asia/Gaza
 false Asia/Harbin
-false Asia/Hebron
+true Asia/Hebron
 false Asia/Ho_Chi_Minh
 false Asia/Hong_Kong
 false Asia/Hovd
@@ -789,7 +789,7 @@ false Zulu
     <database id="2" parent="1" name="SD-Project">
       <ObjectId>16447</ObjectId>
       <Owner>postgres</Owner>
-      <IntrospectionStateNumber>618</IntrospectionStateNumber>
+      <IntrospectionStateNumber>624</IntrospectionStateNumber>
       <Current>1</Current>
     </database>
     <database id="3" parent="1" name="dbfichas">
@@ -873,7 +873,7 @@ UC/10
 </Acl>
       <StateNumber>287</StateNumber>
       <Owner>postgres</Owner>
-      <IntrospectionStateNumber>619</IntrospectionStateNumber>
+      <IntrospectionStateNumber>625</IntrospectionStateNumber>
       <Current>1</Current>
     </schema>
     <extension id="20" parent="2" name="plpgsql">

@@ -17,6 +17,7 @@ import java.util.Scanner;
 
 public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInterface{
 
+
 	AdminConsole() throws RemoteException {
 		super();
 	}
@@ -40,6 +41,18 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		System.out.println("[9] -> Terminar uma eleição (acho que não é aqui mas fica na mm)");
 		System.out.println("[10] -> Consultar resultados detalhados de eleições passadas");
 		System.out.println("=========================");
+	}
+
+	public static void displayOpcoesEleicoes(){
+		System.out.println("==-==-==-==-==-==-==-==-==-==-==-==-==-");
+		System.out.println("OPERAÇÕES A REALIZAR:");
+		System.out.println("[1] -> Listar Candidaturas");
+		System.out.println("[2] -> Listar pessoas que possam ser adicionadas a uma candidatura");
+		System.out.println("[3] -> Adicionar pessoa a uma candidatura");
+		System.out.println("[4] -> Remover pessoa de uma candidatura");
+		System.out.println("[5] -> Listar todas as candidaturas e seus elementos");
+		System.out.println("[6] -> SAIR");
+		System.out.println("==-==-==-==-==-==-==-==-==-==-==-==-==-");
 	}
 
 	public static Pessoa registaPessoa() {
@@ -146,7 +159,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 					if (String.valueOf(num_telefone).length() != 9){
 						System.out.printf("Insira um número de telefone com 9 digitos: ");
 						input = new Scanner(System.in);
-						num_cc = input.nextLine();
+						num_telefone = Integer.parseInt(input.nextLine());
 					}
 					break;
 				}catch (NumberFormatException ex){
@@ -184,7 +197,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 					if (String.valueOf(num_cc_error).length() != 8){
 						System.out.printf("Insira um número de CC com 8 digitos: ");
 						input = new Scanner(System.in);
-						num_telefone = Integer.parseInt(input.nextLine());
+						num_cc = input.nextLine();
 					}
 					break;
 				}catch (NumberFormatException ex){
@@ -340,13 +353,38 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 	}
 
 	@Override
-	public void displayCandidatura(String id, String nomeCandidato, String categoria, String numEleicao) throws RemoteException{
+	public void displayCandidatura(String id, String nomeCandidato, String categoria, String numEleicao, String titulo) throws RemoteException{
 		System.out.println(" -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-");
-		System.out.println("ID -> " + id);
+		System.out.println("\t\t\t\tDETALHES DA ELEIÇÃO");
+		System.out.println("Número de Eleição -> " + numEleicao);
+		System.out.println("Nome da Eleicao -> " + titulo);
+		System.out.println("ID -> " + id); //ID do candidato
 		System.out.println("Nome Candidato -> " + nomeCandidato);
 		System.out.println("Categoria -> " + categoria);
-		System.out.println("Número de Eleição -> " + numEleicao);
 		System.out.println(" -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-");
+	}
+
+	@Override
+	public void displayListaPessoasParaCandidatura(String num_cc, String nomeCandidato) throws RemoteException {
+		System.out.println("NUM_CC -> " + num_cc);
+		System.out.println("Nome -> " + nomeCandidato);
+		System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
+	}
+
+	@Override
+	public void displayListaElementosCandidatura(String num_cc, String nome, String nomeCandidato) throws RemoteException {
+		System.out.println("########################");
+		//System.out.println("Nome da Lista: " + nomeCandidato);
+		System.out.println("Elementos: ");
+		System.out.println("Nome: " + nome + "\tNum CC: " + num_cc);
+	}
+
+	@Override
+	public void displayListaTudoEleicao(String num_cc, String nome, String nomeCandidato) throws RemoteException {
+		System.out.println("-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/");
+		System.out.println("Nome do Candidato: " + nomeCandidato);
+		System.out.println("Num CC: " + num_cc);
+		System.out.println("Nome: " + nome);
 	}
 
 	public static void gereCandidato(RMInterface h) throws RemoteException, SQLException {
@@ -360,24 +398,206 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
 		h.ListaEleicoes();
 
-		int maxEleicoes, opcaoEleicao;
+		int maxEleicoes, opcaoEleicao, flagOut = 0;
 		maxEleicoes = h.maxEleicoes();
 
 		Scanner input;
 
 		//Eleição a ver
-		while (true){
+		while (flagOut != 1){
 			try{
 				System.out.printf("Indique a eleição a visualizar: ");
 				input = new Scanner(System.in);
 				String eleicao = input.nextLine();
 				opcaoEleicao = Integer.parseInt(eleicao);
 				if(!(opcaoEleicao < 1 || opcaoEleicao > maxEleicoes)) { //Ele selecionou uma eleicao valida
-					//Fazer o display das candidaturas dessa eleicao
-					System.out.println("\n");
-					h.ListaCandidaturas(opcaoEleicao);
-					System.out.println("\n\n\nSAI\n\n\n");
-					break;
+
+					//TODO
+					//Fazer um menu para as seguintes opções:
+					//1-> Listar Candidaturas dessa eleicao - DONE
+					//2-> Listar pessoas aptas para serem adicionadas a essa candidatura - DONE
+					//3-> Adicionar pessoas a uma candidatura - DONE
+					//4-> Remover pessoas de uma candidatura
+
+					String listaNomeCandidatos = ""; //Nome dos partidos dos candidatos
+					String numCCListaCandidatos = "";
+					String idPartido = "";
+
+					while (flagOut != 1){
+						displayOpcoesEleicoes();
+						String opcao = "";
+
+						try{
+							System.out.printf("OPÇÃO: ");
+							Scanner inputOpcao = new Scanner(System.in);
+							opcao = input.nextLine();
+							Integer.parseInt(opcao);
+							if (Integer.parseInt(opcao) <= 6 && Integer.parseInt(opcao) > 0){
+								switch(opcao) {
+									case "1":
+										// Listar Candidaturas dessa eleicao
+
+										System.out.println("\n");
+										listaNomeCandidatos = h.ListaCandidaturas(opcaoEleicao);
+										break;
+									case "2":
+										// Listar pessoas aptas para serem adicionadas a essa candidatura
+
+										System.out.println("\t\t\tADICIONAR PESSOAS A UMA CANDIDATURA ");
+										numCCListaCandidatos = h.ListaPessoasParaCandidatura(opcaoEleicao);
+										break;
+									case "3":
+										// Adicionar pessoas a uma candidatura -
+
+										String num_cc = "";
+										while (true){
+											try {
+												//Pedir o CC
+												System.out.printf("Insira o número de cc da pessoa que deseja inserir: ");
+												Scanner num_Cc = new Scanner(System.in);
+												num_cc = num_Cc.nextLine();
+												int num_cc_error = Integer.parseInt(num_cc);
+												int valido = 0;
+												if (String.valueOf(num_cc_error).length() != 8){ //Verifica se tem 8 digitos
+													num_Cc = new Scanner(System.in);
+													num_cc = num_Cc.nextLine();
+												}
+												//Verificar se é um cc válido
+												for (int i = 0; i < numCCListaCandidatos.split("-").length; i++){ //Verifica se pode ser adicionado
+													//System.out.println("\n\n\n" + numCCListaCandidatos.split("-")[i] + "\n\n\n");
+													if (num_cc.equals(numCCListaCandidatos.split("-")[i])){
+														valido++;
+													}
+												}
+												if (valido > 0){
+													break;
+												}else{
+													System.out.printf("Insira o número de cc da lista ao qual se quer inserir: ");
+													num_Cc = new Scanner(System.in);
+													num_cc = num_Cc.nextLine();
+												}
+												break;
+											}catch (NumberFormatException ex){
+												System.out.println("Insira um número de CC válido");
+											}
+										}
+
+										String sPartido = "";
+										while (true){
+											try {
+												//Pedir o Partido a que se quer juntar
+												System.out.printf("Insira o nome da lista ao qual se quer inserir: ");
+												Scanner partido = new Scanner(System.in);
+												sPartido = partido.nextLine();
+												int valido = 0;
+												idPartido = "";
+
+
+												//Verificar se é um partido válido atraves do parsing do output
+												for (int i = 0; i < listaNomeCandidatos.split("-").length; i++){
+													if (sPartido.equals(listaNomeCandidatos.split("-")[i].split("=")[1])){
+														valido++;
+														idPartido = listaNomeCandidatos.split("-")[i].split("=")[0];
+													}
+												}
+												if (valido > 0){
+													break;
+												}else{
+													System.out.printf("Insira o nome da lista ao qual se quer inserir: ");
+
+												}
+											}catch (NumberFormatException ex){
+												System.out.println("Insira um nome de CC válido");
+											}
+										}
+
+										//Já tenho um num_cc, partido agora vamos adicionar à BD
+										h.AdicionaPessoaCandidatura(opcaoEleicao, num_cc, sPartido, idPartido);
+										break;
+
+									case "4":
+										// Remover pessoas de uma candidatura
+										//1-> Perguntar de que candidatura é que quer remover - DONE
+										//2-> Listar os elementos dessa candidatura - DONE
+										//3-> Perguntar que elementos deseja remover - DONE
+
+										String nomeLista = "";
+										while (true){
+											try {
+												//Pedir a Candidatura
+												System.out.printf("Insira o nome da lista: ");
+												Scanner Candidatura = new Scanner(System.in);
+												nomeLista = Candidatura.nextLine();
+												int valido = 0;
+
+
+												//Verificar se é um partido válido atraves do parsing do output
+												for (int i = 0; i < listaNomeCandidatos.split("-").length; i++){
+													if (nomeLista.equals(listaNomeCandidatos.split("-")[i].split("=")[1])){
+														valido++;
+														idPartido = listaNomeCandidatos.split("-")[i].split("=")[0];
+													}
+												}
+												if (valido > 0){
+													break;
+												}else{
+													System.out.printf("Insira o nome da lista que pretende aceder: ");
+												}break;
+											}catch (NumberFormatException ex){
+												System.out.println("Insira um número de CC válido");
+											}
+										}
+
+										//Listar os elementos dessa candidatura
+										System.out.println("########################");
+										System.out.println("Nome da Lista: " + nomeLista);
+										String dadosElementosCandidatura = h.ListaElementosCandidatura(opcaoEleicao, nomeLista, idPartido);
+
+										while (true){
+											try {
+												//Pedir a o num CC a remover
+												System.out.printf("Insira numero de CC a remover: ");
+												Scanner numCC = new Scanner(System.in);
+												num_cc = numCC.nextLine();
+												int valido = 0;
+
+												//Verificar se é um num_cc  válido atraves do parsing do output
+												for (int i = 0; i < dadosElementosCandidatura.split(" ").length; i++){
+													if (num_cc.equals(dadosElementosCandidatura.split(" ")[i])){
+														valido++;
+													}
+												}
+												if (valido > 0){ //O numero que inseriu foi o correto agora vamos removê-lo
+													h.RemovePessoaCandidatura(num_cc, nomeLista);
+													break;
+												}else{
+													System.out.println("Insira numero de CC a remover válido: ");
+												}
+
+											}catch (NumberFormatException ex){
+												System.out.println("Insira um número de CC válido");
+											}
+										}
+										break;
+
+									case "5":
+										// Listar as Candidaturas e seus representantes
+										h.ListaTudoEleicao(opcaoEleicao);
+										break;
+									case "6":
+										// SAIR
+										flagOut++;
+										break;
+
+								}
+							}else{ //Opção não incluída nas possíveis
+								System.out.println("Escolha uma opção válida");
+							}
+
+						} catch(NumberFormatException ex){ // O que foi lido no input não foi um número
+							System.out.println("Insira um número válido");
+						}
+					}
 				}else{
 					System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
 				}
@@ -399,7 +619,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		//System.setSecurityManager(new RMISecurityManager());
 
 		try {
-			RMInterface h = (RMInterface) LocateRegistry.getRegistry(6000).lookup("RMIConnect");
+			RMInterface h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
 			AdminConsole admin = new AdminConsole();
 
 			h.subscribe(admin);
