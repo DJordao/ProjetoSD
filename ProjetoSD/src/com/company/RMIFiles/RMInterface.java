@@ -1,6 +1,7 @@
 package com.company.RMIFiles;
 
 import com.company.Eleicao;
+import com.company.MulticastServerInterface;
 import com.company.Pessoa;
 
 import java.rmi.Remote;
@@ -26,6 +27,8 @@ public interface RMInterface extends Remote {
     void print_on_server(String s) throws RemoteException;
 
     void subscribe(AdminConsoleInterface c) throws RemoteException;
+
+    void subscribeMulticast(MulticastServerInterface c) throws RemoteException;
 
     void ListaEleicoes() throws RemoteException, SQLException;
 

@@ -1,6 +1,7 @@
 package com.company.RMIFiles;
 
 import com.company.Eleicao;
+import com.company.MulticastServerInterface;
 import com.company.Pessoa;
 
 import java.rmi.RemoteException;
@@ -14,6 +15,7 @@ import java.sql.Timestamp;
 
 public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	static AdminConsoleInterface client;
+	static MulticastServerInterface mClient;
 
 
 	public RMI_Server() throws RemoteException {
@@ -23,6 +25,12 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	@Override
 	public void subscribe(AdminConsoleInterface c) throws RemoteException {
 		client = c;
+	}
+
+	@Override
+	public void subscribeMulticast(MulticastServerInterface c) throws RemoteException {
+		mClient = c;
+		mClient.print_on_client("Olá do server");
 	}
 
 
