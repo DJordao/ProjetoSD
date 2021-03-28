@@ -191,6 +191,38 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	}
 
 	@Override
+	public String getDetalhesEleicao(int opcaoEleicao) throws RemoteException, SQLException{
+		//Obter propriedades de uma eleicao para as poder alterar
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+		String detalhes = "";
+
+		ResultSet rs = db.getDetalhesEleicao(opcaoEleicao);
+
+		String titulo, descricao;
+		Timestamp data_inicio, data_fim;
+		while (rs.next()){
+			titulo = rs.getString("titulo");
+			descricao = rs.getString("descricao");
+			data_inicio = rs.getTimestamp("data_inicio");
+			data_fim = rs.getTimestamp("data_fim");
+
+			detalhes = titulo + "#" + descricao + "#" + data_inicio + "#" + data_fim;
+			client.displayDetalhesEleicao(titulo, descricao, data_inicio, data_fim);
+		}
+		return detalhes;
+	}
+
+	@Override
+	public void UpdatePropriedadesEleicao(int opcaoEleicao, String tituloAlteracao, String descricaoAlteracao, Timestamp data_inicio, Timestamp data_fim) throws RemoteException, SQLException {
+		//DAr update às propriedades de uma eleicao
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+		db.UpdatePropriedadesEleicao(opcaoEleicao, tituloAlteracao, descricaoAlteracao,data_inicio, data_fim);
+		client.print_on_client("Update com sucesso");
+	}
+
+	@Override
 	public void tableAndTerminalState() throws RemoteException {
 
 	}
@@ -223,7 +255,7 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		try {
 
 			RMI_Server h = new RMI_Server();
-			Registry r = LocateRegistry.createRegistry(7000);
+			Registry r = LocateRegistry.createRegistry(6000);
 			r.rebind("RMIConnect", h);
 
 			System.out.println("Hello Server ready.");
