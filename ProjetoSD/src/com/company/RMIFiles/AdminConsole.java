@@ -1,4 +1,4 @@
-/*package com.company.RMIFiles;
+package com.company.RMIFiles;
 
 import com.company.Candidato;
 import com.company.Eleicao;
@@ -9,8 +9,11 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -387,6 +390,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		System.out.println("Nome: " + nome);
 	}
 
+
 	public static void gereCandidato(RMInterface h) throws RemoteException, SQLException {
 		//TODO
 		//Listar as eleições a decorrer - DONE
@@ -605,21 +609,187 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 				System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
 			}
 		}
+	}
 
-
-
-
-
+	@Override
+	public void displayDetalhesEleicao(String titulo, String descricao, Timestamp data_inicio, Timestamp data_fim) throws RemoteException {
+		System.out.println("Eleição: " + titulo);
+		System.out.println("Descrição: " + descricao);
+		System.out.println("Data de Início: " + data_inicio);
+		System.out.println("Data de Fim: " + data_fim);
 
 	}
 
-	public static void main(String args[]) {
+	public static void alteraPropriedadesEleicao(RMInterface h) throws RemoteException, SQLException {
+		System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
+		System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
+		h.ListaEleicoes();
+
+		int maxEleicoes, opcaoEleicao,flagOut, idEleicao = 0;
+		maxEleicoes = h.maxEleicoes();
+
+		Scanner input;
+		String tituloAlteracao = "", descricaoAlteracao = "";
+		Timestamp Data_inicio = null, Data_fim = null;
+
+		String currTitulo = "", currDescricao = "";
+		Timestamp currData_inicio = null, currData_fim = null;
+		String detalhes; //String com os detalhes iniciais da eleicao
+
+
+
+		while (true) {
+			flagOut = 0; // Ver se faz update
+			try {
+				System.out.println("==============================");
+				System.out.printf("(999)>Indique a eleição a visualizar: ");
+				input = new Scanner(System.in);
+				String eleicao = input.nextLine();
+				opcaoEleicao = Integer.parseInt(eleicao);
+				if (eleicao.equalsIgnoreCase("999")) break;
+				if (!(opcaoEleicao < 1 || opcaoEleicao > maxEleicoes)) {
+					idEleicao = opcaoEleicao;
+					detalhes = h.getDetalhesEleicao(idEleicao);
+
+					currTitulo = detalhes.split("#")[0];
+					currDescricao = detalhes.split("#")[1];
+
+
+					//Passar a data de String para TimeStamp
+
+					currData_inicio = Timestamp.valueOf(detalhes.split("#")[2]);
+
+					currData_fim = Timestamp.valueOf(detalhes.split("#")[3]);
+
+					//VERIFICAR SE PODE FAZER ALTERAÇÂO NA ELEIÇÂO
+					//comparar a data atual com a data da eleicao
+					Timestamp checkhoraAtual = new Timestamp(System.currentTimeMillis());
+
+					int checkAlteracao = currData_inicio.compareTo(checkhoraAtual);
+
+					if (checkAlteracao < 0){ // >0 significa que a hora atual é superior e não se pode alterar
+						System.out.println("A eleição já começou e não se pode alterar o seu valor");
+						flagOut++;
+
+						break;
+					}else{
+						while (true){
+							System.out.println("-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|");
+							System.out.printf("(999)Indique o campo a alterar: ");
+							Scanner campo = new Scanner(System.in);
+							String atributo = campo.nextLine();
+							if (atributo.equalsIgnoreCase("999")) break;
+							if (atributo.equalsIgnoreCase("Título")){
+								System.out.println("Insira o novo título");
+								Scanner alteração = new Scanner(System.in);
+								tituloAlteracao = alteração.nextLine();
+							}
+							else if (atributo.equalsIgnoreCase("Descrição")){
+								System.out.println("Insira a nova descrição");
+								Scanner alteração = new Scanner(System.in);
+								descricaoAlteracao = alteração.nextLine();
+							}
+							else if (atributo.equalsIgnoreCase("Data de Início")){
+
+								//comparar a data atual com a data da eleicao
+								SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyy HH:mm");
+								Timestamp horaAtual = new Timestamp(System.currentTimeMillis());
+
+								checkAlteracao = currData_inicio.compareTo(horaAtual);
+
+								if (checkAlteracao < 0){ // >0 significa que a hora atual é superior e não se pode alterar
+									System.out.println("A eleição já começou e não se pode alterar o seu valor");
+
+									break;
+								}
+								else{ // A hora atual é inferior à hora da eleição e podemos alterar o seu campo
+									while (true){
+										try{
+											System.out.printf("Nova Data de Início da Eleicao (dd-MM-yyyy HH:mm):");
+											input = new Scanner(System.in);
+											String dataInput = input.nextLine();
+											Date dataError = new SimpleDateFormat("dd-MM-yyyy HH:mm").parse(dataInput);
+
+											//TODO -> Verificar se a data inserida é superior à data que estava na eleicao
+
+											DateTimeFormatter format = DateTimeFormatter.ofPattern("dd-MM-yyy HH:mm");
+											LocalDateTime localTime = LocalDateTime.from(format.parse(dataInput));
+											Data_inicio = Timestamp.valueOf(localTime);
+
+
+											break;
+										}catch (ParseException e) {
+											System.out.println("Insira uma data válida");
+										}
+									}
+
+								}
+							}
+							else if (atributo.equalsIgnoreCase("Data de Fim")){
+
+								//comparar a data atual com a data da eleicao
+								SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyy HH:mm");
+								Timestamp horaAtual = new Timestamp(System.currentTimeMillis());
+
+								checkAlteracao = currData_inicio.compareTo(horaAtual);
+
+								if (checkAlteracao < 0){ // >0 significa que a hora atual é superior e não se pode alterar
+									System.out.println("A eleição já começou e não se pode alterar o seu valor");
+									break;
+								}
+								else{ // A hora atual é inferior à hora da eleição e podemos alterar o seu campo
+									while (true){
+										try{
+											System.out.printf("Nova Data de Fim da Eleicao (dd-MM-yyyy HH:mm):");
+											input = new Scanner(System.in);
+											String dataInput = input.nextLine();
+											Date dataError = new SimpleDateFormat("dd-MM-yyyy HH:mm").parse(dataInput);
+
+											//TODO -> Verificar se a data inserida é superior à data que estava na eleicao
+
+											DateTimeFormatter format = DateTimeFormatter.ofPattern("dd-MM-yyy HH:mm");
+											LocalDateTime localTime = LocalDateTime.from(format.parse(dataInput));
+											Data_fim = Timestamp.valueOf(localTime);
+											break;
+										}catch (ParseException e) {
+											System.out.println("Insira uma data válida");
+										}
+									}
+
+								}
+							}
+							else{
+								System.out.println("Insira um campo válido");
+							}
+
+						}
+
+					}
+
+				} else {
+					System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
+				}
+			} catch (NumberFormatException ex) {
+				System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
+			}
+
+		}
+		if (Data_inicio == null) Data_inicio = currData_inicio;
+		if (Data_fim == null) Data_fim = currData_fim;
+		if (descricaoAlteracao == "") descricaoAlteracao = currDescricao;
+		if (tituloAlteracao == "") tituloAlteracao = currTitulo;
+
+		if (flagOut == 0) h.UpdatePropriedadesEleicao(idEleicao, tituloAlteracao, descricaoAlteracao, Data_inicio, Data_fim);
+		//TODO fazer o update na BD - DONE
+	}
+
+		public static void main(String args[]) {
 
 		//System.getProperties().put("java.security.policy", "policy.all");
 		//System.setSecurityManager(new RMISecurityManager());
 
 		try {
-			RMInterface h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
+			RMInterface h = (RMInterface) LocateRegistry.getRegistry(6000).lookup("RMIConnect");
 			AdminConsole admin = new AdminConsole();
 
 			h.subscribe(admin);
@@ -653,6 +823,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 								// Gerir mesas de voto
 								break;
 							case "5":
+								alteraPropriedadesEleicao(h);
 								// Alterar propriedades de uma eleição
 								break;
 							case "6":
@@ -687,4 +858,9 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 
 	}
 
-}*/
+
+}
+
+
+}
+

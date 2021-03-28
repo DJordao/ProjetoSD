@@ -1,6 +1,7 @@
 package com.company.RMIFiles;
 
 import java.rmi.*;
+import java.sql.Timestamp;
 
 public interface AdminConsoleInterface extends Remote{
     public void print_on_client(String s) throws RemoteException;
@@ -13,4 +14,6 @@ public interface AdminConsoleInterface extends Remote{
     void displayListaElementosCandidatura(String num_cc, String nome, String nomeCandidato) throws RemoteException;
 
     void displayListaTudoEleicao(String num_cc, String nome, String nomeCandidato) throws RemoteException;
+
+    void displayDetalhesEleicao(String titulo, String descricao, Timestamp data_inicio, Timestamp data_fim) throws RemoteException;
 }

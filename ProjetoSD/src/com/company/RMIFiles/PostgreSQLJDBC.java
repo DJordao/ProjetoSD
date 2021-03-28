@@ -427,4 +427,58 @@ public class PostgreSQLJDBC {
         }
         return AllelementosCandidatura;
     }
+
+    public ResultSet getDetalhesEleicao(int opcaoEleicao) throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt;
+        ResultSet detalhesEleicao = null;
+
+        try {
+            stmt = c.createStatement();
+
+
+            String sqlPessoasEleicao =  "SELECT * " +
+                    "FROM eleicao " +
+                    "WHERE eleicao.id = '" + opcaoEleicao + "'";
+
+
+            myStmt = c.prepareStatement(sqlPessoasEleicao);
+
+            ResultSet rs = stmt.executeQuery(sqlPessoasEleicao);
+
+            detalhesEleicao = rs;
+
+            c.commit();
+
+            return rs;
+        } catch (Exception ex) {
+            System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
+            System.exit(0);
+        }
+        return detalhesEleicao;
+    }
+
+    public void UpdatePropriedadesEleicao(int opcaoEleicao, String tituloAlteracao, String descricaoAlteracao, Timestamp data_inicio, Timestamp data_fim) throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt;
+        try {
+            System.out.println("OPção: " + opcaoEleicao);
+            stmt = c.createStatement();
+            String sql = "UPDATE eleicao " +
+                    "SET titulo = '" + tituloAlteracao + "', descricao = '" + descricaoAlteracao + "', data_inicio = '" + data_inicio + "', data_fim = '" + data_fim + "'" +
+                    "WHERE id = '" + opcaoEleicao + "'";
+
+            myStmt = c.prepareStatement(sql);
+            myStmt.executeUpdate();
+
+            myStmt.close();
+            stmt.close();
+            c.commit();
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+            System.exit(0);
+        }
+    }
 }

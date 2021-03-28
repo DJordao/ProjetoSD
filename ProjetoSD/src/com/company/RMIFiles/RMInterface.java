@@ -7,6 +7,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 public interface RMInterface extends Remote {
 
@@ -42,4 +43,7 @@ public interface RMInterface extends Remote {
 
     void ListaTudoEleicao(int opcaoEleicao) throws RemoteException, SQLException;
 
+    String getDetalhesEleicao(int opcaoEleicao) throws RemoteException, SQLException;
+
+    void UpdatePropriedadesEleicao(int opcaoEleicao, String tituloAlteracao, String descricaoAlteracao, Timestamp data_inicio, Timestamp data_fim) throws RemoteException, SQLException;
 }
