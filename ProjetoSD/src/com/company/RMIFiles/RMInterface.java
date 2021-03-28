@@ -5,12 +5,14 @@ import com.company.Pessoa;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.sql.SQLClientInfoException;
+import java.sql.SQLException;
 
 public interface RMInterface extends Remote {
 
-    Pessoa registaPessoa(Pessoa p) throws RemoteException;
+    Pessoa registaPessoa(Pessoa p) throws RemoteException, SQLClientInfoException;
 
-    Eleicao criaEleicao(Eleicao e) throws RemoteException;
+    Eleicao criaEleicao(Eleicao e) throws RemoteException, SQLClientInfoException;
 
      void tableAndTerminalState() throws RemoteException;
 
@@ -19,4 +21,25 @@ public interface RMInterface extends Remote {
     void encerraEleicao(Eleicao e) throws RemoteException;
 
     void listaResultadosAnteriores(Eleicao e) throws RemoteException;
+
+    void print_on_server(String s) throws RemoteException;
+
+    void subscribe(AdminConsoleInterface c) throws RemoteException;
+
+    void ListaEleicoes() throws RemoteException, SQLException;
+
+    int maxEleicoes() throws RemoteException, SQLException;
+
+    String ListaCandidaturas(int opcaoEleicao) throws RemoteException, SQLException;
+
+    String ListaPessoasParaCandidatura(int opcaoEleicao) throws RemoteException, SQLException;
+
+    void AdicionaPessoaCandidatura(int opcaoEleicao, String num_cc, String partido, String idPartido) throws RemoteException, SQLException;
+
+    String ListaElementosCandidatura(int opcaoEleicao, String candidatura, String idPartido) throws RemoteException, SQLException;
+
+    void RemovePessoaCandidatura(String num_cc, String nomeLista) throws RemoteException, SQLException;
+
+    void ListaTudoEleicao(int opcaoEleicao) throws RemoteException, SQLException;
+
 }
