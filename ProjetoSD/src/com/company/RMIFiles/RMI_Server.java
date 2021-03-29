@@ -12,6 +12,8 @@ import java.sql.ResultSet;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	static AdminConsoleInterface client;
@@ -228,6 +230,79 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		db.connectDB();
 		db.UpdatePropriedadesEleicao(opcaoEleicao, tituloAlteracao, descricaoAlteracao,data_inicio, data_fim);
 		client.print_on_client("Update com sucesso");
+	}
+
+	@Override
+	public Pessoa findPessoa(String num_cc) throws RemoteException, SQLException {
+		//Procurar a pessoa na DB
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+		ResultSet rs = db.findPessoa(num_cc);
+
+		boolean val = rs.next();
+		String[] atributosPessoa = new String[8];
+		Pessoa p = null;
+
+		if (val == false) return null;
+		else{
+			while (val){
+				atributosPessoa[0] = rs.getString("num_cc");
+				atributosPessoa[1] = rs.getString("nome");
+				atributosPessoa[2] = rs.getString("password");
+				atributosPessoa[3] = rs.getString("funcao");
+				atributosPessoa[4] = rs.getString("departamento");
+				atributosPessoa[5] = String.valueOf(rs.getInt("num_telefone"));
+				atributosPessoa[6] = rs.getString("morada");
+				atributosPessoa[7] = String.valueOf(rs.getTimestamp("data_validade"));
+				val = rs.next();
+
+				p = new Pessoa(atributosPessoa[1], atributosPessoa[2], atributosPessoa[3], atributosPessoa[4], Integer.parseInt(atributosPessoa[5]), atributosPessoa[6], atributosPessoa[0], atributosPessoa[7]);
+
+			}
+		}
+
+		/*for (int i = 0; i < atributosPessoa.length; i++){
+			System.out.println("-> " + atributosPessoa[i]);
+		}*/
+
+		return p;
+	}
+
+
+	public CopyOnWriteArrayList<Eleicao> getEleicao(String departamento) throws RemoteException, SQLException{
+		//Procurar a pessoa na DB
+		CopyOnWriteArrayList<Eleicao> listaEleicao = new CopyOnWriteArrayList<>();
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+		ResultSet rs = db.getEleicao(departamento);
+
+		boolean val = rs.next();
+		String[] atributosEleicao = new String[8];
+
+		if (val == false) return null;
+		else{
+			while (val){
+				atributosEleicao[0] = rs.getString("id");
+				atributosEleicao[1] = rs.getString("data_inicio");
+				atributosEleicao[2] = rs.getString("data_fim");
+				atributosEleicao[3] = rs.getString("titulo");
+				atributosEleicao[4] = rs.getString("descricao");
+				atributosEleicao[5] = rs.getString("tipo");
+				atributosEleicao[6] = rs.getString("departamento");
+				atributosEleicao[7] = String.valueOf(rs.getInt("resultado"));
+
+
+				Eleicao e = new Eleicao(atributosEleicao[1], atributosEleicao[2],atributosEleicao[3], atributosEleicao[4], atributosEleicao[5],atributosEleicao[6],null ,Integer.parseInt(atributosEleicao[7]));
+				listaEleicao.add(e);
+				val = rs.next();
+			}
+		}
+
+		/*for (int i = 0; i < listaEleicao.size(); i++){
+			System.out.println("-> " + listaEleicao.get(i).getTitulo());
+		}*/
+
+	return listaEleicao;
 	}
 
 	@Override

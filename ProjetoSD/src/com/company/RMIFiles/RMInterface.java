@@ -9,6 +9,8 @@ import java.rmi.RemoteException;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public interface RMInterface extends Remote {
 
@@ -49,4 +51,8 @@ public interface RMInterface extends Remote {
     String getDetalhesEleicao(int opcaoEleicao) throws RemoteException, SQLException;
 
     void UpdatePropriedadesEleicao(int opcaoEleicao, String tituloAlteracao, String descricaoAlteracao, Timestamp data_inicio, Timestamp data_fim) throws RemoteException, SQLException;
+
+    Pessoa findPessoa(String num_cc)  throws RemoteException, SQLException;
+
+    CopyOnWriteArrayList<Eleicao> getEleicao(String departamento) throws RemoteException, SQLException;
 }
