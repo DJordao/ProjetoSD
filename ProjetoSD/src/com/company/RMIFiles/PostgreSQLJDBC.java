@@ -464,7 +464,6 @@ public class PostgreSQLJDBC {
         Statement stmt = null;
         PreparedStatement myStmt;
         try {
-            System.out.println("OPção: " + opcaoEleicao);
             stmt = c.createStatement();
             String sql = "UPDATE eleicao " +
                     "SET titulo = '" + tituloAlteracao + "', descricao = '" + descricaoAlteracao + "', data_inicio = '" + data_inicio + "', data_fim = '" + data_fim + "'" +
@@ -481,4 +480,55 @@ public class PostgreSQLJDBC {
             System.exit(0);
         }
     }
+
+    public ResultSet findPessoa(String num_cc) throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt;
+        ResultSet pessoa = null;
+
+        try {
+            stmt = c.createStatement();
+            String sql = "SELECT * " + "FROM pessoa " + "WHERE num_cc = '" + num_cc + "'";
+
+            ResultSet rs = stmt.executeQuery(sql);
+            pessoa = rs;
+
+            //myStmt.close();
+            //stmt.close();
+            c.commit();
+
+            return rs;
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+            System.exit(0);
+        }
+    return pessoa;
+    }
+
+    public ResultSet getEleicao(String departamento) throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt;
+        ResultSet eleicao = null;
+
+        try {
+            stmt = c.createStatement();
+            String sql = "SELECT * " + "FROM eleicao " + "WHERE departamento = '" + departamento + "'";
+
+            ResultSet rs = stmt.executeQuery(sql);
+            eleicao = rs;
+
+            //myStmt.close();
+            //stmt.close();
+            c.commit();
+
+            return rs;
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+            System.exit(0);
+        }
+        return eleicao;
+    }
+
 }
