@@ -582,4 +582,30 @@ public class PostgreSQLJDBC {
 
     }
 
+    public ResultSet getlocalVotoEleitores(int eleicaoID) throws SQLClientInfoException {
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt;
+        ResultSet listaVotoEleitores = null;
+        try {
+            stmt = c.createStatement();
+            String sql = "SELECT local_voto, hora_voto, nome, num_cc " + "FROM voto, pessoa " + "WHERE eleicao_id = '" + eleicaoID + "' "
+                    + "AND pessoa.num_cc IN (SELECT pessoa_num_cc FROM voto) AND pessoa.num_cc = voto.pessoa_num_cc";
+
+            ResultSet rs = stmt.executeQuery(sql);
+            listaVotoEleitores = rs;
+
+            //myStmt.close();
+            //stmt.close();
+            c.commit();
+
+            return rs;
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+            System.exit(0);
+        }
+        return listaVotoEleitores;
+
+
+    }
 }

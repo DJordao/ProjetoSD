@@ -348,6 +348,27 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	}
 
 	@Override
+	public void getlocalVotoEleitores(int opcaoEleicao) throws RemoteException, SQLException {
+		//Listar todos os votos de cada eleitor de uma certa eleicao
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+		ResultSet rs = db.getlocalVotoEleitores(opcaoEleicao);
+
+		//SELECT local_voto, hora_voto, nome, num_cc
+
+		String num_cc, nome, local_voto, hora_voto;
+
+		while (rs.next()){
+			local_voto = rs.getString(1);
+			hora_voto = String.valueOf(rs.getTimestamp(2));
+			nome = rs.getString(3);
+			num_cc = rs.getString(4);
+
+			client.displaylocalVotoEleitores(local_voto, hora_voto, nome, num_cc);
+		}
+	}
+
+	@Override
 	public void tableAndTerminalState() throws RemoteException {
 
 	}
@@ -380,7 +401,7 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		try {
 
 			RMI_Server h = new RMI_Server();
-			Registry r = LocateRegistry.createRegistry(6000);
+			Registry r = LocateRegistry.createRegistry(7000);
 			r.rebind("RMIConnect", h);
 
 			System.out.println("Hello Server ready.");

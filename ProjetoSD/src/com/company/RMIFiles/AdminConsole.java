@@ -620,6 +620,15 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 
 	}
 
+	@Override
+	public void displaylocalVotoEleitores(String local_voto, String hora_voto, String nome, String num_cc) throws RemoteException {
+		System.out.println("== == == == == == == == == == ==");
+		System.out.println("Nome: " + nome);
+		System.out.println("Número de CC: " + num_cc);
+		System.out.println("Local de Voto: " + local_voto);
+		System.out.println("Hora de Voto: " + hora_voto);
+	}
+
 	public static void alteraPropriedadesEleicao(RMInterface h) throws RemoteException, SQLException {
 		System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
 		System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
@@ -802,6 +811,8 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 				if (eleicao.equalsIgnoreCase("999")) break;
 				if (!(opcaoEleicao < 1 || opcaoEleicao > maxEleicoes)) {
 					idEleicao = opcaoEleicao;
+					h.getlocalVotoEleitores(opcaoEleicao);
+
 
 				} else {
 					System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
@@ -821,7 +832,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		//System.setSecurityManager(new RMISecurityManager());
 
 		try {
-			RMInterface h = (RMInterface) LocateRegistry.getRegistry(6000).lookup("RMIConnect");
+			RMInterface h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
 			AdminConsole admin = new AdminConsole();
 
 			h.subscribe(admin);
