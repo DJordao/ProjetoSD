@@ -783,6 +783,38 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		//TODO fazer o update na BD - DONE
 	}
 
+
+	public static void localVotoEleitores(RMInterface h) throws RemoteException, SQLException {
+		System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
+		h.ListaEleicoes();
+
+		int maxEleicoes, opcaoEleicao,flagOut, idEleicao = 0;
+		Scanner input;
+		maxEleicoes = h.maxEleicoes();
+
+		while (true) {
+			try {
+				System.out.println("==============================");
+				System.out.printf("(999)>Indique a eleição a visualizar: ");
+				input = new Scanner(System.in);
+				String eleicao = input.nextLine();
+				opcaoEleicao = Integer.parseInt(eleicao);
+				if (eleicao.equalsIgnoreCase("999")) break;
+				if (!(opcaoEleicao < 1 || opcaoEleicao > maxEleicoes)) {
+					idEleicao = opcaoEleicao;
+
+				} else {
+					System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
+				}
+			} catch (NumberFormatException ex) {
+				System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
+			}
+		}
+
+
+
+	}
+
 		public static void main(String args[]) {
 
 		//System.getProperties().put("java.security.policy", "policy.all");
@@ -827,6 +859,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 								// Alterar propriedades de uma eleição
 								break;
 							case "6":
+								localVotoEleitores(h);
 								// Saber em que local votou cada eleitors
 								break;
 							case "7":

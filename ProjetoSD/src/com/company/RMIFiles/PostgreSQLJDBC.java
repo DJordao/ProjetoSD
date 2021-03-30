@@ -555,4 +555,31 @@ public class PostgreSQLJDBC {
 
     }
 
+    public int getIdVoto() throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        int maxIdVoto = 0;
+
+        try {
+            //Buscar o valor do último Id que está na tabela
+            stmt = c.createStatement();
+            String sqlIDEleicao = "SELECT COUNT(id_voto) " + "FROM voto ";
+            ResultSet rs = stmt.executeQuery(sqlIDEleicao);
+
+            while (rs.next()){
+                maxIdVoto = rs.getInt(1);
+            }
+
+
+
+            stmt.close();
+            c.commit();
+        } catch (Exception ex) {
+            System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
+            System.exit(0);
+        }
+        return maxIdVoto;
+
+    }
+
 }

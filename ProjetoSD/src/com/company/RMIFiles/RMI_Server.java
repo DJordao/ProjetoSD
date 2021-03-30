@@ -269,7 +269,6 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		return p;
 	}
 
-
 	public CopyOnWriteArrayList<Eleicao> getEleicao(String departamento) throws RemoteException, SQLException{
 		//Procurar a pessoa na DB
 		CopyOnWriteArrayList<Eleicao> listaEleicao = new CopyOnWriteArrayList<>();
@@ -337,6 +336,15 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		}
 
 		return listaCandidatos;
+	}
+
+	public int getIdVoto() throws RemoteException, SQLException {
+		//Vê o qual o ID de voto que é a PK da tabela de voto
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+		int idVoto = db.getIdVoto();
+
+		return idVoto;
 	}
 
 	@Override
