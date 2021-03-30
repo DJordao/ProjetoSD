@@ -13,25 +13,9 @@ import java.sql.SQLException;
 import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class MulticastServer extends Thread implements MulticastServerInterface{
+public class MulticastServer extends Thread{
     private String MULTICAST_ADDRESS_TERM = "224.3.2.1";
     private int PORT = 4321;
-
-    public static class MulticastServerRMI extends UnicastRemoteObject implements MulticastServerInterface{
-
-        protected MulticastServerRMI() throws RemoteException {
-            super();
-        }
-
-        @Override
-        public void print_on_client(String s) throws RemoteException {
-            System.out.println(">Server: " + s);
-        }
-    }
-
-    public void print_on_client(String s) throws RemoteException {
-        System.out.println("> " + s);
-    }
 
     public static void main(String[] args) throws RemoteException, NotBoundException {
         MulticastServer server = new MulticastServer(args[0]);
@@ -46,8 +30,6 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
         RMInterface h = null;
         try {
             h = (RMInterface) LocateRegistry.getRegistry(6000).lookup("RMIConnect");
-            MulticastServerRMI admin = new MulticastServerRMI();
-            h.subscribeMulticast(admin);
             h.print_on_server("olá do multicast");
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -71,7 +53,7 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
             LoginHandler lh = new LoginHandler(h); // Thread que trata dos logins
             lh.start();
 
-            VoteReceiver vr = new VoteReceiver(); // Thread que recebe os votos dos terminais
+            VoteReceiver vr = new VoteReceiver(h); // Thread que recebe os votos dos terminais
             vr.start();
 
             Scanner keyboard_scanner = new Scanner(System.in);
@@ -177,26 +159,10 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
 }
 
 
-class LoginHandler extends Thread implements MulticastServerInterface{
+class LoginHandler extends Thread{
     private String MULTICAST_ADDRESS_LOGIN = "224.3.2.2";
     private int PORT = 4321;
     private RMInterface h;
-
-    public static class MulticastServerRMI extends UnicastRemoteObject implements MulticastServerInterface{
-
-        protected MulticastServerRMI() throws RemoteException {
-            super();
-        }
-
-        @Override
-        public void print_on_client(String s) throws RemoteException {
-            System.out.println(">Server: " + s);
-        }
-    }
-
-    public void print_on_client(String s) throws RemoteException {
-        System.out.println("> " + s);
-    }
 
     public LoginHandler(RMInterface h) {
         super();
@@ -241,12 +207,14 @@ class LoginHandler extends Thread implements MulticastServerInterface{
 }
 
 
-class VoteReceiver extends Thread {
+class VoteReceiver extends Thread{
     private String MULTICAST_ADDRESS_VOTE = "224.3.2.3";
     private int PORT = 4321;
+    private RMInterface h;
 
-    public VoteReceiver() {
+    public VoteReceiver(RMInterface h) {
         super();
+        this.h = h;
     }
 
     public void run() {
