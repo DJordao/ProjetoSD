@@ -76,6 +76,7 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
             vr.start();
 
             Scanner keyboard_scanner = new Scanner(System.in);
+            Scanner keyboard_scanner1 = new Scanner(System.in);
 
             Pessoa p = null;
             Eleicao e = null;
@@ -84,6 +85,8 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
                 while (!id) { // Enquanto o ulilizador não estiver identificado
                     System.out.println("Indique o seu nª do cc:");
                     String input = keyboard_scanner.nextLine();
+
+                    System.out.println("->" + input + "<-");
 
                     p = h.findPessoa(input);
 
@@ -113,9 +116,9 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
                             e = null;
                             while (e == null) {
                                 System.out.println("Escolha uma eleição para votar:");
-                                i = keyboard_scanner.nextInt();
+                                i = keyboard_scanner1.nextInt();
 
-                                e = listaEleicao.get(i);
+                                e = listaEleicao.get(i-1);
                                 idEleicao = i;
                                 if(e == null) {
                                     System.out.println("Opção inválida.");;
@@ -123,7 +126,7 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
                             }
 
                             System.out.println("A procurar um terminal de voto...");
-                            break;
+
                         }
                     }
 
@@ -146,7 +149,6 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
                     //Teste
                     CopyOnWriteArrayList<Candidato> listaCandidatos = h.getListaCandidatos(idEleicao);
                     e.setListaCandidatos(listaCandidatos);
-                    System.out.println("vou para o RMI");
                     CopyOnWriteArrayList<Candidato> l = e.getListaCandidatos();
                     /*
                     //Confirmar que recebe a lista dos candidatos
@@ -205,7 +207,7 @@ class LoginHandler extends Thread {
                     String n_cc = message[2].split("\\|")[1];
                     String password = message[3].split("\\|")[1];
 
-                    Pessoa p = new Pessoa("Diogo Filipe", "1234", "Estudante", "DEI", 856475645, "Leiria", "56475643", "04/2025");
+                    Pessoa p = new Pessoa("Diogo Filipe", "12345", "Estudante", "DEI", 856475645, "Leiria", "56475643", "04/2025");
 
 
                     if(p.getPassword().equals(password)) {
