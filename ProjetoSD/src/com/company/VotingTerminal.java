@@ -8,6 +8,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.io.IOException;
 import java.sql.SQLOutput;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -60,11 +61,14 @@ public class VotingTerminal extends Thread {
 
                         String elec_name = message[1].split("\\|")[1];
                         int n = Integer.parseInt(message[2].split("\\|")[1]);
-                        ArrayString
+                        ArrayList<String> candidates = new ArrayList<>();
 
+                        for (int i = 3; i < n + 3; i++) {
+                            candidates.add(message[i].split("\\|")[1]);
+                        }
 
                         // Efetuar login
-                        lt = new LoginThread(getName(), n_cc);
+                        lt = new LoginThread(getName(), n_cc, elec_name, candidates);
                         lt.start();
                         lt.join();
 
@@ -86,8 +90,10 @@ class LoginThread extends Thread {
     private String MULTICAST_ADDRESS_LOGIN = "224.3.2.2";
     private int PORT = 4321;
     private String n_cc;
+    private String elec_name;
 
-    public LoginThread(String id, String n_cc) {
+
+    public LoginThread(String id, String n_cc, String elec_name, ArrayList<String> candidates) {
         super(id);
         this.n_cc = n_cc;
     }
