@@ -37,11 +37,6 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
     public static void main(String[] args) throws RemoteException, NotBoundException {
         MulticastServer server = new MulticastServer(args[0]);
         server.start();
-
-        //RMInterface h = (RMInterface) LocateRegistry.getRegistry(6000).lookup("RMIConnect");
-        //MulticastServerRMI admin = new MulticastServerRMI();
-        //h.subscribeMulticast(admin);
-        //h.print_on_server("olá do multicast");
     }
 
     public MulticastServer(String department) {
@@ -51,7 +46,7 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
     public void run() {
         RMInterface h = null;
         try {
-             h = (RMInterface) LocateRegistry.getRegistry(6000).lookup("RMIConnect");
+            h = (RMInterface) LocateRegistry.getRegistry(6000).lookup("RMIConnect");
             MulticastServerRMI admin = new MulticastServerRMI();
             h.subscribeMulticast(admin);
             h.print_on_server("olá do multicast");
@@ -63,7 +58,6 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
 
 
         boolean id = false;
-        Pessoa p = null;
         MulticastSocket socket = null;
 
         System.out.println(this.getName() + " online...");
@@ -75,7 +69,7 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
 
             Communication c = new Communication(socket, group);
 
-            LoginHandler lh = new LoginHandler();
+            LoginHandler lh = new LoginHandler(); // Thread que trata dos logins
             lh.start();
 
             VoteReceiver vr = new VoteReceiver(); // Thread que recebe os votos dos terminais
@@ -83,48 +77,50 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
 
             Scanner keyboard_scanner = new Scanner(System.in);
 
+            Pessoa p = null;
+            Eleicao e = null;
             while (true) {
                 while (!id) { // Enquanto o ulilizador não estiver identificado
                     System.out.println("Indique o seu nª do cc:");
                     String input = keyboard_scanner.nextLine();
 
-                    Pessoa pessoa = null;
-                    String[] propriedadesPessoa = null;
-                    CopyOnWriteArrayList<Eleicao>listaEleicao = new CopyOnWriteArrayList<>();
-
-                    //TODO funcao de encontrar pressoa retorna um String[] com todas as propriedades da pessoa
-                    pessoa = h.findPessoa(input);
-
-                    //TODO retorna um array List de todas as eleições de um dado Departamento.
-                    listaEleicao = h.getEleicao("FLUC");
-
-                    //Só para ver se recebia bem a lista das eleições
-                    if (listaEleicao != null){
-                        for (int i = 0; i < listaEleicao.size(); i++){
-                            System.out.println("-> " + listaEleicao.get(i).getTitulo());
-                        }
-                    }else System.out.println("Nã há eleições para esse Departamento");
-
-                    /* Só para verificar se recebia as propriedades bem
-                    System.out.println("\n\n\n");
-                    for (int i = 0; i < propriedadesPessoa.length; i++){
-                        System.out.println("-> " + propriedadesPessoa[i]);
-                    }*/
+                    p = h.findPessoa(input);
 
                     // Tem que se ir buscar ao RMI
-                    CopyOnWriteArrayList<Pessoa> l = new CopyOnWriteArrayList<>();
-                    l.add(new Pessoa("Diogo Filipe", "1234", "Estudante", "DEI", 856475645, "Leiria", "56475643", "04/2025"));
+                    //CopyOnWriteArrayList<Pessoa> l = new CopyOnWriteArrayList<>();
+                    //l.add(new Pessoa("Diogo Filipe", "1234", "Estudante", "DEI", 856475645, "Leiria", "56475643", "04/2025"));
 
                     //TODO: alterei este ciclo de forma a que compare com a string que recebe
-                    for(int i = 0; i < l.size(); i++) {
-                        p = l.get(i);
-                        if (pessoa != null){
-                            if(pessoa.getNum_cc().equals(input)) {
-                                id = true;
-                                System.out.println("Identificação bem sucedida.");
-                                System.out.println("A procurar um terminal de voto...");
+                    if (p != null){
+                        if(p.getNum_cc().equals(input)) {
+                            id = true;
+                            System.out.println("Identificação bem sucedida.");
+
+                            CopyOnWriteArrayList<Eleicao> listaEleicao = h.getEleicao(getName());
+                            if (listaEleicao != null){
+                                for (int i = 0; i < listaEleicao.size(); i++){
+                                    System.out.println(i + "-> " + listaEleicao.get(i).getTitulo());
+                                }
+                            }
+                            else {
+                                System.out.println("Não existem eleições a decorrer para este Departamento.");
                                 break;
                             }
+
+                            int i;
+                            e = null;
+                            while (e == null) {
+                                System.out.println("Escolha uma eleição para votar:");
+                                i = keyboard_scanner.nextInt();
+
+                                e = listaEleicao.get(i);
+                                if(e == null) {
+                                    System.out.println("Opção inválida.");;
+                                }
+                            }
+
+                            System.out.println("A procurar um terminal de voto...");
+                            break;
                         }
                     }
 
@@ -142,7 +138,17 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
                     String term = message[1].split("\\|")[1];
                     System.out.println("Pode votar no terminal " + term);
 
-                    c.sendOperation("type|term_unlock;term|" + term);
+                    c.sendOperation("type|term_unlock;term|" + term + ";user|" + p.getNum_cc());
+
+                    ArrayList<Candidato> l = e.getListaCandidatos();
+                    String election = "type|send_elec;name|" + e.getTitulo() + ";item_count|" + l.size();
+
+                    for(int i = 0; i < l.size(); i++) {
+                        election += ";item_" + i + "|" + l.get(i).getNome();
+                    }
+
+                    c.sendOperation(election);
+
                     id = false;
                 }
 
@@ -169,7 +175,7 @@ class LoginHandler extends Thread {
         MulticastSocket socket = null;
         System.out.println("login_handler");
         try {
-            socket = new MulticastSocket(PORT);  // Socket para receber os votos
+            socket = new MulticastSocket(PORT);  // Socket para tratar dos logins
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_LOGIN);
             socket.joinGroup(group);
             Communication c = new Communication(socket, group);
@@ -180,14 +186,13 @@ class LoginHandler extends Thread {
 
                 if(message_type.equals("login_request")) {
                     String term = message[1].split("\\|")[1];
-                    String username = message[2].split("\\|")[1];
+                    String n_cc = message[2].split("\\|")[1];
                     String password = message[3].split("\\|")[1];
-
-                    // Tem que se ir buscar ao RMI
 
                     Pessoa p = new Pessoa("Diogo Filipe", "1234", "Estudante", "DEI", 856475645, "Leiria", "56475643", "04/2025");
 
-                    if(p.getPassword().equals(username) && p.getPassword().equals(password)) {
+
+                    if(p.getPassword().equals(password)) {
                         c.sendOperation("type|login_accept;term|" + term);
                     }
                     else {

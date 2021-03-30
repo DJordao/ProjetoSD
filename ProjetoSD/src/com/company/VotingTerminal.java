@@ -37,8 +37,6 @@ public class VotingTerminal extends Thread {
             Communication c = new Communication(socket, group);
 
             while (true) {
-                lt = new LoginThread(getName());
-
                 String[] message = c.receiveOperation().split(";");
                 String message_type = c.getMessageType(message[0]);
 
@@ -53,7 +51,20 @@ public class VotingTerminal extends Thread {
                     if (term.equals(getName())) {
                         System.out.println("Terminal de voto " + getName());
 
+                        String n_cc = message[2].split("\\|")[1];
+
+                        while (!message_type.equals("send_elec")) {
+                            message = c.receiveOperation().split(";");
+                            message_type = c.getMessageType(message[0]);
+                        }
+
+                        String elec_name = message[1].split("\\|")[1];
+                        int n = Integer.parseInt(message[2].split("\\|")[1]);
+                        ArrayString
+
+
                         // Efetuar login
+                        lt = new LoginThread(getName(), n_cc);
                         lt.start();
                         lt.join();
 
@@ -74,9 +85,11 @@ public class VotingTerminal extends Thread {
 class LoginThread extends Thread {
     private String MULTICAST_ADDRESS_LOGIN = "224.3.2.2";
     private int PORT = 4321;
+    private String n_cc;
 
-    public LoginThread(String id) {
+    public LoginThread(String id, String n_cc) {
         super(id);
+        this.n_cc = n_cc;
     }
 
     public void run() {
@@ -92,12 +105,15 @@ class LoginThread extends Thread {
             Communication c = new Communication(socket, group);
 
             Scanner keyboard_scanner = new Scanner(System.in);
-            System.out.println("Introduza o seu username: ");
-            String username = keyboard_scanner.nextLine();
+            String n_cc = "";
+            while (!n_cc.equals(this.n_cc)) {
+                System.out.println("Introduza o seu nº do cc: ");
+                n_cc = keyboard_scanner.nextLine();
+            }
             System.out.println("Introduza a sua password: ");
             String password = keyboard_scanner.nextLine();
 
-            c.sendOperation("type|login_request;term|" + getName() + ";username|" + username + ";passowrd|" + password);
+            c.sendOperation("type|login_request;term|" + getName() + ";n_cc|" + n_cc + ";passowrd|" + password);
 
             while (true) {
                 String[] message = c.receiveOperation().split(";");
@@ -125,11 +141,11 @@ class LoginThread extends Thread {
 
                         keyboard_scanner = new Scanner(System.in);
                         System.out.println("Introduza o seu username: ");
-                        username = keyboard_scanner.nextLine();
+                        n_cc = keyboard_scanner.nextLine();
                         System.out.println("Introduza a sua password: ");
                         password = keyboard_scanner.nextLine();
 
-                        c.sendOperation("type|login_request;term|" + getName() + ";username|" + username + ";passowrd|" + password);
+                        c.sendOperation("type|login_request;term|" + getName() + ";n_cc|" + n_cc + ";passowrd|" + password);
 
                     }
                 }
