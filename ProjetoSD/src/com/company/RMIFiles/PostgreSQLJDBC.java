@@ -511,7 +511,6 @@ public class PostgreSQLJDBC {
         Statement stmt = null;
         PreparedStatement myStmt;
         ResultSet eleicao = null;
-
         try {
             stmt = c.createStatement();
             String sql = "SELECT * " + "FROM eleicao " + "WHERE departamento = '" + departamento + "'";
@@ -529,6 +528,31 @@ public class PostgreSQLJDBC {
             System.exit(0);
         }
         return eleicao;
+    }
+
+    public ResultSet getListaCandidatos(int eleicaoID) throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt;
+        ResultSet listaCandidatos = null;
+        try {
+            stmt = c.createStatement();
+            String sql = "SELECT * " + "FROM lista_candidatos " + "WHERE eleicao_id = '" + eleicaoID + "'";
+
+            ResultSet rs = stmt.executeQuery(sql);
+            listaCandidatos = rs;
+
+            //myStmt.close();
+            //stmt.close();
+            c.commit();
+
+            return rs;
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+            System.exit(0);
+        }
+        return listaCandidatos;
+
     }
 
 }

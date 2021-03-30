@@ -3,6 +3,7 @@ package com.company;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Eleicao implements Serializable{
     private String data_inicio;
@@ -11,10 +12,10 @@ public class Eleicao implements Serializable{
     private String descricao;
     private String tipoEleicao;
     private String departamento;
-    private ArrayList<Candidato> listaCandidatos;
+    private CopyOnWriteArrayList<Candidato> listaCandidatos;
     private int resultado;
 
-    public Eleicao(String data_inicio, String data_fim, String titulo, String descricao, String tipoEleicao, String departamento, ArrayList<Candidato> listaCandidatos, int resultado) {
+    public Eleicao(String data_inicio, String data_fim, String titulo, String descricao, String tipoEleicao, String departamento, CopyOnWriteArrayList<Candidato> listaCandidatos, int resultado) {
         this.data_inicio = data_inicio;
         this.data_fim = data_fim;
         this.titulo = titulo;
@@ -73,11 +74,11 @@ public class Eleicao implements Serializable{
         this.departamento = departamento;
     }
 
-    public ArrayList<Candidato> getListaCandidatos() {
+    public CopyOnWriteArrayList<Candidato> getListaCandidatos() {
         return listaCandidatos;
     }
 
-    public void setListaCandidatos(ArrayList<Candidato> listaCandidatos) {
+    public void setListaCandidatos(CopyOnWriteArrayList<Candidato> listaCandidatos) {
         this.listaCandidatos = listaCandidatos;
     }
 

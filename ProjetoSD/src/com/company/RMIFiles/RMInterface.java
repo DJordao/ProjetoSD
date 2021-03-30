@@ -1,5 +1,6 @@
 package com.company.RMIFiles;
 
+import com.company.Candidato;
 import com.company.Eleicao;
 import com.company.MulticastServerInterface;
 import com.company.Pessoa;
@@ -55,4 +56,6 @@ public interface RMInterface extends Remote {
     Pessoa findPessoa(String num_cc)  throws RemoteException, SQLException;
 
     CopyOnWriteArrayList<Eleicao> getEleicao(String departamento) throws RemoteException, SQLException;
+
+    CopyOnWriteArrayList<Candidato> getListaCandidatos(int eleicaoID) throws RemoteException, SQLException;
 }

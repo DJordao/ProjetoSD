@@ -1,5 +1,6 @@
 package com.company.RMIFiles;
 
+import com.company.Candidato;
 import com.company.Eleicao;
 import com.company.MulticastServerInterface;
 import com.company.Pessoa;
@@ -275,12 +276,12 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
 		db.connectDB();
 		ResultSet rs = db.getEleicao(departamento);
-
 		boolean val = rs.next();
 		String[] atributosEleicao = new String[8];
 
 		if (val == false) return null;
 		else{
+
 			while (val){
 				atributosEleicao[0] = rs.getString("id");
 				atributosEleicao[1] = rs.getString("data_inicio");
@@ -298,11 +299,44 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 			}
 		}
 
-		/*for (int i = 0; i < listaEleicao.size(); i++){
+		for (int i = 0; i < listaEleicao.size(); i++){
 			System.out.println("-> " + listaEleicao.get(i).getTitulo());
-		}*/
+		}
 
 	return listaEleicao;
+	}
+
+	public CopyOnWriteArrayList<Candidato> getListaCandidatos(int eleicaoID) throws RemoteException, SQLException{
+		//Retorna os candidatos de uma eleicao
+		CopyOnWriteArrayList<Candidato> listaCandidatos = new CopyOnWriteArrayList<>();
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+
+		System.out.println("Eleição Id: " + eleicaoID);
+		ResultSet rs = db.getListaCandidatos(eleicaoID);
+		boolean val = rs.next();
+		String[] atributosListaCandidatos = new String[4];
+
+		System.out.println("VAL: " + val);
+		if (val == false) return null;
+		else{
+			while (val){
+				atributosListaCandidatos[0] = rs.getString("id");
+				atributosListaCandidatos[1] = rs.getString("nomecandidato");
+				atributosListaCandidatos[2] = rs.getString("categoria");
+				atributosListaCandidatos[3] = rs.getString("eleicao_id");
+
+				Candidato c = new Candidato(atributosListaCandidatos[1], atributosListaCandidatos[2], null);
+				listaCandidatos.add(c);
+				val = rs.next();
+			}
+		}
+
+		for (int i = 0; i < listaCandidatos.size(); i++){
+			System.out.println("-> " + listaCandidatos.get(i).getNome());
+		}
+
+		return listaCandidatos;
 	}
 
 	@Override

@@ -40,7 +40,7 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
     }
 
     public MulticastServer(String department) {
-        super("Mesa de voto " + department);
+        super(department);
     }
 
     public void run() {
@@ -79,6 +79,7 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
 
             Pessoa p = null;
             Eleicao e = null;
+            int idEleicao = 0;
             while (true) {
                 while (!id) { // Enquanto o ulilizador não estiver identificado
                     System.out.println("Indique o seu nª do cc:");
@@ -98,8 +99,9 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
 
                             CopyOnWriteArrayList<Eleicao> listaEleicao = h.getEleicao(getName());
                             if (listaEleicao != null){
+
                                 for (int i = 0; i < listaEleicao.size(); i++){
-                                    System.out.println(i + "-> " + listaEleicao.get(i).getTitulo());
+                                    System.out.println((i+1) + "-> " + listaEleicao.get(i).getTitulo());
                                 }
                             }
                             else {
@@ -114,6 +116,7 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
                                 i = keyboard_scanner.nextInt();
 
                                 e = listaEleicao.get(i);
+                                idEleicao = i;
                                 if(e == null) {
                                     System.out.println("Opção inválida.");;
                                 }
@@ -140,7 +143,20 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
 
                     c.sendOperation("type|term_unlock;term|" + term + ";user|" + p.getNum_cc());
 
-                    ArrayList<Candidato> l = e.getListaCandidatos();
+                    //Teste
+                    CopyOnWriteArrayList<Candidato> listaCandidatos = h.getListaCandidatos(idEleicao);
+                    e.setListaCandidatos(listaCandidatos);
+                    System.out.println("vou para o RMI");
+                    CopyOnWriteArrayList<Candidato> l = e.getListaCandidatos();
+                    /*
+                    //Confirmar que recebe a lista dos candidatos
+                    for (int i = 0; i < l.size(); i++){
+                        System.out.println("L-> " + l.get(i).getNome());
+                    }*/
+
+
+
+
                     String election = "type|send_elec;name|" + e.getTitulo() + ";item_count|" + l.size();
 
                     for(int i = 0; i < l.size(); i++) {
