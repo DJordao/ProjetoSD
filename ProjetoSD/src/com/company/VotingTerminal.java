@@ -30,7 +30,6 @@ public class VotingTerminal extends Thread {
 
     public void run() {
         MulticastSocket socket = null;
-        //LoginThread lt;
 
         try {
             socket = new MulticastSocket(PORT);  // Socket para comunicar com o servidor
@@ -71,11 +70,8 @@ public class VotingTerminal extends Thread {
 
                         // Efetuar login
                         MulticastSocket login_socket = null;
-                        //VotingThread vt;
 
                         try {
-                            //vt = new VotingThread(getName());
-
                             login_socket = new MulticastSocket(PORT);  // Socket para fazer login
                             InetAddress login_group = InetAddress.getByName(MULTICAST_ADDRESS_LOGIN);
                             login_socket.joinGroup(login_group);
@@ -112,9 +108,17 @@ public class VotingTerminal extends Thread {
                                             InetAddress vote_group = InetAddress.getByName(MULTICAST_ADDRESS_VOTE);
                                             Communication vote_c = new Communication(vote_socket, vote_group);
 
+                                            System.out.println(elec_name);
+                                            for(int i = 0; i < n; i++) {
+                                                System.out.println(i+1 + "-> " + candidates.get(i));
+                                            }
+                                            System.out.println(n + "-> Voto em branco");
+
+                                            System.out.println("Introduza o número correspondente à sua escolha: ");
                                             keyboard_scanner = new Scanner(System.in);
-                                            String readKeyboard = keyboard_scanner.nextLine();
-                                            vote_c.sendOperation(readKeyboard);
+                                            int option = keyboard_scanner.nextInt() - 1;
+
+                                            vote_c.sendOperation("type|send_vote;elec_name|" + elec_name + ";vote|" + option);
                                             System.out.println("Voto enviado.");
 
                                         } catch (IOException e) {
@@ -163,116 +167,3 @@ public class VotingTerminal extends Thread {
         }
     }
 }
-
-
-/*class LoginThread extends Thread {
-    private String MULTICAST_ADDRESS_LOGIN = "224.3.2.2";
-    private int PORT = 4321;
-    private String n_cc;
-    private String elec_name;
-
-
-    public LoginThread(String id, String n_cc, String elec_name, ArrayList<String> candidates) {
-        super(id);
-        this.n_cc = n_cc;
-    }
-
-    public void run() {
-        MulticastSocket socket = null;
-        VotingThread vt;
-
-        try {
-            vt = new VotingThread(getName());
-
-            socket = new MulticastSocket(PORT);  // Socket para fazer login
-            InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_LOGIN);
-            socket.joinGroup(group);
-            Communication c = new Communication(socket, group);
-
-            Scanner keyboard_scanner = new Scanner(System.in);
-            String n_cc = "";
-            while (!n_cc.equals(this.n_cc)) {
-                System.out.println("Introduza o seu nº do cc: ");
-                n_cc = keyboard_scanner.nextLine();
-            }
-            System.out.println("Introduza a sua password: ");
-            String password = keyboard_scanner.nextLine();
-
-            c.sendOperation("type|login_request;term|" + getName() + ";n_cc|" + n_cc + ";passowrd|" + password);
-
-            while (true) {
-                String[] message = c.receiveOperation().split(";");
-                String message_type = c.getMessageType(message[0]);
-
-                if (message_type.equals("login_accept")) {
-                    String term = message[1].split("\\|")[1];
-
-                    if (term.equals(getName())) {
-                        System.out.println("Autenticação bem sucedida.");
-
-                        // Vote
-                        vt.start();
-                        vt.join();
-
-                        break;
-                    }
-                }
-
-                else if (message_type.equals("login_deny")) {
-                    String term = message[1].split("\\|")[1];
-
-                    if (term.equals(getName())) {
-                        System.out.println("Dados incorretos.");
-
-                        keyboard_scanner = new Scanner(System.in);
-                        System.out.println("Introduza o seu username: ");
-                        n_cc = keyboard_scanner.nextLine();
-                        System.out.println("Introduza a sua password: ");
-                        password = keyboard_scanner.nextLine();
-
-                        c.sendOperation("type|login_request;term|" + getName() + ";n_cc|" + n_cc + ";passowrd|" + password);
-
-                    }
-                }
-            }
-
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            socket.close();
-        }
-
-    }
-}*/
-
-
-/*class VotingThread extends Thread {
-    private String MULTICAST_ADDRESS_VOTE = "224.3.2.3";
-    private int PORT = 4321;
-
-    public VotingThread(String id) {
-        super(id);
-    }
-
-    public void run() {
-        System.out.println("Terminal de voto " + getName());
-
-        MulticastSocket socket = null;
-
-        try {
-            socket = new MulticastSocket();  // Socket para enviar os votos
-            InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_VOTE);
-            Communication c = new Communication(socket, group);
-
-            Scanner keyboard_scanner = new Scanner(System.in);
-            String readKeyboard = keyboard_scanner.nextLine();
-            c.sendOperation(readKeyboard);
-            System.out.println("Voto enviado.");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            socket.close();
-        }
-    }
-}*/

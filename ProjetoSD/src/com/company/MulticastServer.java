@@ -10,7 +10,6 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -69,7 +68,7 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
 
             Communication c = new Communication(socket, group);
 
-            LoginHandler lh = new LoginHandler(); // Thread que trata dos logins
+            LoginHandler lh = new LoginHandler(h); // Thread que trata dos logins
             lh.start();
 
             VoteReceiver vr = new VoteReceiver(); // Thread que recebe os votos dos terminais
@@ -156,10 +155,7 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
                         System.out.println("L-> " + l.get(i).getNome());
                     }*/
 
-
-
-
-                    String election = "type|send_elec;name|" + e.getTitulo() + ";item_count|" + l.size();
+                    String election = "type|send_elec;elec_name|" + e.getTitulo() + ";item_count|" + l.size();
 
                     for(int i = 0; i < l.size(); i++) {
                         election += ";item_" + i + "|" + l.get(i).getNome();
@@ -181,12 +177,30 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
 }
 
 
-class LoginHandler extends Thread {
+class LoginHandler extends Thread implements MulticastServerInterface{
     private String MULTICAST_ADDRESS_LOGIN = "224.3.2.2";
     private int PORT = 4321;
+    private RMInterface h;
 
-    public LoginHandler() {
+    public static class MulticastServerRMI extends UnicastRemoteObject implements MulticastServerInterface{
+
+        protected MulticastServerRMI() throws RemoteException {
+            super();
+        }
+
+        @Override
+        public void print_on_client(String s) throws RemoteException {
+            System.out.println(">Server: " + s);
+        }
+    }
+
+    public void print_on_client(String s) throws RemoteException {
+        System.out.println("> " + s);
+    }
+
+    public LoginHandler(RMInterface h) {
         super();
+        this.h = h;
     }
 
     public void run() {
@@ -207,8 +221,7 @@ class LoginHandler extends Thread {
                     String n_cc = message[2].split("\\|")[1];
                     String password = message[3].split("\\|")[1];
 
-                    Pessoa p = new Pessoa("Diogo Filipe", "12345", "Estudante", "DEI", 856475645, "Leiria", "56475643", "04/2025");
-
+                    Pessoa p = h.findPessoa(n_cc);
 
                     if(p.getPassword().equals(password)) {
                         c.sendOperation("type|login_accept;term|" + term);
@@ -219,7 +232,7 @@ class LoginHandler extends Thread {
                 }
             }
 
-        } catch (IOException e) {
+        } catch (IOException | SQLException e) {
             e.printStackTrace();
         } finally {
             socket.close();
@@ -240,13 +253,15 @@ class VoteReceiver extends Thread {
         MulticastSocket socket = null;
 
         try {
-            socket = new MulticastSocket(PORT);  // Socket para fazer logins
+            socket = new MulticastSocket(PORT);  // Socket para receber os votos
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_VOTE);
             socket.joinGroup(group);
             Communication c = new Communication(socket, group);
 
             while (true) {
-                String op = c.receiveOperation();
+                String[] message = c.receiveOperation().split(";");
+                String elec_name = c.getMessageType(message[1]);
+                String option = c.getMessageType(message[2]);
 
                 //System.out.println(op);
             }

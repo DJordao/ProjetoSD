@@ -8,5 +8,5 @@ type|login_request;term|term_id;n_cc|cc_input;password|pass_input (Enviada pelo 
 type|login_accept;term|term_id (Enviada pelo servidor ao terminal que pediu autenticação de um utilizador e os dados estavam corretos)
 type|login_deny;term|term_id (Enviada pelo servidor ao terminal que pediu autenticação de um utilizador e os dados estavam incorretos)
 
-type|send_elec;name|elec_name;item_count|n;item_n|list_name (Enviado pelo servidor ao terminal)
-type|send_vote;vote|option (Enviado pelos terminais quando um utilizador subemeter o seu voto)
+type|send_elec;elec_name|name;item_count|n;item_n|list_name (Enviado pelo servidor ao terminal)
+type|send_vote;elec_name|name;vote|option (Enviado pelos terminais quando um utilizador subemeter o seu voto)
