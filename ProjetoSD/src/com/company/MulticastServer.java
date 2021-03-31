@@ -10,29 +10,13 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.sql.Timestamp;
 import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class MulticastServer extends Thread implements MulticastServerInterface{
+public class MulticastServer extends Thread{
     private String MULTICAST_ADDRESS_TERM = "224.3.2.1";
     private int PORT = 4321;
-
-    public static class MulticastServerRMI extends UnicastRemoteObject implements MulticastServerInterface{
-
-        protected MulticastServerRMI() throws RemoteException {
-            super();
-        }
-
-        @Override
-        public void print_on_client(String s) throws RemoteException {
-            System.out.println(">Server: " + s);
-        }
-    }
-
-    public void print_on_client(String s) throws RemoteException {
-        System.out.println("> " + s);
-    }
 
     public static void main(String[] args) throws RemoteException, NotBoundException {
         MulticastServer server = new MulticastServer(args[0]);
@@ -47,8 +31,6 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
         RMInterface h = null;
         try {
             h = (RMInterface) LocateRegistry.getRegistry(6000).lookup("RMIConnect");
-            MulticastServerRMI admin = new MulticastServerRMI();
-            h.subscribeMulticast(admin);
             h.print_on_server("olá do multicast");
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -69,10 +51,10 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
 
             Communication c = new Communication(socket, group);
 
-            LoginHandler lh = new LoginHandler(); // Thread que trata dos logins
+            LoginHandler lh = new LoginHandler(h); // Thread que trata dos logins
             lh.start();
 
-            VoteReceiver vr = new VoteReceiver(); // Thread que recebe os votos dos terminais
+            VoteReceiver vr = new VoteReceiver(h); // Thread que recebe os votos dos terminais
             vr.start();
 
             Scanner keyboard_scanner = new Scanner(System.in);
@@ -144,6 +126,8 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
                     String term = message[1].split("\\|")[1];
                     System.out.println("Pode votar no terminal " + term);
 
+                    // TODO Enviar para o RMI que a pessoa votou neste local
+
                     c.sendOperation("type|term_unlock;term|" + term + ";user|" + p.getNum_cc());
 
                     //Teste
@@ -156,10 +140,7 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
                         System.out.println("L-> " + l.get(i).getNome());
                     }*/
 
-
-
-
-                    String election = "type|send_elec;name|" + e.getTitulo() + ";item_count|" + l.size();
+                    String election = "type|send_elec;elec_name|" + e.getTitulo() + ";item_count|" + l.size();
 
                     for(int i = 0; i < l.size(); i++) {
                         election += ";item_" + i + "|" + l.get(i).getNome();
@@ -181,12 +162,14 @@ public class MulticastServer extends Thread implements MulticastServerInterface{
 }
 
 
-class LoginHandler extends Thread {
+class LoginHandler extends Thread{
     private String MULTICAST_ADDRESS_LOGIN = "224.3.2.2";
     private int PORT = 4321;
+    private RMInterface h;
 
-    public LoginHandler() {
+    public LoginHandler(RMInterface h) {
         super();
+        this.h = h;
     }
 
     public void run() {
@@ -207,8 +190,7 @@ class LoginHandler extends Thread {
                     String n_cc = message[2].split("\\|")[1];
                     String password = message[3].split("\\|")[1];
 
-                    Pessoa p = new Pessoa("Diogo Filipe", "12345", "Estudante", "DEI", 856475645, "Leiria", "56475643", "04/2025");
-
+                    Pessoa p = h.findPessoa(n_cc);
 
                     if(p.getPassword().equals(password)) {
                         c.sendOperation("type|login_accept;term|" + term);
@@ -217,9 +199,16 @@ class LoginHandler extends Thread {
                         c.sendOperation("type|login_deny;term|" + term);
                     }
                 }
+                else if(message_type.equals("user_voted")) {
+                    String elec_name = message[1].split("\\|")[1];
+                    String n_cc = message[2].split("\\|")[1];
+                    Timestamp cur_date = new Timestamp(System.currentTimeMillis());
+
+                    // TODO Enviar para o RMI a data em que a pessoa votou na eleição
+                }
             }
 
-        } catch (IOException e) {
+        } catch (IOException | SQLException e) {
             e.printStackTrace();
         } finally {
             socket.close();
@@ -228,27 +217,31 @@ class LoginHandler extends Thread {
 }
 
 
-class VoteReceiver extends Thread {
+class VoteReceiver extends Thread{
     private String MULTICAST_ADDRESS_VOTE = "224.3.2.3";
     private int PORT = 4321;
+    private RMInterface h;
 
-    public VoteReceiver() {
+    public VoteReceiver(RMInterface h) {
         super();
+        this.h = h;
     }
 
     public void run() {
         MulticastSocket socket = null;
 
         try {
-            socket = new MulticastSocket(PORT);  // Socket para fazer logins
+            socket = new MulticastSocket(PORT);  // Socket para receber os votos
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_VOTE);
             socket.joinGroup(group);
             Communication c = new Communication(socket, group);
 
             while (true) {
-                String op = c.receiveOperation();
+                String[] message = c.receiveOperation().split(";");
+                String elec_name = c.getMessageType(message[1]);
+                String option = c.getMessageType(message[2]);
 
-                //System.out.println(op);
+                // TODO Enviar para o RMI a opção escolhida numa eleição
             }
         } catch (IOException e) {
             e.printStackTrace();
