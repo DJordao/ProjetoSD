@@ -377,7 +377,7 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	}
 
 	@Override
-	public void updateVotoPessoaData(Timestamp dataVoto,String num_cc, String nomeEleicao) throws RemoteException, SQLException{
+	public void updateVotoPessoaData(Timestamp dataVoto, String num_cc, String nomeEleicao) throws RemoteException, SQLException{
 		int idEleicao = getIdEleicao(nomeEleicao);
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
 		db.connectDB();

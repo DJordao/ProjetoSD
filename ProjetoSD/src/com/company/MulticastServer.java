@@ -126,8 +126,6 @@ public class MulticastServer extends Thread{
                     String term = message[1].split("\\|")[1];
                     System.out.println("Pode votar no terminal " + term);
 
-                    // TODO Enviar para o RMI que a pessoa votou neste local
-
                     c.sendOperation("type|term_unlock;term|" + term + ";user|" + p.getNum_cc());
 
                     //Teste
@@ -139,6 +137,8 @@ public class MulticastServer extends Thread{
                     for (int i = 0; i < l.size(); i++){
                         System.out.println("L-> " + l.get(i).getNome());
                     }*/
+
+                    h.recebeLocalVoto(getName(), p.getNum_cc(), e.getTitulo()); // Envia para o RMI o local e a eleição em que x pessoa vai votar
 
                     String election = "type|send_elec;elec_name|" + e.getTitulo() + ";item_count|" + l.size();
 
@@ -204,7 +204,7 @@ class LoginHandler extends Thread{
                     String n_cc = message[2].split("\\|")[1];
                     Timestamp cur_date = new Timestamp(System.currentTimeMillis());
 
-                    // TODO Enviar para o RMI a data em que a pessoa votou na eleição
+                    h.updateVotoPessoaData(cur_date, n_cc, elec_name); // Depois da pessoa votar envia a data
                 }
             }
 
