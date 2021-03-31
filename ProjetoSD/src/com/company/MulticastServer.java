@@ -10,6 +10,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -125,6 +126,8 @@ public class MulticastServer extends Thread{
                     String term = message[1].split("\\|")[1];
                     System.out.println("Pode votar no terminal " + term);
 
+                    // TODO Enviar para o RMI que a pessoa votou neste local
+
                     c.sendOperation("type|term_unlock;term|" + term + ";user|" + p.getNum_cc());
 
                     //Teste
@@ -196,6 +199,13 @@ class LoginHandler extends Thread{
                         c.sendOperation("type|login_deny;term|" + term);
                     }
                 }
+                else if(message_type.equals("user_voted")) {
+                    String elec_name = message[1].split("\\|")[1];
+                    String n_cc = message[2].split("\\|")[1];
+                    Timestamp cur_date = new Timestamp(System.currentTimeMillis());
+
+                    // TODO Enviar para o RMI a data em que a pessoa votou na eleição
+                }
             }
 
         } catch (IOException | SQLException e) {
@@ -231,7 +241,7 @@ class VoteReceiver extends Thread{
                 String elec_name = c.getMessageType(message[1]);
                 String option = c.getMessageType(message[2]);
 
-                //System.out.println(op);
+                // TODO Enviar para o RMI a opção escolhida numa eleição
             }
         } catch (IOException e) {
             e.printStackTrace();

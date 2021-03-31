@@ -121,6 +121,8 @@ public class VotingTerminal extends Thread {
                                             vote_c.sendOperation("type|send_vote;elec_name|" + elec_name + ";vote|" + option);
                                             System.out.println("Voto enviado.");
 
+                                            login_c.sendOperation("type|user_voted;elec_name|" + elec_name + ";user|" + n_cc);
+
                                         } catch (IOException e) {
                                             e.printStackTrace();
                                         } finally {
