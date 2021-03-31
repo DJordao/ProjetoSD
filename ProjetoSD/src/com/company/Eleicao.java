@@ -15,14 +15,16 @@ public class Eleicao implements Serializable{
     private CopyOnWriteArrayList<Candidato> listaCandidatos;
     private int resultado;
 
-    public Eleicao(String data_inicio, String data_fim, String titulo, String descricao, String tipoEleicao, String departamento, CopyOnWriteArrayList<Candidato> listaCandidatos, int resultado) {
+    public Eleicao(String data_inicio, String data_fim, String titulo, String descricao, String tipoEleicao, String departamento, int resultado) {
         this.data_inicio = data_inicio;
         this.data_fim = data_fim;
         this.titulo = titulo;
         this.descricao = descricao;
         this.tipoEleicao = tipoEleicao;
         this.departamento = departamento;
-        this.listaCandidatos = listaCandidatos;
+        this.listaCandidatos = new CopyOnWriteArrayList<>();
+        this.listaCandidatos.add(new Candidato("Branco", tipoEleicao, null));
+        this.listaCandidatos.add(new Candidato("Nulo", tipoEleicao, null));
         this.resultado = resultado;
     }
 

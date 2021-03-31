@@ -1,5 +1,6 @@
 package com.company.RMIFiles;
 
+import com.company.Candidato;
 import com.company.Eleicao;
 import com.company.Pessoa;
 
@@ -8,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PostgreSQLJDBC {
     public PostgreSQLJDBC() {
@@ -582,6 +584,33 @@ public class PostgreSQLJDBC {
 
     }
 
+    public int getMaxCandidato() throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        int maxCandidatos = 0;
+
+        try {
+            //Buscar o valor do último Id que está na tabela
+            stmt = c.createStatement();
+            String sqlIDEleicao = "SELECT COUNT(id) " + "FROM lista_candidatos ";
+            ResultSet rs = stmt.executeQuery(sqlIDEleicao);
+
+            while (rs.next()){
+                maxCandidatos = rs.getInt(1);
+            }
+
+
+
+            stmt.close();
+            c.commit();
+        } catch (Exception ex) {
+            System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
+            System.exit(0);
+        }
+        return maxCandidatos;
+
+    }
+
     public ResultSet getlocalVotoEleitores(int eleicaoID) throws SQLClientInfoException {
         Connection c = connectDB();
         Statement stmt = null;
@@ -606,6 +635,210 @@ public class PostgreSQLJDBC {
         }
         return listaVotoEleitores;
 
+
+    }
+
+    public ResultSet getEleicaoByID(int opcaoEleicao) throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt;
+        ResultSet eleicao = null;
+        try {
+            stmt = c.createStatement();
+            String sql = "SELECT * " + "FROM eleicao " + "WHERE id = '" + opcaoEleicao + "'";
+
+            ResultSet rs = stmt.executeQuery(sql);
+            eleicao = rs;
+
+            //myStmt.close();
+            //stmt.close();
+            c.commit();
+
+            return rs;
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+            System.exit(0);
+        }
+        return eleicao;
+
+    }
+
+    public void criaNovoCandidato(int idCandidato, Candidato cand, int opcaoEleicao) throws SQLClientInfoException {
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt;
+        try {
+
+            stmt = c.createStatement();
+            String sql = "INSERT INTO lista_candidatos (id, nomecandidato, categoria,eleicao_id) "
+                    + "VALUES (?,?,?,?);";
+
+            myStmt = c.prepareStatement(sql);
+
+
+            //
+            myStmt.setInt(1, idCandidato);
+            myStmt.setString(2, cand.getNome());
+            myStmt.setString(3, cand.getCategoria());
+            myStmt.setInt(4, opcaoEleicao);
+
+
+
+            myStmt.executeUpdate();
+
+            myStmt.close();
+            stmt.close();
+            c.commit();
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+            System.exit(0);
+        }
+        System.out.println("Candidato Inserido com sucesso");
+
+
+    }
+
+    public int getIdEleicao(String nomeEleicao) throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        int idEleicao = 0;
+
+        try {
+            //Buscar o valor do último Id que está na tabela
+            stmt = c.createStatement();
+            String sqlIDEleicao = "SELECT id " + "FROM eleicao " + "WHERE titulo = '" + nomeEleicao + "'";
+            ResultSet rs = stmt.executeQuery(sqlIDEleicao);
+
+            while (rs.next()){
+                idEleicao = rs.getInt(1);
+            }
+
+
+
+            stmt.close();
+            c.commit();
+        } catch (Exception ex) {
+            System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
+            System.exit(0);
+        }
+        return idEleicao;
+
+    }
+
+    public void criaVoto(int idVoto, String local, int idEleicao, String num_cc) throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt;
+        try {
+
+            stmt = c.createStatement();
+            String sql = "INSERT INTO voto (id_voto, local_voto, eleicao_id, pessoa_num_cc) "
+                    + "VALUES (?, ?, ?, ?);";
+
+            myStmt = c.prepareStatement(sql);
+
+            myStmt.setInt(1, idVoto);
+            myStmt.setString(2, local);
+            myStmt.setInt(3, idEleicao);
+            myStmt.setString(4, num_cc);
+
+            myStmt.executeUpdate();
+
+            myStmt.close();
+            stmt.close();
+            c.commit();
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+            System.exit(0);
+        }
+    }
+
+    public int getVotoIDbyNome(String num_cc, int idEleicao) throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        int votoID = 0;
+
+        try {
+            //Buscar o valor do último Id que está na tabela
+            stmt = c.createStatement();
+            String sqlIDEleicao = "SELECT id_voto " + "FROM voto " + "WHERE eleicao_id = '" + idEleicao + "' AND pessoa_num_cc = '" + num_cc + "'" ;
+            ResultSet rs = stmt.executeQuery(sqlIDEleicao);
+
+            while (rs.next()){
+                votoID = rs.getInt(1);
+            }
+
+
+
+            stmt.close();
+            c.commit();
+        } catch (Exception ex) {
+            System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
+            System.exit(0);
+        }
+        return votoID;
+    }
+
+    public void updateVotoPessoaData(Timestamp dataVoto, String num_cc, int idEleicao) throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt;
+        int votoID = getVotoIDbyNome(num_cc, idEleicao);
+        try {
+            stmt = c.createStatement();
+            String sql = "UPDATE voto " +
+                    "SET hora_voto = '" + dataVoto + "'" +
+                    "WHERE id_voto = '" + votoID + "'";
+
+            myStmt = c.prepareStatement(sql);
+            myStmt.executeUpdate();
+
+            myStmt.close();
+            stmt.close();
+            c.commit();
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+            System.exit(0);
+        }
+
+    }
+
+    public void InsertElectionCandidatos(Eleicao e) throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt;
+        CopyOnWriteArrayList<Candidato> candidatoNulo = e.getListaCandidatos();
+        int idCandidato = getMaxCandidato();
+        int idEleicao = getIdEleicao(e.getTitulo());
+
+        try {
+
+            for (int i = 0; i < candidatoNulo.size(); i++){
+                stmt = c.createStatement();
+                String sql = "INSERT INTO lista_candidatos (id, nomecandidato, categoria,eleicao_id) "
+                        + "VALUES (?,?,?,?);";
+
+                myStmt = c.prepareStatement(sql);
+                idCandidato++;
+
+                //
+                myStmt.setInt(1, idCandidato);
+                myStmt.setString(2, candidatoNulo.get(i).getNome());
+                myStmt.setString(3, candidatoNulo.get(i).getCategoria());
+                myStmt.setInt(4, idEleicao);
+
+                myStmt.executeUpdate();
+                myStmt.close();
+
+            }
+
+            stmt.close();
+            c.commit();
+        } catch (Exception ex) {
+            System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
+            System.exit(0);
+        }
+        System.out.println("Candidato Inserido com sucesso");
 
     }
 }

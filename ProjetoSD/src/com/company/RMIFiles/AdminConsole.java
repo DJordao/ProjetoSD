@@ -54,7 +54,8 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		System.out.println("[3] -> Adicionar pessoa a uma candidatura");
 		System.out.println("[4] -> Remover pessoa de uma candidatura");
 		System.out.println("[5] -> Listar todas as candidaturas e seus elementos");
-		System.out.println("[6] -> SAIR");
+		System.out.println("[6] -> Criar candidatura");
+		System.out.println("[7] -> SAIR");
 		System.out.println("==-==-==-==-==-==-==-==-==-==-==-==-==-");
 	}
 
@@ -307,7 +308,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 			tipoEleicao = input.nextLine();
 			try {
 
-				if (String.valueOf(descricao).length() != 0 && !descricao.isBlank() &&
+				if (String.valueOf(tipoEleicao).length() != 0 && !tipoEleicao.isBlank() &&
 						(tipoEleicao.equalsIgnoreCase("estudante")
 						|| tipoEleicao.equalsIgnoreCase("docente")
 						|| tipoEleicao.equalsIgnoreCase("funcionario"))) {
@@ -340,7 +341,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		}
 
 
-		Eleicao e = new Eleicao(data_inicio, data_fim, titulo, descricao, tipoEleicao, departamento, null, 0);
+		Eleicao e = new Eleicao(data_inicio, data_fim, titulo, descricao, tipoEleicao, departamento, 0);
 
 		return e;
 		}
@@ -395,9 +396,9 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		//TODO
 		//Listar as eleições a decorrer - DONE
 		//1-> Buscar a lista de candidaturas para uma determinada eleição. - DONE
-		//2-> Para o tipo de eleicao mostrar a todas as pessoas que estão na tabela das pessoas
-		//3-> Adicionar uma certa pessoa a uma determinada candidatura
-		//4-> Remover uma pessoa de uma certa lista se ela lá estiver
+		//2-> Para o tipo de eleicao mostrar a todas as pessoas que estão na tabela das pessoas - DONE
+		//3-> Adicionar uma certa pessoa a uma determinada candidatura -DONE
+		//4-> Remover uma pessoa de uma certa lista se ela lá estiver -DONE
 		System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
 		System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
 		h.ListaEleicoes();
@@ -421,7 +422,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 					//1-> Listar Candidaturas dessa eleicao - DONE
 					//2-> Listar pessoas aptas para serem adicionadas a essa candidatura - DONE
 					//3-> Adicionar pessoas a uma candidatura - DONE
-					//4-> Remover pessoas de uma candidatura
+					//4-> Remover pessoas de uma candidatura - DONE
 
 					String listaNomeCandidatos = ""; //Nome dos partidos dos candidatos
 					String numCCListaCandidatos = "";
@@ -436,7 +437,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 							Scanner inputOpcao = new Scanner(System.in);
 							opcao = input.nextLine();
 							Integer.parseInt(opcao);
-							if (Integer.parseInt(opcao) <= 6 && Integer.parseInt(opcao) > 0){
+							if (Integer.parseInt(opcao) <= 7 && Integer.parseInt(opcao) > 0){
 								switch(opcao) {
 									case "1":
 										// Listar Candidaturas dessa eleicao
@@ -589,10 +590,84 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 										h.ListaTudoEleicao(opcaoEleicao);
 										break;
 									case "6":
+										// Criar Candidatura
+										//TODO verificar a hora da eleicao
+										int maxCandidato = h.getMaxCandidato();
+										String nomenovoCandidato;
+										String tipoEleicao;
+
+										Scanner inputCandidatura;
+
+										//nome Candidato
+										while (true){
+											System.out.printf("Nome: ");
+											inputCandidatura = new Scanner(System.in);
+											nomenovoCandidato = inputCandidatura.nextLine();
+											try {
+
+												if (String.valueOf(nomenovoCandidato).length() != 0 && !nomenovoCandidato.isBlank()) {
+													break;
+												} else {
+													System.out.println("Insira o nome do candidato");
+												}
+
+											}catch (InputMismatchException e){
+												System.out.println("Insira o nome do candidato");
+											}
+
+										}
+
+										//tipo eleicao
+										while (true){
+											System.out.printf("Tipo Eleição: ");
+											inputCandidatura = new Scanner(System.in);
+											tipoEleicao = inputCandidatura.nextLine();
+											try {
+
+												if (String.valueOf(tipoEleicao).length() != 0 && !tipoEleicao.isBlank() &&
+														(tipoEleicao.equalsIgnoreCase("estudante")
+																|| tipoEleicao.equalsIgnoreCase("docente")
+																|| tipoEleicao.equalsIgnoreCase("funcionario"))) {
+													break;
+												} else {
+													System.out.println("Insira um tipo de Candidatura (Estudante/Docente/Funcionario)");
+												}
+
+											}catch (InputMismatchException e){
+												System.out.println("Insira um tipo de Candidatura (Estudante/Docente/Funcionario)");
+											}
+										}
+
+										//Eleicao a participar
+										while (true){
+											try {
+												System.out.printf("Escolha uma eleição a participar: ");
+												Scanner eleicaoNovaCandidatura = new Scanner(System.in);
+												String novaCandidatura = eleicaoNovaCandidatura.nextLine();
+												opcaoEleicao = Integer.parseInt(novaCandidatura);
+												if(!(opcaoEleicao < 1 || opcaoEleicao > maxEleicoes)) { //Verificar se o tipo de eleição é igual ao tipo da candidatura
+													Eleicao e = h.getEleicaoByID(opcaoEleicao);
+													if (e.getTipoEleicao().equals(tipoEleicao)){	//Pode adicionar
+														Candidato c = new Candidato(nomenovoCandidato, tipoEleicao, null);
+														h.criaNovoCandidato(maxCandidato + 1, c, opcaoEleicao);
+														break;
+													}else{
+														System.out.println("Insira uma eleição do tipo " + tipoEleicao);
+													}
+
+												}else{
+													System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
+												}
+											}catch (NumberFormatException ex){
+												System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
+											}
+										}
+										break;
+
+									case "7":
 										// SAIR
 										flagOut++;
 										break;
-
 								}
 							}else{ //Opção não incluída nas possíveis
 								System.out.println("Escolha uma opção válida");

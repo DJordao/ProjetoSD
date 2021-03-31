@@ -62,4 +62,14 @@ public interface RMInterface extends Remote {
     int getIdVoto() throws RemoteException, SQLException;
 
     void getlocalVotoEleitores(int opcaoEleicao) throws RemoteException, SQLException;
+
+    int getMaxCandidato() throws RemoteException, SQLException;
+
+    Eleicao getEleicaoByID(int opcaoEleicao) throws RemoteException, SQLException;
+
+    void criaNovoCandidato(int i, Candidato c, int opcaoEleicao) throws RemoteException, SQLException;
+
+    void recebeLocalVoto(String local, String num_cc, String nomeEleicao)throws RemoteException, SQLException;
+
+    void updateVotoPessoaData(Timestamp dataVoto,String num_cc, String nomeEleicao) throws RemoteException, SQLException;
 }

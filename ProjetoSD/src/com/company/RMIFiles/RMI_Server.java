@@ -54,6 +54,7 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
 		db.connectDB();
 		db.InsertElection(e);
+		db.InsertElectionCandidatos(e);
 
 		client.print_on_client("Server: Eleição criada com sucesso");
 		return e;
@@ -270,7 +271,7 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	}
 
 	public CopyOnWriteArrayList<Eleicao> getEleicao(String departamento) throws RemoteException, SQLException{
-		//Procurar a pessoa na DB
+		//Procurar a eleicao na DB
 		CopyOnWriteArrayList<Eleicao> listaEleicao = new CopyOnWriteArrayList<>();
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
 		db.connectDB();
@@ -292,7 +293,7 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 				atributosEleicao[7] = String.valueOf(rs.getInt("resultado"));
 
 
-				Eleicao e = new Eleicao(atributosEleicao[1], atributosEleicao[2],atributosEleicao[3], atributosEleicao[4], atributosEleicao[5],atributosEleicao[6],null ,Integer.parseInt(atributosEleicao[7]));
+				Eleicao e = new Eleicao(atributosEleicao[1], atributosEleicao[2],atributosEleicao[3], atributosEleicao[4], atributosEleicao[5],atributosEleicao[6],Integer.parseInt(atributosEleicao[7]));
 				listaEleicao.add(e);
 				val = rs.next();
 			}
@@ -345,6 +346,85 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		int idVoto = db.getIdVoto();
 
 		return idVoto;
+	}
+
+	public int getMaxCandidato() throws RemoteException, SQLException {
+		//Vê o qual o nºo max de candidatos
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+		int maxCandidato = db.getMaxCandidato();
+
+		return maxCandidato;
+	}
+
+
+	public int getIdEleicao(String nomeEleicao) throws RemoteException, SQLException {
+		//Vê o qual o ID da eleicao dado um nome
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+		int idEleicao = db.getIdEleicao(nomeEleicao);
+
+		return idEleicao;
+	}
+
+	@Override
+	public void recebeLocalVoto(String local, String num_cc, String nomeEleicao)throws RemoteException, SQLException{
+			int idEleicao = getIdEleicao(nomeEleicao);
+			int idVoto = getIdVoto();
+			PostgreSQLJDBC db = new PostgreSQLJDBC();
+			db.connectDB();
+			db.criaVoto(idVoto + 1, local, idEleicao, num_cc);
+	}
+
+	@Override
+	public void updateVotoPessoaData(Timestamp dataVoto,String num_cc, String nomeEleicao) throws RemoteException, SQLException{
+		int idEleicao = getIdEleicao(nomeEleicao);
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+		db.updateVotoPessoaData(dataVoto, num_cc, idEleicao);
+	}
+
+
+	@Override
+	public Eleicao getEleicaoByID(int opcaoEleicao) throws RemoteException, SQLException {
+		//Procurar a eleicao na DB
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+		ResultSet rs = db.getEleicaoByID(opcaoEleicao);
+
+		boolean val = rs.next();
+		String[] atributosEleicao = new String[8];
+		Eleicao e = null;
+
+		if (val == false) return null;
+		else{
+
+			while (val){
+				atributosEleicao[0] = rs.getString("id");
+				atributosEleicao[1] = rs.getString("data_inicio");
+				atributosEleicao[2] = rs.getString("data_fim");
+				atributosEleicao[3] = rs.getString("titulo");
+				atributosEleicao[4] = rs.getString("descricao");
+				atributosEleicao[5] = rs.getString("tipo");
+				atributosEleicao[6] = rs.getString("departamento");
+				atributosEleicao[7] = String.valueOf(rs.getInt("resultado"));
+
+
+				e = new Eleicao(atributosEleicao[1], atributosEleicao[2],atributosEleicao[3], atributosEleicao[4], atributosEleicao[5],atributosEleicao[6] ,Integer.parseInt(atributosEleicao[7]));
+				val = rs.next();
+			}
+		}
+
+		return e;
+	}
+
+	@Override
+	public void criaNovoCandidato(int idCandidato, Candidato c, int opcaoEleicao) throws RemoteException, SQLException {
+		//Inserir na tabela dos candidatos o novo candidato
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+		db.criaNovoCandidato(idCandidato, c, opcaoEleicao);
+		System.out.println("Candidato criado com sucesso");
 	}
 
 	@Override
