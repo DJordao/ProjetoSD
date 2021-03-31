@@ -97,7 +97,7 @@ public class MulticastServer extends Thread{
                             int i;
                             e = null;
                             while (e == null) {
-                                System.out.println("Escolha uma eleição para votar:");
+                                System.out.println("Escolha uma eleição para votar: ");
                                 i = keyboard_scanner1.nextInt();
 
                                 e = listaEleicao.get(i-1);
@@ -105,6 +105,7 @@ public class MulticastServer extends Thread{
                                 if(e == null) {
                                     System.out.println("Opção inválida.");;
                                 }
+                                // TODO Verificar se a pessoa já votou nessa eleição
                             }
 
                             System.out.println("A procurar um terminal de voto...");
