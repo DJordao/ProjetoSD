@@ -19,9 +19,9 @@ public interface RMInterface extends Remote {
 
     Eleicao criaEleicao(Eleicao e) throws RemoteException, SQLClientInfoException;
 
-     void tableAndTerminalState() throws RemoteException;
+    void tableAndTerminalState() throws RemoteException;
 
-     void getStatsEleicao(Eleicao e) throws RemoteException;
+    void getStatsEleicao(Eleicao e) throws RemoteException;
 
     void encerraEleicao(Eleicao e) throws RemoteException;
 
