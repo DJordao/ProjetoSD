@@ -242,6 +242,7 @@ class VoteReceiver extends Thread{
                 String elec_name = c.getMessageType(message[1]);
                 String list_name = c.getMessageType(message[2]);
 
+                // Mekie
                 h.recebeVoto(list_name, elec_name);
             }
         } catch (IOException | SQLException e) {
