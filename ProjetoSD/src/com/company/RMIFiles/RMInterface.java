@@ -1,9 +1,6 @@
 package com.company.RMIFiles;
 
-import com.company.Candidato;
-import com.company.Eleicao;
-import com.company.MulticastServerInterface;
-import com.company.Pessoa;
+import com.company.*;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -74,4 +71,6 @@ public interface RMInterface extends Remote {
     void updateVotoPessoaData(Timestamp dataVoto,String num_cc, String nomeEleicao) throws RemoteException, SQLException;
 
     void recebeVoto(String Voto, String nomeEleicao)	throws RemoteException, SQLException;
+
+    CopyOnWriteArrayList<Voto> getListaVotos() throws RemoteException, SQLException;
 }

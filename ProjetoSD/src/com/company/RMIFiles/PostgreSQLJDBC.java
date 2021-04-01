@@ -842,7 +842,6 @@ public class PostgreSQLJDBC {
 
     }
 
-
     public int getCandidatoByID(String nomeCandidato, int idEleicao) throws SQLClientInfoException{
         Connection c = connectDB();
         Statement stmt = null;
@@ -896,5 +895,27 @@ public class PostgreSQLJDBC {
 
     }
 
+    public ResultSet getListaVotos() throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt;
+        ResultSet listaVotos = null;
+        try {
+            stmt = c.createStatement();
+            String sql = "SELECT * FROM voto ORDER BY id_voto";
 
+            ResultSet rs = stmt.executeQuery(sql);
+            listaVotos = rs;
+
+            //myStmt.close();
+            //stmt.close();
+            c.commit();
+
+            return rs;
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+            System.exit(0);
+        }
+        return listaVotos;
+    }
 }

@@ -1,9 +1,6 @@
 package com.company.RMIFiles;
 
-import com.company.Candidato;
-import com.company.Eleicao;
-import com.company.MulticastServerInterface;
-import com.company.Pessoa;
+import com.company.*;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -455,6 +452,42 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 
 			client.displaylocalVotoEleitores(local_voto, hora_voto, nome, num_cc);
 		}
+	}
+
+	@Override
+	public CopyOnWriteArrayList<Voto> getListaVotos() throws RemoteException, SQLException{
+		//Retorna a tabela de votos
+		CopyOnWriteArrayList<Voto> listaVotos = new CopyOnWriteArrayList<>();
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+
+		ResultSet rs = db.getListaVotos();
+		boolean val = rs.next();
+
+		String[] atributosTabelaVotos = new String[5];
+
+		System.out.println("VAL: " + val);
+		if (val == false) return null;
+		else{
+			while (val){
+				atributosTabelaVotos[0] = rs.getString("id_voto");
+				atributosTabelaVotos[1] = rs.getString("local_voto");
+				atributosTabelaVotos[2] = rs.getString("hora_voto");
+				atributosTabelaVotos[3] = rs.getString("eleicao_id");
+				atributosTabelaVotos[4] = rs.getString("pessoa_num_cc");
+
+
+				Voto v = new Voto(atributosTabelaVotos[3], atributosTabelaVotos[4], atributosTabelaVotos[1], Timestamp.valueOf(atributosTabelaVotos[2]));
+				listaVotos.add(v);
+				val = rs.next();
+			}
+		}
+
+		for (int i = 0; i < listaVotos.size(); i++){
+			System.out.println("-> " + listaVotos.get(i).getNum_cc());
+		}
+
+		return listaVotos;
 	}
 
 	@Override

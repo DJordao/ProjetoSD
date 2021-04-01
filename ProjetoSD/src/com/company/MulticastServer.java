@@ -30,7 +30,7 @@ public class MulticastServer extends Thread{
     public void run() {
         RMInterface h = null;
         try {
-            h = (RMInterface) LocateRegistry.getRegistry(6000).lookup("RMIConnect");
+            h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
             h.print_on_server("olá do multicast");
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -239,11 +239,13 @@ class VoteReceiver extends Thread{
 
             while (true) {
                 String[] message = c.receiveOperation().split(";");
-                String elec_name = c.getMessageType(message[1]);
-                String list_name = c.getMessageType(message[2]);
+                String message_type = c.getMessageType(message[0]);
+                if(message_type.equals("send_vote")){
+                    String elec_name = message[1].split("\\|")[1];
+                    String list_name = message[2].split("\\|")[1];
+                    h.recebeVoto(list_name, elec_name);
+                }
 
-                // Mekie
-                h.recebeVoto(list_name, elec_name);
             }
         } catch (IOException | SQLException e) {
             e.printStackTrace();

@@ -119,6 +119,7 @@ public class VotingTerminal extends Thread {
                                             int option = keyboard_scanner.nextInt() - 1;
 
                                             vote_c.sendOperation("type|send_vote;elec_name|" + elec_name + ";vote|" + candidates.get(option));
+                                            System.out.println("-> " + candidates.get(option));
                                             System.out.println("Voto enviado.");
 
                                             login_c.sendOperation("type|user_voted;elec_name|" + elec_name + ";user|" + n_cc);
