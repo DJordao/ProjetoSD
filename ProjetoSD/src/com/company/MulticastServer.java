@@ -242,9 +242,9 @@ class VoteReceiver extends Thread{
                 String elec_name = c.getMessageType(message[1]);
                 String list_name = c.getMessageType(message[2]);
 
-                // TODO Enviar para o RMI a opção escolhida numa eleição
+                h.recebeVoto(list_name, elec_name);
             }
-        } catch (IOException e) {
+        } catch (IOException | SQLException e) {
             e.printStackTrace();
         } finally {
             socket.close();
