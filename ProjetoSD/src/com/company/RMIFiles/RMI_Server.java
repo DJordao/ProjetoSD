@@ -386,6 +386,17 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 
 
 	@Override
+	public void recebeVoto(String Voto, String nomeEleicao)	throws RemoteException, SQLException{
+		//A string Voto corresponde ao Candidato neste caso o seu nome
+		//Esta função vai dar update ao número de votos de um candidato
+		int idEleicao = getIdEleicao(nomeEleicao);
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+		db.recebeVoto(Voto, idEleicao);
+	}
+
+
+	@Override
 	public Eleicao getEleicaoByID(int opcaoEleicao) throws RemoteException, SQLException {
 		//Procurar a eleicao na DB
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
@@ -433,8 +444,6 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
 		db.connectDB();
 		ResultSet rs = db.getlocalVotoEleitores(opcaoEleicao);
-
-		//SELECT local_voto, hora_voto, nome, num_cc
 
 		String num_cc, nome, local_voto, hora_voto;
 

@@ -146,7 +146,7 @@ public class PostgreSQLJDBC {
         try {
             //Retorna todas as eleições a decorrer
             stmt = c.createStatement();
-            String sqlIDEleicao = "SELECT id, titulo, tipo, departamento, data_inicio " + "FROM eleicao";
+            String sqlIDEleicao = "SELECT id, titulo, tipo, departamento, data_inicio " + "FROM eleicao ORDER BY id";
             ResultSet rs = stmt.executeQuery(sqlIDEleicao);
 
             eleicoes = rs;
@@ -207,7 +207,7 @@ public class PostgreSQLJDBC {
             stmt = c.createStatement();
             String sqlCandidatos =  "SELECT lista_candidatos.id, nomecandidato, categoria, eleicao_id, titulo " +
                                     "FROM lista_candidatos, eleicao " +
-                                    "WHERE eleicao_id = " + opcaoEleicao + " AND lista_candidatos.eleicao_id = eleicao.id ";
+                                    "WHERE eleicao_id = " + opcaoEleicao + " AND lista_candidatos.eleicao_id = eleicao.id ORDER BY id";
 
 
             myStmt = c.prepareStatement(sqlCandidatos);
@@ -236,7 +236,7 @@ public class PostgreSQLJDBC {
             stmt = c.createStatement();
             String sqlIDEleicao = "SELECT tipo, departamento " +
                     "FROM eleicao " +
-                    "WHERE id = " + opcaoEleicao;
+                    "WHERE id = " + opcaoEleicao + " ORDER BY id";
             ResultSet rs = stmt.executeQuery(sqlIDEleicao);
 
             while (rs.next()){
@@ -442,7 +442,7 @@ public class PostgreSQLJDBC {
 
             String sqlPessoasEleicao =  "SELECT * " +
                     "FROM eleicao " +
-                    "WHERE eleicao.id = '" + opcaoEleicao + "'";
+                    "WHERE eleicao.id = '" + opcaoEleicao + "' ORDER BY id";
 
 
             myStmt = c.prepareStatement(sqlPessoasEleicao);
@@ -515,7 +515,7 @@ public class PostgreSQLJDBC {
         ResultSet eleicao = null;
         try {
             stmt = c.createStatement();
-            String sql = "SELECT * " + "FROM eleicao " + "WHERE departamento = '" + departamento + "'";
+            String sql = "SELECT * " + "FROM eleicao " + "WHERE departamento = '" + departamento + "' ORDER BY id";
 
             ResultSet rs = stmt.executeQuery(sql);
             eleicao = rs;
@@ -539,7 +539,7 @@ public class PostgreSQLJDBC {
         ResultSet listaCandidatos = null;
         try {
             stmt = c.createStatement();
-            String sql = "SELECT * " + "FROM lista_candidatos " + "WHERE eleicao_id = '" + eleicaoID + "'";
+            String sql = "SELECT * " + "FROM lista_candidatos " + "WHERE eleicao_id = '" + eleicaoID + "' ORDER BY id";
 
             ResultSet rs = stmt.executeQuery(sql);
             listaCandidatos = rs;
@@ -841,4 +841,60 @@ public class PostgreSQLJDBC {
         System.out.println("Candidato Inserido com sucesso");
 
     }
+
+
+    public int getCandidatoByID(String nomeCandidato, int idEleicao) throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        int candidatoID = 0;
+
+        try {
+            //Buscar o valor do último Id que está na tabela
+            stmt = c.createStatement();
+            String sqlIDEleicao = "SELECT id " + "FROM lista_candidatos " + "WHERE eleicao_id = '" + idEleicao + "' AND nomecandidato = '" + nomeCandidato + "'" ;
+            ResultSet rs = stmt.executeQuery(sqlIDEleicao);
+
+            while (rs.next()){
+                candidatoID = rs.getInt(1);
+            }
+
+            stmt.close();
+            c.commit();
+        } catch (Exception ex) {
+            System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
+            System.exit(0);
+        }
+        return candidatoID;
+    }
+
+    public void recebeVoto(String nomeCandidato, int idEleicao) throws SQLClientInfoException {
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt;
+
+        //
+        int idCandidato = getCandidatoByID(nomeCandidato, idEleicao);
+
+
+        try {
+            stmt = c.createStatement();
+            String sql = "UPDATE lista_candidatos " +
+                    "SET num_votos = num_votos + 1 " +
+                    "WHERE eleicao_id = '" + idEleicao +"' AND id = '" + idCandidato + "'";
+
+            myStmt = c.prepareStatement(sql);
+            myStmt.executeUpdate();
+
+            myStmt.close();
+            stmt.close();
+            c.commit();
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+            System.exit(0);
+        }
+
+
+    }
+
+
 }
