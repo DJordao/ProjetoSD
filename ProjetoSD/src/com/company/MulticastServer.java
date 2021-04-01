@@ -11,6 +11,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -68,15 +69,8 @@ public class MulticastServer extends Thread{
                     System.out.println("Indique o seu nª do cc:");
                     String input = keyboard_scanner.nextLine();
 
-                    System.out.println("->" + input + "<-");
-
                     p = h.findPessoa(input);
 
-                    // Tem que se ir buscar ao RMI
-                    //CopyOnWriteArrayList<Pessoa> l = new CopyOnWriteArrayList<>();
-                    //l.add(new Pessoa("Diogo Filipe", "1234", "Estudante", "DEI", 856475645, "Leiria", "56475643", "04/2025"));
-
-                    //TODO: alterei este ciclo de forma a que compare com a string que recebe
                     if (p != null){
                         if(p.getNum_cc().equals(input)) {
                             id = true;
@@ -105,7 +99,27 @@ public class MulticastServer extends Thread{
                                 if(e == null) {
                                     System.out.println("Opção inválida.");;
                                 }
-                                // TODO Verificar se a pessoa já votou nessa eleição
+
+                                else {
+                                    Voto cur;
+                                    String elec_id;
+                                    CopyOnWriteArrayList<Voto> v = h.getListaVotos();
+
+                                    for(int j = 0; j < v.size(); j++) {
+                                        cur = v.get(j);
+
+                                        if(cur.getNum_cc().equals(input)) {
+                                            elec_id = String.valueOf(h.getIdEleicao(e.getTitulo()));
+
+                                            if(cur.getEleicaoID().equals(elec_id)) {
+                                                System.out.println("Já votou nesta eleição.");
+                                                e = null;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+
                             }
 
                             System.out.println("A procurar um terminal de voto...");

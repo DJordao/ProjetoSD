@@ -109,17 +109,34 @@ public class VotingTerminal extends Thread {
                                             Communication vote_c = new Communication(vote_socket, vote_group);
 
                                             System.out.println(elec_name);
-                                            for(int i = 0; i < n; i++) {
-                                                System.out.println(i+1 + "-> " + candidates.get(i));
+                                            for(int i = 2; i < n; i++) {
+                                                System.out.println(i-1 + "-> " + candidates.get(i));
                                             }
-                                            System.out.println(n + "-> Voto em branco");
-
+                                            System.out.println("Se não introduzir nenhum caracter o voto é contado como branco.");
+                                            System.out.println("Se introduzir um caracter diferente dos números apresentados o voto é contado como nulo.");
                                             System.out.println("Introduza o número correspondente à sua escolha: ");
                                             keyboard_scanner = new Scanner(System.in);
-                                            int option = keyboard_scanner.nextInt() - 1;
+                                            String vote = keyboard_scanner.nextLine();
 
-                                            vote_c.sendOperation("type|send_vote;elec_name|" + elec_name + ";vote|" + candidates.get(option));
-                                            System.out.println("-> " + candidates.get(option));
+                                            if(vote.equals("")) {
+                                                vote = "Branco";
+                                            }
+                                            else {
+                                                try {
+                                                    int option = Integer.parseInt(vote);
+
+                                                    if(option > 0 && option < n-1) {
+                                                        vote = candidates.get(option + 1);
+                                                    }
+                                                    else {
+                                                        vote = "Nulo";
+                                                    }
+                                                } catch (NumberFormatException e) {
+                                                    vote = "Nulo";
+                                                }
+                                            }
+
+                                            vote_c.sendOperation("type|send_vote;elec_name|" + elec_name + ";vote|" + vote);
                                             System.out.println("Voto enviado.");
 
                                             login_c.sendOperation("type|user_voted;elec_name|" + elec_name + ";user|" + n_cc);
