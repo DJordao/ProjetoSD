@@ -240,7 +240,7 @@ class VoteReceiver extends Thread{
             while (true) {
                 String[] message = c.receiveOperation().split(";");
                 String elec_name = c.getMessageType(message[1]);
-                String option = c.getMessageType(message[2]);
+                String list_name = c.getMessageType(message[2]);
 
                 // TODO Enviar para o RMI a opção escolhida numa eleição
             }
