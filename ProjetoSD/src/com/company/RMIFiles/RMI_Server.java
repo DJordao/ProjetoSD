@@ -491,6 +491,50 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	}
 
 	@Override
+	public void consultaEleicoesPassadas(int eleicaoID) throws RemoteException, SQLException {
+		//Listar uma eleicao passada com o seu nº de votos
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+		ResultSet rs = db.consultaEleicoesPassadas(eleicaoID);
+
+
+		Eleicao e = getEleicaoByID(eleicaoID);
+		String nomeCandidato, numVotos;
+		int totalVotos = 0;
+		int votoBranco = 0;
+		int votoNulo = 0;
+
+		while (rs.next()){
+			nomeCandidato = rs.getString(2);
+			numVotos = rs.getString(5);
+			totalVotos += Integer.parseInt(numVotos);
+			if (nomeCandidato.equals("Branco")) votoBranco = Integer.parseInt(numVotos);
+			if (nomeCandidato.equals("Nulo")) votoNulo = Integer.parseInt(numVotos);
+		}
+
+		client.displayEleicoesPassadas1(e, totalVotos, votoBranco, votoNulo, 1, null, 0, 0);
+
+
+		rs = db.consultaEleicoesPassadas(eleicaoID);
+
+		int votosVálidos = totalVotos - votoBranco - votoNulo;
+		while (rs.next()){
+			nomeCandidato = rs.getString(2);
+			numVotos = rs.getString(5);
+			int votos = Integer.parseInt(numVotos);
+			float percentagem = (float) (votos * 100.0/votosVálidos);
+			if (!(nomeCandidato.equals("Branco") || nomeCandidato.equals("Nulo"))){
+				//System.out.println("----------------------");
+				//System.out.println("Nome do candidato: " + nomeCandidato);
+				//System.out.println("Votos: " + numVotos + "\t(" + percentagem + "%)");
+				client.displayEleicoesPassadas1(e, totalVotos, votoBranco, votoNulo, 2, nomeCandidato, votos, percentagem);
+
+			}
+		}
+		//client.displayEleicoesPassadas(totalVotos, votoBranco, votoNulo, rs, e);
+	}
+
+	@Override
 	public void tableAndTerminalState() throws RemoteException {
 
 	}

@@ -918,4 +918,28 @@ public class PostgreSQLJDBC {
         }
         return listaVotos;
     }
+
+    public ResultSet consultaEleicoesPassadas(int eleicaoID) throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt;
+        ResultSet eleicaoPassada = null;
+        try {
+            stmt = c.createStatement();
+            String sql = "SELECT * FROM lista_candidatos WHERE eleicao_id = '" + eleicaoID + "' ORDER BY id";
+
+            ResultSet rs = stmt.executeQuery(sql);
+            eleicaoPassada = rs;
+
+            //myStmt.close();
+            //stmt.close();
+            c.commit();
+
+            return rs;
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+            System.exit(0);
+        }
+        return eleicaoPassada;
+    }
 }

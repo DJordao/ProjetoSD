@@ -7,6 +7,7 @@ import com.company.Pessoa;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
+import java.sql.ResultSet;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -704,6 +705,24 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		System.out.println("Hora de Voto: " + hora_voto);
 	}
 
+	@Override
+	public void displayEleicoesPassadas1(Eleicao e,int  totalVotos, int votoBranco, int votoNulo, int flag, String nomeCandidato, int numVotos, float percentagem) throws RemoteException {
+		if (flag == 1){
+			System.out.println("====================");
+			System.out.println("Eleição: " + e.getTitulo());
+			System.out.println("Número de votos: " + totalVotos);
+			System.out.println("Votos em branco: " + votoBranco + "\t(" + (votoBranco/totalVotos)*100 + ")%");
+			System.out.println("Votos nulo: " + votoNulo + "\t(" + (votoNulo/totalVotos)*100 + "%)");
+		}
+		else{
+			System.out.println("----------------------");
+			System.out.println("Nome do candidato: " + nomeCandidato);
+			System.out.println("Votos: " + numVotos + "\t(" + percentagem + "%)");
+		}
+
+
+	}
+
 	public static void alteraPropriedadesEleicao(RMInterface h) throws RemoteException, SQLException {
 		System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
 		System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
@@ -867,6 +886,63 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		//TODO fazer o update na BD - DONE
 	}
 
+	public static void consultaEleicoesPassadas(RMInterface h) throws RemoteException, SQLException {
+		System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
+		System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
+		h.ListaEleicoes();
+
+		int maxEleicoes, opcaoEleicao,flagOut, eleicaoID;
+		maxEleicoes = h.maxEleicoes();
+
+		Scanner input;
+
+		while(true) {
+			flagOut = 0; // Ver se faz update
+			try {
+				System.out.println("==============================");
+				System.out.printf("(999)>Indique a eleição a visualizar: ");
+				input = new Scanner(System.in);
+				String eleicao = input.nextLine();
+				opcaoEleicao = Integer.parseInt(eleicao);
+
+
+				Timestamp currData_fim;
+				String detalhes; //String com os detalhes iniciais da eleicao
+
+				if (eleicao.equalsIgnoreCase("999")) break;
+				if (!(opcaoEleicao < 1 || opcaoEleicao > maxEleicoes)) {
+					eleicaoID = opcaoEleicao;
+					detalhes = h.getDetalhesEleicao(eleicaoID);
+
+					//Passar a data de String para TimeStamp
+
+					currData_fim = Timestamp.valueOf(detalhes.split("#")[3]);
+
+					//VERIFICAR SE PODE FAZER ALTERAÇÂO NA ELEIÇÂO
+					//comparar a data atual com a data de fim da eleicao
+					Timestamp checkhoraAtual = new Timestamp(System.currentTimeMillis());
+
+					int checkAlteracao = currData_fim.compareTo(checkhoraAtual);
+
+					if (checkAlteracao > 0) { // >0 significa que a hora atual é superior e não se pode alterar
+						System.out.println("A eleição ainda não terminou e não pode consultar os resultados");
+						flagOut++;
+						//break;
+
+					} else {
+						h.consultaEleicoesPassadas(eleicaoID);
+
+					}
+
+				} else {
+					System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
+				}
+			}catch (NumberFormatException ex) {
+				System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
+			}
+		}
+
+	}
 
 	public static void localVotoEleitores(RMInterface h) throws RemoteException, SQLException {
 		System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
@@ -958,6 +1034,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 								// Terminar uma eleição
 								break;
 							case "10":
+								consultaEleicoesPassadas(h);
 								// Consultar resultados detalhados de eleições passadas
 								break;
 
@@ -976,6 +1053,8 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		}
 
 	}
+
+
 
 
 }
