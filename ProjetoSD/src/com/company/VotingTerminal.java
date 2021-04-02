@@ -22,7 +22,6 @@ public class VotingTerminal extends Thread {
 
     public VotingTerminal(String id) {
         super(id);
-        this.tt = new TimerThread(this);
     }
 
     public void run() {
@@ -78,11 +77,13 @@ public class VotingTerminal extends Thread {
                             String input = "";
                             while (!input.equals(n_cc)) {
                                 System.out.println("Introduza o seu nº do cc: ");
+                                tt = new TimerThread(this);
                                 tt.start();
                                 input = keyboard_scanner.nextLine();
                                 tt.interrupt();
                             }
                             System.out.println("Introduza a sua password: ");
+                            tt = new TimerThread(this);
                             tt.start();
                             String password = keyboard_scanner.nextLine();
                             tt.interrupt();
@@ -117,6 +118,7 @@ public class VotingTerminal extends Thread {
                                             System.out.println("Se introduzir um caracter diferente dos números apresentados o voto é contado como nulo.");
                                             System.out.println("Introduza o número correspondente à sua escolha: ");
                                             keyboard_scanner = new Scanner(System.in);
+                                            tt = new TimerThread(this);
                                             tt.start();
                                             String vote = keyboard_scanner.nextLine();
                                             tt.interrupt();
@@ -162,10 +164,12 @@ public class VotingTerminal extends Thread {
 
                                         keyboard_scanner = new Scanner(System.in);
                                         System.out.println("Introduza o seu username: ");
+                                        tt = new TimerThread(this);
                                         tt.start();
                                         n_cc = keyboard_scanner.nextLine();
                                         tt.interrupt();
                                         System.out.println("Introduza a sua password: ");
+                                        tt = new TimerThread(this);
                                         tt.start();
                                         password = keyboard_scanner.nextLine();
                                         tt.interrupt();
