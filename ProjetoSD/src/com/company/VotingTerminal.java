@@ -19,9 +19,16 @@ public class VotingTerminal extends Thread {
     private int PORT = 4321;
     private boolean ready = true;
 
-    public static void main(String[] args) {
-        VotingTerminal term = new VotingTerminal(args[0]);
-        term.start();
+    public static void main(String[] args) throws InterruptedException {
+        while(true) {
+            VotingTerminal term = new VotingTerminal(args[0]);
+            term.start();
+            term.join(120000);
+            if(!term.isAlive()) {
+                term.interrupt();
+            }
+        }
+
     }
 
     public VotingTerminal(String id) {
