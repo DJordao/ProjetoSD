@@ -1,16 +1,11 @@
 package com.company;
 
-import java.io.ByteArrayInputStream;
-import java.io.ObjectInputStream;
-import java.io.StreamCorruptedException;
 import java.net.MulticastSocket;
-import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.io.IOException;
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.concurrent.CopyOnWriteArrayList;
+
 
 public class VotingTerminal extends Thread {
     private String MULTICAST_ADDRESS_TERM = "224.3.2.1";
@@ -18,10 +13,11 @@ public class VotingTerminal extends Thread {
     private String MULTICAST_ADDRESS_VOTE = "224.3.2.3";
     private int PORT = 4321;
     private boolean ready = true;
+    private TimerThread tt;
 
     public static void main(String[] args) {
-        VotingTerminal term = new VotingTerminal(args[0]);
-        term.start();
+            VotingTerminal term = new VotingTerminal(args[0]);
+            term.start();
     }
 
     public VotingTerminal(String id) {
@@ -81,10 +77,16 @@ public class VotingTerminal extends Thread {
                             String input = "";
                             while (!input.equals(n_cc)) {
                                 System.out.println("Introduza o seu nº do cc: ");
+                                tt = new TimerThread(this);
+                                tt.start();
                                 input = keyboard_scanner.nextLine();
+                                tt.interrupt();
                             }
                             System.out.println("Introduza a sua password: ");
+                            tt = new TimerThread(this);
+                            tt.start();
                             String password = keyboard_scanner.nextLine();
+                            tt.interrupt();
 
                             login_c.sendOperation("type|login_request;term|" + getName() + ";n_cc|" + n_cc + ";passowrd|" + password);
 
@@ -116,7 +118,10 @@ public class VotingTerminal extends Thread {
                                             System.out.println("Se introduzir um caracter diferente dos números apresentados o voto é contado como nulo.");
                                             System.out.println("Introduza o número correspondente à sua escolha: ");
                                             keyboard_scanner = new Scanner(System.in);
+                                            tt = new TimerThread(this);
+                                            tt.start();
                                             String vote = keyboard_scanner.nextLine();
+                                            tt.interrupt();
 
                                             if(vote.equals("")) {
                                                 vote = "Branco";
@@ -159,9 +164,15 @@ public class VotingTerminal extends Thread {
 
                                         keyboard_scanner = new Scanner(System.in);
                                         System.out.println("Introduza o seu username: ");
+                                        tt = new TimerThread(this);
+                                        tt.start();
                                         n_cc = keyboard_scanner.nextLine();
+                                        tt.interrupt();
                                         System.out.println("Introduza a sua password: ");
+                                        tt = new TimerThread(this);
+                                        tt.start();
                                         password = keyboard_scanner.nextLine();
+                                        tt.interrupt();
 
                                         login_c.sendOperation("type|login_request;term|" + getName() + ";n_cc|" + n_cc + ";passowrd|" + password);
 
@@ -184,6 +195,25 @@ public class VotingTerminal extends Thread {
                 e.printStackTrace();
         } finally{
                 socket.close();
+        }
+    }
+}
+
+class TimerThread extends Thread {
+    private long TIMEOUT = 120000;
+    private VotingTerminal vt;
+
+    public TimerThread(VotingTerminal vt) {
+        super();
+        this.vt = vt;
+    }
+
+    public void run() {
+        try {
+            Thread.sleep(TIMEOUT);
+            vt.interrupt();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }
