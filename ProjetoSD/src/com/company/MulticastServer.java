@@ -12,6 +12,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -76,11 +77,60 @@ public class MulticastServer extends Thread{
                             id = true;
                             System.out.println("Identificação bem sucedida.");
 
-                            CopyOnWriteArrayList<Eleicao> listaEleicao = h.getEleicao(getName());
-                            if (listaEleicao != null){
+                            ArrayList<Eleicao> l = new ArrayList<>();
 
-                                for (int i = 0; i < listaEleicao.size(); i++){
-                                    System.out.println((i+1) + "-> " + listaEleicao.get(i).getTitulo());
+                            // Filtra as eleições de outra função
+                            CopyOnWriteArrayList<Eleicao> listaEleicao = h.getEleicao(getName());
+                            ArrayList<Eleicao> aux_e = new ArrayList<>();
+                            Eleicao cur_e;
+                            for(int i = 0; i < listaEleicao.size(); i++) {
+                                cur_e = listaEleicao.get(i);
+                                if(cur_e.getTipoEleicao().equals(p.getFuncao())) {
+                                    aux_e.add(cur_e);
+                                }
+                            }
+
+                            // Filtra as eleições já votadas
+                            CopyOnWriteArrayList<Voto> v = h.getListaVotos();
+                            if(v != null) {
+                                ArrayList<Voto> aux_v = new ArrayList<>();
+                                Voto cur_v;
+                                for(int i = 0; i < v.size(); i++) {
+                                    cur_v = v.get(i);
+                                    if(cur_v.getNum_cc().equals(p.getNum_cc())) {
+                                        aux_v.add(cur_v);
+                                    }
+                                }
+
+                                int check = 0;
+                                for(int i = 0; i < aux_e.size(); i++) {
+                                    cur_e = aux_e.get(i);
+
+                                    for(int j = 0; j < aux_v.size(); j++) {
+                                        cur_v = aux_v.get(i);
+                                        int e_id = Integer.parseInt(cur_v.getEleicaoID());
+
+                                        if(h.getEleicaoByID(e_id).getTitulo().equals(cur_e.getTitulo())) {
+                                            check = 1;
+                                            break;
+                                        }
+                                    }
+
+                                    if(check == 0) {
+                                        l.add(cur_e);
+                                    }
+                                    check = 0;
+                                }
+                            }
+                            else {
+                                l = aux_e;
+                            }
+
+                            // Lista as eleições válidas para votar
+                            if (l != null){
+
+                                for (int i = 0; i < l.size(); i++){
+                                    System.out.println((i+1) + "-> " + l.get(i).getTitulo());
                                 }
                             }
                             else {
@@ -90,21 +140,30 @@ public class MulticastServer extends Thread{
 
                             int i;
                             e = null;
+
                             while (e == null) {
                                 System.out.println("Escolha uma eleição para votar: ");
-                                i = keyboard_scanner1.nextInt();
 
-                                e = listaEleicao.get(i-1);
-                                idEleicao = i;
-                                if(e == null) {
-                                    System.out.println("Opção inválida.");;
+                                try {
+                                    i = keyboard_scanner1.nextInt();
+
+                                    if(i > 0 && i <= l.size()) {
+                                        e = l.get(i-1);
+                                        idEleicao = i;
+                                    }
+                                    else {
+                                        System.out.println("Opção inválida.");
+                                    }
+
+                                } catch (InputMismatchException ie) {
+                                    System.out.println("Opção inválida.");
                                 }
 
-                                else {
+                                /*else {
                                     Voto cur;
                                     String elec_id;
                                     CopyOnWriteArrayList<Voto> v = h.getListaVotos();
-
+                                    //TODO verificar != null
                                     for(int j = 0; j < v.size(); j++) {
                                         cur = v.get(j);
 
@@ -118,7 +177,7 @@ public class MulticastServer extends Thread{
                                             }
                                         }
                                     }
-                                }
+                                }*/
 
                             }
 
