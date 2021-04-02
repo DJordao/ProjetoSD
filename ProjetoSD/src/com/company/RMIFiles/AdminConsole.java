@@ -710,9 +710,14 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		if (flag == 1){
 			System.out.println("====================");
 			System.out.println("Eleição: " + e.getTitulo());
-			System.out.println("Número de votos: " + totalVotos);
-			System.out.println("Votos em branco: " + votoBranco + "\t(" + (votoBranco/totalVotos)*100 + ")%");
-			System.out.println("Votos nulo: " + votoNulo + "\t(" + (votoNulo/totalVotos)*100 + "%)");
+			if(!(totalVotos == 0)){
+				System.out.println("Número de votos: " + totalVotos);
+				System.out.println("Votos em branco: " + votoBranco + "\t(" + (votoBranco/totalVotos)*100 + ")%");
+				System.out.println("Votos nulo: " + votoNulo + "\t(" + (votoNulo/totalVotos)*100 + "%)");
+			}else{
+				System.out.println(">Eleição sem votos");
+			}
+
 		}
 		else{
 			System.out.println("----------------------");

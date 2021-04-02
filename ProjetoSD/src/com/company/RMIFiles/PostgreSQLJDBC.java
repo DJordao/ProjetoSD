@@ -515,7 +515,7 @@ public class PostgreSQLJDBC {
         ResultSet eleicao = null;
         try {
             stmt = c.createStatement();
-            String sql = "SELECT * " + "FROM eleicao " + "WHERE departamento = '" + departamento + "' ORDER BY id";
+            String sql = "SELECT * " + "FROM eleicao " + "WHERE departamento = '" + departamento + "' AND CURRENT_TIMESTAMP BETWEEN data_inicio AND data_fim ORDER BY id";
 
             ResultSet rs = stmt.executeQuery(sql);
             eleicao = rs;
