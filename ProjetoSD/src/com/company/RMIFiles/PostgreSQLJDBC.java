@@ -78,7 +78,7 @@ public class PostgreSQLJDBC {
 
     }
 
-    public void InsertElection(Eleicao e) throws SQLClientInfoException {
+    public int InsertElection(Eleicao e) throws SQLClientInfoException {
 
         Connection c = connectDB();
         Statement stmt = null;
@@ -96,8 +96,8 @@ public class PostgreSQLJDBC {
             }
 
             stmt = c.createStatement();
-            String sql = "INSERT INTO eleicao (id, data_inicio, data_fim, titulo, descricao, tipo, departamento) "
-                    + "VALUES (?,?,?,?,?, ?, ?);";
+            String sql = "INSERT INTO eleicao (id, data_inicio, data_fim, titulo, descricao, tipo) "
+                    + "VALUES (?,?,?,?,?, ?);";
 
             myStmt = c.prepareStatement(sql);
 
@@ -120,7 +120,6 @@ public class PostgreSQLJDBC {
             myStmt.setString(4,e.getTitulo());
             myStmt.setString(5,e.getDescricao());
             myStmt.setString(6,e.getTipoEleicao());
-            myStmt.setString(7,e.getDepartamento());
 
             myStmt.executeUpdate();
 
@@ -133,7 +132,7 @@ public class PostgreSQLJDBC {
         }
         System.out.println("Eleição Criada com sucesso");
 
-
+        return idElection;
     }
 
     public ResultSet listaEleicoes() throws SQLClientInfoException {
@@ -146,7 +145,8 @@ public class PostgreSQLJDBC {
         try {
             //Retorna todas as eleições a decorrer
             stmt = c.createStatement();
-            String sqlIDEleicao = "SELECT id, titulo, tipo, departamento, data_inicio " + "FROM eleicao ORDER BY id";
+            String sqlIDEleicao = "SELECT eleicao.id, titulo, tipo, data_inicio, departamento " + "FROM eleicao, departamento " +
+                    "WHERE eleicao.id = departamento.eleicao_id ORDER BY eleicao.id";
             ResultSet rs = stmt.executeQuery(sqlIDEleicao);
 
             eleicoes = rs;
@@ -219,6 +219,8 @@ public class PostgreSQLJDBC {
 
             c.commit();
 
+            System.out.println("BD-entei");
+
             return rs;
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
@@ -227,24 +229,27 @@ public class PostgreSQLJDBC {
         return candidatos;
     }
 
-    public String getTipoEleicaoAndDepartamento(int opcaoEleicao) throws SQLClientInfoException{
+    public String[] getTipoEleicaoAndDepartamento(int opcaoEleicao) throws SQLClientInfoException{
         Connection c = connectDB();
         Statement stmt = null;
         String tipoAndDep = "";
+        String[] output = new String[4];
+        int i = 0;
         try {
             //Buscar tipo de eleicao e o seu departamento
             stmt = c.createStatement();
             String sqlIDEleicao = "SELECT tipo, departamento " +
-                    "FROM eleicao " +
-                    "WHERE id = " + opcaoEleicao + " ORDER BY id";
+                    "FROM eleicao, departamento " +
+                    "WHERE eleicao.id = " + opcaoEleicao + " AND departamento.eleicao_id = '" + opcaoEleicao + "' ORDER BY eleicao.id";
             ResultSet rs = stmt.executeQuery(sqlIDEleicao);
 
             while (rs.next()){
                 tipoAndDep = rs.getString("tipo");
                 tipoAndDep += " ";
                 tipoAndDep += rs.getString("departamento");
-                System.out.println("OUTPUT: " + tipoAndDep);
-                return tipoAndDep;
+                //System.out.println("OUTPUT: " + tipoAndDep);
+                output[i] = tipoAndDep;
+                i++;
             }
 
             stmt.close();
@@ -253,7 +258,7 @@ public class PostgreSQLJDBC {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
         }
-        return tipoAndDep;
+        return output;
 
     }
 
@@ -269,29 +274,30 @@ public class PostgreSQLJDBC {
             //Se verificar estas 2 condições é feito o display da pessoa            stmt = c.createStatement();
 
             //Obter o Tipo e Departamento da Eleicao
-            String[] output = getTipoEleicaoAndDepartamento(opcaoEleicao).split(" ");
+            String[] listaTipoDep =  getTipoEleicaoAndDepartamento(opcaoEleicao);
+            for (int i = 0; i < listaTipoDep.length; i++){
+                String[] output = listaTipoDep[i].split(" ");
+                String tipo = output[0];
+                String departamento = output[1];
 
-            String tipo = output[0];
-            String departamento = output[1];
-
-            stmt = c.createStatement();
+                stmt = c.createStatement();
 
 
-            String sqlPessoasEleicao =  "SELECT pessoa.num_cc, pessoa.nome " +
-                    "FROM pessoa " +
-                    "WHERE pessoa.num_cc NOT IN (SELECT pessoa_lista_candidatos.pessoa_num_cc " +
-                                                "FROM pessoa_lista_candidatos) " +
-                    "AND pessoa.departamento = '" + departamento + "' AND pessoa.funcao = '" + tipo + "'";
+                String sqlPessoasEleicao =  "SELECT pessoa.num_cc, pessoa.nome " +
+                        "FROM pessoa " +
+                        "WHERE pessoa.num_cc NOT IN (SELECT pessoa_lista_candidatos.pessoa_num_cc " +
+                                                    "FROM pessoa_lista_candidatos) " +
+                        "AND pessoa.departamento = '" + departamento + "' AND pessoa.funcao = '" + tipo + "'";
 
-            myStmt = c.prepareStatement(sqlPessoasEleicao);
+                myStmt = c.prepareStatement(sqlPessoasEleicao);
 
-            ResultSet rs = stmt.executeQuery(sqlPessoasEleicao);
-
-            candidatos = rs;
-
+                ResultSet rs = stmt.executeQuery(sqlPessoasEleicao);
+                boolean val = rs.next();
+                if (val == true) return rs;
+                candidatos = rs;
+            }
             c.commit();
 
-            return rs;
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
@@ -336,38 +342,43 @@ public class PostgreSQLJDBC {
 
         try {
 
-            //Obter para uma certa candidatura todos os seus elementos
-            String[] output = getTipoEleicaoAndDepartamento(opcaoEleicao).split(" ");
+            String[] listaTipoDep =  getTipoEleicaoAndDepartamento(opcaoEleicao);
+            for (int i = 0; i < listaTipoDep.length; i++){
+                if (listaTipoDep[i] != null){
+                    //Obter para uma certa candidatura todos os seus elementos
+                    String[] output = listaTipoDep[i].split(" ");
 
-            String tipo = output[0];
-            String departamento = output[1];
+                    String tipo = output[0];
+                    String departamento = output[1];
 
-            stmt = c.createStatement();
+                    stmt = c.createStatement();
 
 
-            String sqlPessoasEleicao =  "SELECT pessoa.num_cc, pessoa.nome, nomecandidato " +
-                    "FROM pessoa, lista_candidatos " +
-                    "WHERE pessoa.num_cc IN (SELECT pessoa_lista_candidatos.pessoa_num_cc " +
-                    "FROM pessoa_lista_candidatos) " +
-                    "AND pessoa.departamento = '" + departamento + "' AND pessoa.funcao = '" + tipo + "'" +
-                    "AND lista_candidatos.nomecandidato =  '" + candidatura + "'";
+                    String sqlPessoasEleicao =  "SELECT pessoa.num_cc, pessoa.nome, nomecandidato " +
+                            "FROM pessoa, lista_candidatos " +
+                            "WHERE pessoa.num_cc IN (SELECT pessoa_lista_candidatos.pessoa_num_cc " +
+                            "FROM pessoa_lista_candidatos WHERE lista_candidatos_id = '" + idPartido + "') " +
+                            "AND pessoa.departamento = '" + departamento + "' AND pessoa.funcao = '" + tipo + "'" +
+                            "AND lista_candidatos.nomecandidato =  '" + candidatura + "'";
 
-            myStmt = c.prepareStatement(sqlPessoasEleicao);
+                    myStmt = c.prepareStatement(sqlPessoasEleicao);
 
-            ResultSet rs = stmt.executeQuery(sqlPessoasEleicao);
+                    ResultSet rs = stmt.executeQuery(sqlPessoasEleicao);
+                    boolean val = rs.next();
+                    if (val == true) return rs;
+                    elementosCandidatura = rs;
 
-            elementosCandidatura = rs;
+                    c.commit();
 
-            c.commit();
+                }
 
-            return rs;
+            }
+
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
         }
         return elementosCandidatura;
-
-
     }
 
     public void RemovePessoaCandidatura(String num_cc, String nomeLista) throws SQLClientInfoException {
@@ -411,7 +422,7 @@ public class PostgreSQLJDBC {
                     "(SELECT pessoa_lista_candidatos.pessoa_num_cc " + " FROM pessoa_lista_candidatos)" +
                     "AND lista_candidatos.id IN (SELECT pessoa_lista_candidatos.lista_candidatos_id " +
                     "FROM pessoa_lista_candidatos " +
-                    "WHERE pessoa_lista_candidatos.lista_candidatos_id = lista_candidatos.id AND pessoa_lista_candidatos.pessoa_num_cc = pessoa.num_cc)";
+                    "WHERE pessoa_lista_candidatos.lista_candidatos_id = lista_candidatos.id AND pessoa_lista_candidatos.pessoa_num_cc = pessoa.num_cc AND lista_candidatos.eleicao_id = '" + opcaoEleicao + "') ";
 
 
             myStmt = c.prepareStatement(sqlPessoasEleicao);
@@ -515,7 +526,7 @@ public class PostgreSQLJDBC {
         ResultSet eleicao = null;
         try {
             stmt = c.createStatement();
-            String sql = "SELECT * " + "FROM eleicao " + "WHERE departamento = '" + departamento + "' AND CURRENT_TIMESTAMP BETWEEN data_inicio AND data_fim ORDER BY id";
+            String sql = "SELECT * " + "FROM eleicao " + "WHERE id IN (SELECT eleicao_id  FROM departamento WHERE departamento.departamento = '" + departamento + "') AND CURRENT_TIMESTAMP BETWEEN data_inicio AND data_fim ORDER BY eleicao.id";
 
             ResultSet rs = stmt.executeQuery(sql);
             eleicao = rs;
@@ -842,6 +853,97 @@ public class PostgreSQLJDBC {
 
     }
 
+    public int getIDMaxDep() throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        int maxDep = 0;
+
+        try {
+            //Buscar o valor do último Id que está na tabela
+            stmt = c.createStatement();
+            String sqlIDEleicao = "SELECT COUNT(id) " + "FROM departamento ";
+            ResultSet rs = stmt.executeQuery(sqlIDEleicao);
+
+            while (rs.next()){
+                maxDep = rs.getInt(1);
+            }
+
+
+
+            stmt.close();
+            c.commit();
+        } catch (Exception ex) {
+            System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
+            System.exit(0);
+        }
+        return maxDep;
+
+    }
+
+    public CopyOnWriteArrayList<String> getDepEleicao(int opcaoEleicao) throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        CopyOnWriteArrayList<String> listaDep = new CopyOnWriteArrayList<>();
+        String dep;
+
+        try {
+            stmt = c.createStatement();
+            String sqlIDEleicao = "SELECT departamento " + "FROM departamento  WHERE eleicao_id = '" + opcaoEleicao + "'";
+            ResultSet rs = stmt.executeQuery(sqlIDEleicao);
+
+
+            while (rs.next()){
+                dep = rs.getString(1);
+                listaDep.add(dep);
+            }
+
+            stmt.close();
+            c.commit();
+        } catch (Exception ex) {
+            System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
+            System.exit(0);
+        }
+        return listaDep;
+    }
+
+    public void InsertDepartamentoEleicao(int idEleicao, Eleicao e) throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt;
+        CopyOnWriteArrayList<String> listaDep = e.getDepartamento();
+        int idMaxdDep = getIDMaxDep();
+
+        try {
+
+            for (int i = 0; i < listaDep.size(); i++){
+                stmt = c.createStatement();
+                String sql = "INSERT INTO departamento (id, departamento,eleicao_id) "
+                        + "VALUES (?,?,?);";
+
+                myStmt = c.prepareStatement(sql);
+                idMaxdDep++;
+
+                //
+                myStmt.setInt(1, idMaxdDep);
+                myStmt.setString(2, listaDep.get(i));
+                myStmt.setInt(3, idEleicao);
+
+                myStmt.executeUpdate();
+                myStmt.close();
+
+            }
+
+            stmt.close();
+            c.commit();
+        } catch (Exception ex) {
+            System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
+            System.exit(0);
+        }
+        System.out.println("Departamento Inserido com sucesso");
+
+
+    }
+
     public int getCandidatoByID(String nomeCandidato, int idEleicao) throws SQLClientInfoException{
         Connection c = connectDB();
         Statement stmt = null;
@@ -942,4 +1044,7 @@ public class PostgreSQLJDBC {
         }
         return eleicaoPassada;
     }
+
+
+
 }

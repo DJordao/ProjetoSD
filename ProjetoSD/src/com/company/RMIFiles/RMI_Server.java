@@ -50,8 +50,9 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		//Inserir na tabela das eleições a eleiçao recebida
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
 		db.connectDB();
-		db.InsertElection(e);
+		int idEleicao = db.InsertElection(e);
 		db.InsertElectionCandidatos(e);
+		db.InsertDepartamentoEleicao(idEleicao, e);
 
 		client.print_on_client("Server: Eleição criada com sucesso");
 		return e;
@@ -92,32 +93,37 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	}
 
 	@Override
-	public String ListaCandidaturas(int opcaoEleicao) throws SQLException, RemoteException {
+	public String[] ListaCandidaturas(int opcaoEleicao) throws SQLException, RemoteException {
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
 		db.connectDB();
-		String listaCandidatosArray = "";
+		//String listaCandidatosArray = "";
+		String[] returnCantidatos = new String[10];
 
 		ResultSet rs = db.listaCandidaturas(opcaoEleicao); //Retorna a lista de candidaturas
 		int id, i = 0;
 		String nomeCandidato, categoria, numEleicao, titulo;
 
 		while (rs.next()){
+			String listaCandidatosArray = "";
 			id = rs.getInt(1);
 			nomeCandidato = rs.getString("nomecandidato");
 			categoria = rs.getString("categoria");
 			numEleicao = rs.getString("eleicao_id");
 			titulo = rs.getString("titulo");
 
-			//1=Partido Chega-2=PS
+			//[1=Partido Chega][2=PS]
 			listaCandidatosArray += id;
 			listaCandidatosArray += "=";
 			listaCandidatosArray += nomeCandidato;
-			listaCandidatosArray += "-";
+			returnCantidatos[i] = listaCandidatosArray;
+			i++;
 
-			client.displayCandidatura(String.valueOf(id), nomeCandidato, categoria, numEleicao, titulo);
+			if(!(nomeCandidato.equals("Branco") || nomeCandidato.equals("Nulo"))){
+				client.displayCandidatura(String.valueOf(id), nomeCandidato, categoria, numEleicao, titulo);
+			}
 
 		}
-		return listaCandidatosArray;
+		return returnCantidatos;
 	}
 
 	@Override
@@ -270,11 +276,14 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	public CopyOnWriteArrayList<Eleicao> getEleicao(String departamento) throws RemoteException, SQLException{
 		//Procurar a eleicao na DB
 		CopyOnWriteArrayList<Eleicao> listaEleicao = new CopyOnWriteArrayList<>();
+		CopyOnWriteArrayList<String> listaDep = new CopyOnWriteArrayList<>();
+		listaDep.add(departamento);
+
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
 		db.connectDB();
 		ResultSet rs = db.getEleicao(departamento);
 		boolean val = rs.next();
-		String[] atributosEleicao = new String[8];
+		String[] atributosEleicao = new String[7];
 
 		if (val == false) return null;
 		else{
@@ -286,11 +295,10 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 				atributosEleicao[3] = rs.getString("titulo");
 				atributosEleicao[4] = rs.getString("descricao");
 				atributosEleicao[5] = rs.getString("tipo");
-				atributosEleicao[6] = rs.getString("departamento");
-				atributosEleicao[7] = String.valueOf(rs.getInt("resultado"));
+				atributosEleicao[6] = String.valueOf(rs.getInt("resultado"));
 
 
-				Eleicao e = new Eleicao(atributosEleicao[1], atributosEleicao[2],atributosEleicao[3], atributosEleicao[4], atributosEleicao[5],atributosEleicao[6],Integer.parseInt(atributosEleicao[7]));
+				Eleicao e = new Eleicao(atributosEleicao[1], atributosEleicao[2],atributosEleicao[3], atributosEleicao[4], atributosEleicao[5],listaDep,Integer.parseInt(atributosEleicao[7]));
 				listaEleicao.add(e);
 				val = rs.next();
 			}
@@ -400,8 +408,11 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		db.connectDB();
 		ResultSet rs = db.getEleicaoByID(opcaoEleicao);
 
+		CopyOnWriteArrayList<String> listaDep = new CopyOnWriteArrayList<>();
+		listaDep = db.getDepEleicao(opcaoEleicao);
+
 		boolean val = rs.next();
-		String[] atributosEleicao = new String[8];
+		String[] atributosEleicao = new String[7];
 		Eleicao e = null;
 
 		if (val == false) return null;
@@ -414,11 +425,10 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 				atributosEleicao[3] = rs.getString("titulo");
 				atributosEleicao[4] = rs.getString("descricao");
 				atributosEleicao[5] = rs.getString("tipo");
-				atributosEleicao[6] = rs.getString("departamento");
-				atributosEleicao[7] = String.valueOf(rs.getInt("resultado"));
+				atributosEleicao[6] = String.valueOf(rs.getInt("resultado"));
 
 
-				e = new Eleicao(atributosEleicao[1], atributosEleicao[2],atributosEleicao[3], atributosEleicao[4], atributosEleicao[5],atributosEleicao[6] ,Integer.parseInt(atributosEleicao[7]));
+				e = new Eleicao(atributosEleicao[1], atributosEleicao[2],atributosEleicao[3], atributosEleicao[4], atributosEleicao[5],listaDep ,Integer.parseInt(atributosEleicao[6]));
 				val = rs.next();
 			}
 		}

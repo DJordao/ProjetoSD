@@ -34,7 +34,7 @@ public interface RMInterface extends Remote {
 
     int maxEleicoes() throws RemoteException, SQLException;
 
-    String ListaCandidaturas(int opcaoEleicao) throws RemoteException, SQLException;
+    String[] ListaCandidaturas(int opcaoEleicao) throws RemoteException, SQLException;
 
     String ListaPessoasParaCandidatura(int opcaoEleicao) throws RemoteException, SQLException;
 

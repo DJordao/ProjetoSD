@@ -11,11 +11,11 @@ public class Eleicao implements Serializable{
     private String titulo;
     private String descricao;
     private String tipoEleicao;
-    private String departamento;
+    private CopyOnWriteArrayList<String> departamento;
     private CopyOnWriteArrayList<Candidato> listaCandidatos;
     private int resultado;
 
-    public Eleicao(String data_inicio, String data_fim, String titulo, String descricao, String tipoEleicao, String departamento, int resultado) {
+    public Eleicao(String data_inicio, String data_fim, String titulo, String descricao, String tipoEleicao, CopyOnWriteArrayList<String> departamento, int resultado) {
         this.data_inicio = data_inicio;
         this.data_fim = data_fim;
         this.titulo = titulo;
@@ -68,11 +68,11 @@ public class Eleicao implements Serializable{
         this.tipoEleicao = tipoEleicao;
     }
 
-    public String getDepartamento() {
+    public CopyOnWriteArrayList<String> getDepartamento() {
         return departamento;
     }
 
-    public void setDepartamento(String departamento) {
+    public void setDepartamento(CopyOnWriteArrayList<String> departamento) {
         this.departamento = departamento;
     }
 
