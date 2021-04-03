@@ -83,4 +83,6 @@ public interface RMInterface extends Remote {
     void updateListaDep(int opcaoEleicao, CopyOnWriteArrayList<String> listaDept) throws RemoteException, SQLException;
 
     void ListaEleicoesPassadas() throws RemoteException, SQLException;
+
+    void ListaEleicoesNaoComecadas() throws RemoteException, SQLException;
 }

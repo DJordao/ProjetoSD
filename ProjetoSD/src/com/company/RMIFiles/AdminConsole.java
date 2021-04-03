@@ -1018,7 +1018,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 	private static void gereMesadeVoto(RMInterface h) throws RemoteException, SQLException {
 		System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
 		System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
-		h.ListaEleicoes();
+		h.ListaEleicoesNaoComecadas();
 
 		int maxEleicoes, opcaoEleicao,flagOut, eleicaoID;
 		maxEleicoes = h.maxEleicoes();
@@ -1112,8 +1112,6 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 			AdminConsole admin = new AdminConsole();
 
 			h.subscribe(admin);
-
-
 
 			while(true){
 

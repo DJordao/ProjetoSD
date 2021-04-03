@@ -23,7 +23,7 @@ public class PostgreSQLJDBC {
                     .getConnection("jdbc:postgresql://localhost:5432/SD-Project",
                             "postgres", "josemiguel1910");
             c.setAutoCommit(false);
-            System.out.println("Opened database successfully");
+            //System.out.println("Opened database successfully");
 
             //c.close();
         } catch ( Exception e ) {
@@ -163,7 +163,39 @@ public class PostgreSQLJDBC {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
         }
-        System.out.println("Eleição Criada com sucesso");
+        //System.out.println("Eleição Criada com sucesso");
+        return eleicoes;
+    }
+
+    public ResultSet listaEleicoesNaoComecadas() throws SQLClientInfoException {
+
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt;
+        ResultSet eleicoes = null;
+
+        try {
+            //Retorna todas as eleições a decorrer
+            stmt = c.createStatement();
+            String sqlIDEleicao = "SELECT eleicao.id, titulo, tipo, data_inicio, departamento " + "FROM eleicao, departamento " +
+                    "WHERE eleicao.id = departamento.eleicao_id AND CURRENT_TIMESTAMP < data_inicio  ORDER BY eleicao.id";
+            ResultSet rs = stmt.executeQuery(sqlIDEleicao);
+
+            eleicoes = rs;
+
+            /*while (rs.next()){
+                idElection = rs.getInt(1);
+            }*/
+
+            //stmt.close();
+            c.commit();
+
+            return rs;
+        } catch (Exception ex) {
+            System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
+            System.exit(0);
+        }
+        //System.out.println("Eleição Criada com sucesso");
         return eleicoes;
     }
 
