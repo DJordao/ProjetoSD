@@ -318,7 +318,7 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 				atributosEleicao[6] = String.valueOf(rs.getInt("resultado"));
 
 
-				Eleicao e = new Eleicao(atributosEleicao[1], atributosEleicao[2],atributosEleicao[3], atributosEleicao[4], atributosEleicao[5],listaDep,Integer.parseInt(atributosEleicao[7]));
+				Eleicao e = new Eleicao(atributosEleicao[1], atributosEleicao[2],atributosEleicao[3], atributosEleicao[4], atributosEleicao[5],listaDep,Integer.parseInt(atributosEleicao[6]));
 				listaEleicao.add(e);
 				val = rs.next();
 			}
@@ -507,8 +507,15 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 				atributosTabelaVotos[4] = rs.getString("pessoa_num_cc");
 
 
-				Voto v = new Voto(atributosTabelaVotos[3], atributosTabelaVotos[4], atributosTabelaVotos[1], Timestamp.valueOf(atributosTabelaVotos[2]));
-				listaVotos.add(v);
+				if (atributosTabelaVotos[2] == null){
+					Voto v = new Voto(atributosTabelaVotos[3], atributosTabelaVotos[4], atributosTabelaVotos[1], null);
+					listaVotos.add(v);
+
+
+				}else{
+					Voto v = new Voto(atributosTabelaVotos[3], atributosTabelaVotos[4], atributosTabelaVotos[1], Timestamp.valueOf(atributosTabelaVotos[2]));
+					listaVotos.add(v);
+				}
 				val = rs.next();
 			}
 		}

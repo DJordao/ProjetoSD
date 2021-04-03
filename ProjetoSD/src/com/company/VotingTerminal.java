@@ -204,7 +204,7 @@ public class VotingTerminal extends Thread {
 }
 
 class TimerThread extends Thread {
-    private long TIMEOUT = 120000;
+    private long TIMEOUT = 2000;
     private VotingTerminal vt;
 
     public TimerThread(VotingTerminal vt) {
@@ -215,7 +215,8 @@ class TimerThread extends Thread {
     public void run() {
         try {
             Thread.sleep(TIMEOUT);
-            vt.interrupt();
+            System.out.println("timeout fim");
+            vt.stop();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

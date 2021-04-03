@@ -97,6 +97,7 @@ public class MulticastServer extends Thread{
                                 Voto cur_v;
                                 for(int i = 0; i < v.size(); i++) {
                                     cur_v = v.get(i);
+
                                     if(cur_v.getNum_cc().equals(p.getNum_cc())) {
                                         aux_v.add(cur_v);
                                     }
@@ -107,7 +108,7 @@ public class MulticastServer extends Thread{
                                     cur_e = aux_e.get(i);
 
                                     for(int j = 0; j < aux_v.size(); j++) {
-                                        cur_v = aux_v.get(i);
+                                        cur_v = aux_v.get(j);
                                         int e_id = Integer.parseInt(cur_v.getEleicaoID());
 
                                         if(h.getEleicaoByID(e_id).getTitulo().equals(cur_e.getTitulo())) {
