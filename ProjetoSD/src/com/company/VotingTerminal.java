@@ -29,6 +29,7 @@ public class VotingTerminal extends Thread {
     }
 
     public void run() {
+        System.out.println("Terminal de voto " + getName());
         MulticastSocket socket = null;
 
         try {
@@ -215,7 +216,7 @@ class TimerThread extends Thread {
     public void run() {
         try {
             Thread.sleep(TIMEOUT);
-            System.out.println("timeout fim");
+            System.out.println("Terminal bloqueado por inatividade.");
             vt.stop();
         } catch (InterruptedException e) {
             e.printStackTrace();

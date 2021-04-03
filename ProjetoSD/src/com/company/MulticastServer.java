@@ -8,7 +8,6 @@ import java.net.MulticastSocket;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
-import java.rmi.server.UnicastRemoteObject;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -19,21 +18,43 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class MulticastServer extends Thread{
     private String MULTICAST_ADDRESS_TERM = "224.3.2.1";
     private int PORT = 4321;
+    private RMInterface h;
+
 
     public static void main(String[] args) throws RemoteException, NotBoundException {
         MulticastServer server = new MulticastServer(args[0]);
         server.start();
     }
 
+
     public MulticastServer(String department) {
         super(department);
     }
 
-    public void run() {
-        RMInterface h = null;
+
+    public void changeRMI() {
         try {
             h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
             h.print_on_server("olá do multicast");
+
+            RMIChecker rc = new RMIChecker(this, h);
+            rc.start();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (NotBoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void run() {
+        try {
+            h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
+            h.print_on_server("olá do multicast");
+
+            RMIChecker rc = new RMIChecker(this, h);
+            rc.start();
+
         } catch (RemoteException e) {
             e.printStackTrace();
         } catch (NotBoundException e) {
@@ -332,4 +353,27 @@ class VoteReceiver extends Thread{
             socket.close();
         }
     }
+}
+
+class RMIChecker extends Thread {
+    private MulticastServer s;
+    private RMInterface h;
+
+    public RMIChecker (MulticastServer s, RMInterface h) {
+        super();
+        this.s = s;
+        this.h = h;
+    }
+
+    public void run() {
+        while (true) {
+            try {
+                h.print_on_server("Multicast Server check");
+            } catch (RemoteException e) {
+                s.changeRMI();
+                break;
+            }
+        }
+    }
+
 }
