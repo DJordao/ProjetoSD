@@ -98,7 +98,7 @@ public class MulticastServer extends Thread{
                                 for(int i = 0; i < v.size(); i++) {
                                     cur_v = v.get(i);
 
-                                    if(cur_v.getNum_cc().equals(p.getNum_cc())) {
+                                    if(cur_v.getNum_cc().equals(p.getNum_cc()) || cur_v.getHoraVoto() == null) {
                                         aux_v.add(cur_v);
                                     }
                                 }
@@ -135,7 +135,12 @@ public class MulticastServer extends Thread{
                                 }
                             }
                             else {
-                                System.out.println("Não existem eleições a decorrer para este Departamento.");
+                                System.out.println("Não existem eleições a decorrer neste departamento.");
+                                break;
+                            }
+
+                            if(l.size() == 0) {
+                                System.out.println("Não existem eleições disponíveis para votar neste departamento.");
                                 break;
                             }
 
