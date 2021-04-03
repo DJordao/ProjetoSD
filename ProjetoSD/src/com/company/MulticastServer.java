@@ -11,17 +11,16 @@ import java.rmi.registry.LocateRegistry;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class MulticastServer extends Thread{
-    private String MULTICAST_ADDRESS_TERM = "224.3.2.1";
-    private int PORT = 4321;
+    private final String MULTICAST_ADDRESS_TERM = "224.3.2.1";
+    private final int PORT = 4321;
     private RMInterface h;
 
 
-    public static void main(String[] args) throws RemoteException, NotBoundException {
+    public static void main(String[] args) {
         MulticastServer server = new MulticastServer(args[0]);
         server.start();
     }
@@ -39,11 +38,61 @@ public class MulticastServer extends Thread{
 
             RMIChecker rc = new RMIChecker(this, h);
             rc.start();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (NotBoundException e) {
+        } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
+    }
+
+
+    private ArrayList<Eleicao> filterVotedElections(Pessoa p, ArrayList<Eleicao> aux_e) throws RemoteException, SQLException {
+        CopyOnWriteArrayList<Voto> v = h.getListaVotos();
+        ArrayList<Eleicao> l = new ArrayList<>();
+
+        if(v != null) {
+            ArrayList<Voto> aux_v = new ArrayList<>();
+
+            for (Voto voto : v) {
+                if (voto.getNum_cc().equals(p.getNum_cc()) || voto.getHoraVoto() == null) {
+                    aux_v.add(voto);
+                }
+            }
+
+            int check = 0;
+            for (Eleicao eleicao : aux_e) {
+                for (Voto voto : aux_v) {
+                    int e_id = Integer.parseInt(voto.getEleicaoID());
+
+                    if (h.getEleicaoByID(e_id).getTitulo().equals(eleicao.getTitulo())) {
+                        check = 1;
+                        break;
+                    }
+                }
+
+                if (check == 0) {
+                    l.add(eleicao);
+                }
+                check = 0;
+            }
+        }
+        else {
+            l = aux_e;
+        }
+
+        return l;
+    }
+
+
+    private ArrayList<Eleicao> filterElectionsByRole(Pessoa p) throws RemoteException, SQLException {
+        CopyOnWriteArrayList<Eleicao> listaEleicao = h.getEleicao(getName());
+        ArrayList<Eleicao> aux_e = new ArrayList<>();
+
+        for (Eleicao eleicao : listaEleicao) {
+            if (eleicao.getTipoEleicao().equals(p.getFuncao())) {
+                aux_e.add(eleicao);
+            }
+        }
+
+        return aux_e;
     }
 
 
@@ -55,20 +104,15 @@ public class MulticastServer extends Thread{
             RMIChecker rc = new RMIChecker(this, h);
             rc.start();
 
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (NotBoundException e) {
+        } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
 
-
-        boolean id = false;
-        MulticastSocket socket = null;
-
         System.out.println(this.getName() + " online...");
 
-        try {
-            socket = new MulticastSocket(PORT);  // Socket para comunicar com os terminais
+        boolean id = false;
+        try (MulticastSocket socket = new MulticastSocket(PORT)) {
+            // Socket para comunicar com os terminais
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_TERM);
             socket.joinGroup(group);
 
@@ -81,7 +125,7 @@ public class MulticastServer extends Thread{
             vr.start();
 
             Scanner keyboard_scanner = new Scanner(System.in);
-            Scanner keyboard_scanner1 = new Scanner(System.in);
+            //Scanner keyboard_scanner1 = new Scanner(System.in);
 
             Pessoa p = null;
             Eleicao e = null;
@@ -93,127 +137,61 @@ public class MulticastServer extends Thread{
 
                     p = h.findPessoa(input);
 
-                    if (p != null){
-                        if(p.getNum_cc().equals(input)) {
+                    if (p != null) {
+                        if (p.getNum_cc().equals(input)) {
                             id = true;
                             System.out.println("Identificação bem sucedida.");
 
-                            ArrayList<Eleicao> l = new ArrayList<>();
-
                             // Filtra as eleições de outra função
-                            CopyOnWriteArrayList<Eleicao> listaEleicao = h.getEleicao(getName());
-                            ArrayList<Eleicao> aux_e = new ArrayList<>();
-                            Eleicao cur_e;
-                            for(int i = 0; i < listaEleicao.size(); i++) {
-                                cur_e = listaEleicao.get(i);
-                                if(cur_e.getTipoEleicao().equals(p.getFuncao())) {
-                                    aux_e.add(cur_e);
-                                }
-                            }
+                            ArrayList<Eleicao> aux_e = filterElectionsByRole(p);
 
                             // Filtra as eleições já votadas
-                            CopyOnWriteArrayList<Voto> v = h.getListaVotos();
-                            if(v != null) {
-                                ArrayList<Voto> aux_v = new ArrayList<>();
-                                Voto cur_v;
-                                for(int i = 0; i < v.size(); i++) {
-                                    cur_v = v.get(i);
-
-                                    if(cur_v.getNum_cc().equals(p.getNum_cc()) || cur_v.getHoraVoto() == null) {
-                                        aux_v.add(cur_v);
-                                    }
-                                }
-
-                                int check = 0;
-                                for(int i = 0; i < aux_e.size(); i++) {
-                                    cur_e = aux_e.get(i);
-
-                                    for(int j = 0; j < aux_v.size(); j++) {
-                                        cur_v = aux_v.get(j);
-                                        int e_id = Integer.parseInt(cur_v.getEleicaoID());
-
-                                        if(h.getEleicaoByID(e_id).getTitulo().equals(cur_e.getTitulo())) {
-                                            check = 1;
-                                            break;
-                                        }
-                                    }
-
-                                    if(check == 0) {
-                                        l.add(cur_e);
-                                    }
-                                    check = 0;
-                                }
-                            }
-                            else {
-                                l = aux_e;
-                            }
+                            ArrayList<Eleicao> l = filterVotedElections(p, aux_e);
 
                             // Lista as eleições válidas para votar
-                            if (l != null){
+                            if (l != null) {
 
-                                for (int i = 0; i < l.size(); i++){
-                                    System.out.println((i+1) + "-> " + l.get(i).getTitulo());
+                                for (int i = 0; i < l.size(); i++) {
+                                    System.out.println((i + 1) + "-> " + l.get(i).getTitulo());
                                 }
-                            }
-                            else {
+                            } else {
                                 System.out.println("Não existem eleições a decorrer neste departamento.");
                                 break;
                             }
 
-                            if(l.size() == 0) {
+                            if (l.size() == 0) {
                                 System.out.println("Não existem eleições disponíveis para votar neste departamento.");
                                 break;
                             }
 
-                            int i;
+                            String option;
                             e = null;
 
                             while (e == null) {
                                 System.out.println("Escolha uma eleição para votar: ");
+                                int i;
 
+                                option = keyboard_scanner.nextLine();
                                 try {
-                                    i = keyboard_scanner1.nextInt();
+                                    i = Integer.parseInt(option);
 
-                                    if(i > 0 && i <= l.size()) {
-                                        e = l.get(i-1);
+                                    if (i > 0 && i <= l.size()) {
+                                        e = l.get(i - 1);
                                         idEleicao = i;
-                                    }
-                                    else {
+                                    } else {
                                         System.out.println("Opção inválida.");
                                     }
 
-                                } catch (InputMismatchException ie) {
+                                } catch (NumberFormatException ne) {
                                     System.out.println("Opção inválida.");
                                 }
-
-                                /*else {
-                                    Voto cur;
-                                    String elec_id;
-                                    CopyOnWriteArrayList<Voto> v = h.getListaVotos();
-                                    //TODO verificar != null
-                                    for(int j = 0; j < v.size(); j++) {
-                                        cur = v.get(j);
-
-                                        if(cur.getNum_cc().equals(input)) {
-                                            elec_id = String.valueOf(h.getIdEleicao(e.getTitulo()));
-
-                                            if(cur.getEleicaoID().equals(elec_id)) {
-                                                System.out.println("Já votou nesta eleição.");
-                                                e = null;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }*/
-
                             }
 
                             System.out.println("A procurar um terminal de voto...");
-
                         }
                     }
 
-                    if(!id) {
+                    if (!id) {
                         System.out.println("Identificação falhada.");
                     }
                 }
@@ -223,27 +201,21 @@ public class MulticastServer extends Thread{
                 String[] message = c.receiveOperation().split(";");
                 String message_type = c.getMessageType(message[0]);
 
-                if(message_type.equals("term_ready")) {
+                if (message_type.equals("term_ready")) {
                     String term = message[1].split("\\|")[1];
                     System.out.println("Pode votar no terminal " + term);
 
                     c.sendOperation("type|term_unlock;term|" + term + ";user|" + p.getNum_cc());
 
-                    //Teste
                     CopyOnWriteArrayList<Candidato> listaCandidatos = h.getListaCandidatos(idEleicao);
                     e.setListaCandidatos(listaCandidatos);
                     CopyOnWriteArrayList<Candidato> l = e.getListaCandidatos();
-                    /*
-                    //Confirmar que recebe a lista dos candidatos
-                    for (int i = 0; i < l.size(); i++){
-                        System.out.println("L-> " + l.get(i).getNome());
-                    }*/
 
                     h.recebeLocalVoto(getName(), p.getNum_cc(), e.getTitulo()); // Envia para o RMI o local e a eleição em que x pessoa vai votar
 
                     String election = "type|send_elec;elec_name|" + e.getTitulo() + ";item_count|" + l.size();
 
-                    for(int i = 0; i < l.size(); i++) {
+                    for (int i = 0; i < l.size(); i++) {
                         election += ";item_" + i + "|" + l.get(i).getNome();
                     }
 
@@ -256,16 +228,14 @@ public class MulticastServer extends Thread{
 
         } catch (IOException | SQLException e) {
             e.printStackTrace();
-        } finally {
-            socket.close();
         }
     }
 }
 
 
 class LoginHandler extends Thread{
-    private String MULTICAST_ADDRESS_LOGIN = "224.3.2.2";
-    private int PORT = 4321;
+    private final String MULTICAST_ADDRESS_LOGIN = "224.3.2.2";
+    private final int PORT = 4321;
     private RMInterface h;
 
     public LoginHandler(RMInterface h) {
@@ -274,33 +244,29 @@ class LoginHandler extends Thread{
     }
 
     public void run() {
-        MulticastSocket socket = null;
-        System.out.println("login_handler");
-        try {
-            socket = new MulticastSocket(PORT);  // Socket para tratar dos logins
+        try (MulticastSocket socket = new MulticastSocket(PORT)) {
+            // Socket para tratar dos logins
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_LOGIN);
             socket.joinGroup(group);
             Communication c = new Communication(socket, group);
 
-            while(true) {
+            while (true) {
                 String[] message = c.receiveOperation().split(";");
                 String message_type = c.getMessageType(message[0]);
 
-                if(message_type.equals("login_request")) {
+                if (message_type.equals("login_request")) {
                     String term = message[1].split("\\|")[1];
                     String n_cc = message[2].split("\\|")[1];
                     String password = message[3].split("\\|")[1];
 
                     Pessoa p = h.findPessoa(n_cc);
 
-                    if(p.getPassword().equals(password)) {
+                    if (p.getPassword().equals(password)) {
                         c.sendOperation("type|login_accept;term|" + term);
-                    }
-                    else {
+                    } else {
                         c.sendOperation("type|login_deny;term|" + term);
                     }
-                }
-                else if(message_type.equals("user_voted")) {
+                } else if (message_type.equals("user_voted")) {
                     String elec_name = message[1].split("\\|")[1];
                     String n_cc = message[2].split("\\|")[1];
                     Timestamp cur_date = new Timestamp(System.currentTimeMillis());
@@ -311,16 +277,14 @@ class LoginHandler extends Thread{
 
         } catch (IOException | SQLException e) {
             e.printStackTrace();
-        } finally {
-            socket.close();
         }
     }
 }
 
 
 class VoteReceiver extends Thread{
-    private String MULTICAST_ADDRESS_VOTE = "224.3.2.3";
-    private int PORT = 4321;
+    private final String MULTICAST_ADDRESS_VOTE = "224.3.2.3";
+    private final int PORT = 4321;
     private RMInterface h;
 
     public VoteReceiver(RMInterface h) {
@@ -329,10 +293,8 @@ class VoteReceiver extends Thread{
     }
 
     public void run() {
-        MulticastSocket socket = null;
-
-        try {
-            socket = new MulticastSocket(PORT);  // Socket para receber os votos
+        try (MulticastSocket socket = new MulticastSocket(PORT)) {
+            // Socket para receber os votos
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_VOTE);
             socket.joinGroup(group);
             Communication c = new Communication(socket, group);
@@ -340,7 +302,7 @@ class VoteReceiver extends Thread{
             while (true) {
                 String[] message = c.receiveOperation().split(";");
                 String message_type = c.getMessageType(message[0]);
-                if(message_type.equals("send_vote")){
+                if (message_type.equals("send_vote")) {
                     String elec_name = message[1].split("\\|")[1];
                     String list_name = message[2].split("\\|")[1];
                     h.recebeVoto(list_name, elec_name);
@@ -349,8 +311,6 @@ class VoteReceiver extends Thread{
             }
         } catch (IOException | SQLException e) {
             e.printStackTrace();
-        } finally {
-            socket.close();
         }
     }
 }
