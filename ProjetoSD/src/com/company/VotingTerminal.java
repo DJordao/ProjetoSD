@@ -15,9 +15,13 @@ public class VotingTerminal extends Thread {
     private boolean ready = true;
     private TimerThread tt;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
+        while(true) {
             VotingTerminal term = new VotingTerminal(args[0]);
             term.start();
+            term.join();
+        }
+
     }
 
     public VotingTerminal(String id) {
