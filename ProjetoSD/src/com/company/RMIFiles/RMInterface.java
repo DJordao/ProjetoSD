@@ -77,4 +77,10 @@ public interface RMInterface extends Remote {
     CopyOnWriteArrayList<Voto> getListaVotos() throws RemoteException, SQLException;
 
     void consultaEleicoesPassadas(int eleicaoID) throws RemoteException, SQLException;
+
+    CopyOnWriteArrayList<String> gereMesadeVoto(int eleicaoID) throws RemoteException, SQLException;
+
+    void updateListaDep(int opcaoEleicao, CopyOnWriteArrayList<String> listaDept) throws RemoteException, SQLException;
+
+    void ListaEleicoesPassadas() throws RemoteException, SQLException;
 }

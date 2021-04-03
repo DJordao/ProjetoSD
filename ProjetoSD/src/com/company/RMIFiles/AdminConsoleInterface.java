@@ -8,9 +8,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 public interface AdminConsoleInterface extends Remote{
-    public void print_on_client(String s) throws RemoteException;
+    void print_on_client(String s) throws RemoteException;
 
-    public void displayEleicoes(String id, String titulo, String tipo, String departamento, String data_inicio) throws RemoteException;
+    void displayEleicoes(String id, String titulo, String tipo, String departamento, String data_inicio) throws RemoteException;
 
     void displayCandidatura(String id, String nomeCandidato, String categoria, String numEleicao, String titulo) throws RemoteException;
 
@@ -25,4 +25,6 @@ public interface AdminConsoleInterface extends Remote{
     void displaylocalVotoEleitores(String local_voto, String hora_voto, String nome, String num_cc) throws RemoteException;
 
     void displayEleicoesPassadas1(Eleicao e, int totalVotos, int votoBranco, int votoNulo, int flag, String nomeCandidato, int numVotos, float percentagem) throws RemoteException;
+
+    void displaygereMesadeVoto(String titulo, String departameto) throws RemoteException;
 }

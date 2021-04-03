@@ -7,8 +7,6 @@ import com.company.Pessoa;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
-import java.sql.ResultSet;
-import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -43,8 +41,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		System.out.println("[6] -> Saber em que local votou cada eleitors");
 		System.out.println("[7] -> Mostrar estado das mesas de voto");
 		System.out.println("[8] -> Mostrar eleitores em tempo real");
-		System.out.println("[9] -> Terminar uma eleição (acho que não é aqui mas fica na mm)");
-		System.out.println("[10] -> Consultar resultados detalhados de eleições passadas");
+		System.out.println("[9] -> Consultar resultados detalhados de eleições passadas");
 		System.out.println("=========================");
 	}
 
@@ -757,6 +754,13 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 
 	}
 
+	@Override
+	public void displaygereMesadeVoto(String titulo, String departameto) throws RemoteException {
+		System.out.println("------------------");
+		System.out.println("Nome: " + titulo);
+		System.out.println("Departamento: " + departameto);
+	}
+
 	public static void alteraPropriedadesEleicao(RMInterface h) throws RemoteException, SQLException {
 		System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
 		System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
@@ -923,7 +927,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 	public static void consultaEleicoesPassadas(RMInterface h) throws RemoteException, SQLException {
 		System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
 		System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
-		h.ListaEleicoes();
+		h.ListaEleicoesPassadas();
 
 		int maxEleicoes, opcaoEleicao,flagOut, eleicaoID;
 		maxEleicoes = h.maxEleicoes();
@@ -1011,6 +1015,93 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 
 	}
 
+	private static void gereMesadeVoto(RMInterface h) throws RemoteException, SQLException {
+		System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
+		System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
+		h.ListaEleicoes();
+
+		int maxEleicoes, opcaoEleicao,flagOut, eleicaoID;
+		maxEleicoes = h.maxEleicoes();
+		CopyOnWriteArrayList<String> listaDept = new CopyOnWriteArrayList<>();
+
+		Scanner input;
+		Scanner inputDep;
+		String departamento;
+
+		while (true){
+			flagOut = 0; // Ver se faz update
+			try {
+				System.out.println("==============================");
+				System.out.printf("(999)>Indique a eleição a visualizar: ");
+				input = new Scanner(System.in);
+				String eleicao = input.nextLine();
+				opcaoEleicao = Integer.parseInt(eleicao);
+
+				if (eleicao.equalsIgnoreCase("999")) break;
+				if (!(opcaoEleicao < 1 || opcaoEleicao > maxEleicoes)) {
+					eleicaoID = opcaoEleicao;
+					listaDept = h.gereMesadeVoto(eleicaoID);
+
+					//ADICIONAR DEP
+					while (true){
+						System.out.printf("Deseja Inserir algum departamento? (S/N)");
+						inputDep = new Scanner(System.in);
+						String opcaoDep = inputDep.nextLine();
+						if (opcaoDep.equalsIgnoreCase("S")){
+							System.out.printf("Departamento: ");
+							inputDep = new Scanner(System.in);
+							departamento = inputDep.nextLine();
+							if (String.valueOf(departamento).length() != 0 && !departamento.isBlank()) {
+								listaDept.add(departamento);
+							}
+						}else if (opcaoDep.equalsIgnoreCase("N")){
+							break;
+						}else System.out.println("Insira uma resposta válida");
+					}
+					//REMOVER DEP
+
+					while (true){
+						System.out.printf("Deseja Remover algum departamento? (S/N)");
+						int valido = 0;
+						inputDep = new Scanner(System.in);
+						String opcaoDep = inputDep.nextLine();
+						if (opcaoDep.equalsIgnoreCase("S")){
+							System.out.printf("Departamento: ");
+							inputDep = new Scanner(System.in);
+							departamento = inputDep.nextLine();
+							if (String.valueOf(departamento).length() != 0 && !departamento.isBlank()) {
+								for (int i = 0; i < listaDept.size(); i++){
+									if (departamento.equalsIgnoreCase(listaDept.get(i))){
+										valido++;
+										listaDept.remove(i);
+									}
+								}
+								if (valido > 0);
+								else System.out.println("Insira um Departamento válido");
+
+							}
+						}else if (opcaoDep.equalsIgnoreCase("N")){
+							for(int i = 0; i < listaDept.size(); i++){
+								System.out.println(i + "-> " + listaDept.get(i));
+							}
+							h.updateListaDep(opcaoEleicao, listaDept);
+							break;
+						}else System.out.println("Insira uma resposta válida");
+					}
+					break;
+
+
+				}else {
+					System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
+				}
+
+			}catch (NumberFormatException ex) {
+				System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
+			}
+		}
+
+	}
+
 		public static void main(String args[]) {
 
 		//System.getProperties().put("java.security.policy", "policy.all");
@@ -1033,7 +1124,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 					Scanner input = new Scanner(System.in);
 					opcao = input.nextLine();
 					Integer.parseInt(opcao);
-					if (Integer.parseInt(opcao) <= 10){
+					if (Integer.parseInt(opcao) <= 9){
 						switch(opcao) {
 							case "1":
 								// Registar Pessoas
@@ -1048,6 +1139,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 								// Gerir listas de candidatos a uma eleição
 								break;
 							case "4":
+								gereMesadeVoto(h);
 								// Gerir mesas de voto
 								break;
 							case "5":
@@ -1065,9 +1157,6 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 								// Mostrar eleitores em tempo real
 								break;
 							case "9":
-								// Terminar uma eleição
-								break;
-							case "10":
 								consultaEleicoesPassadas(h);
 								// Consultar resultados detalhados de eleições passadas
 								break;
@@ -1087,8 +1176,6 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		}
 
 	}
-
-
 
 
 }
