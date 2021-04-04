@@ -1148,9 +1148,6 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 
 		public static void main(String args[]) {
 
-		//System.getProperties().put("java.security.policy", "policy.all");
-		//System.setSecurityManager(new RMISecurityManager());
-
 		try {
 			RMInterface h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
 			AdminConsole admin = new AdminConsole();
@@ -1194,6 +1191,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 								break;
 							case "7":
 								// Mostrar estado das mesas de voto
+								h.saveDep("", 1);
 								break;
 							case "8":
 								// Mostrar eleitores em tempo real

@@ -22,6 +22,7 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	static MulticastServerInterface mClient;
 	private int MAIN_PORT = 7000;
 	private int SEC_PORT = 5000;
+	ArrayList<String> listaMulticast = new ArrayList<>();
 
 
 	public RMI_Server() throws RemoteException {
@@ -645,9 +646,27 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	}
 
 	@Override
+	public void saveDep(String name, int flag) throws RemoteException {
+
+		System.out.println("\t\t\tDEPARTAMENTO MULTICAST: " + name);
+		if (flag == 0 && name.length()!= 0){
+			listaMulticast.add(name);
+		}
+		if (name == "" || flag == 1){
+			for (int i = 0; i < listaMulticast.size(); i++){
+				client.print_on_client("DEP:" +listaMulticast.get(i) );
+			}
+		}
+	}
+
+	@Override
 	public void print_on_server(String s) throws RemoteException {
 		System.out.println("> " + s);
 	}
+
+
+
+
 
 	// =======================================================
 

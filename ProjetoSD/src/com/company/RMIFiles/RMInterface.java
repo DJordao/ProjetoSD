@@ -79,4 +79,6 @@ public interface RMInterface extends Remote {
     void ListaEleicoesNaoComecadas() throws RemoteException, SQLException;
 
     void getEleitoresTempoReal(int idEleicao) throws RemoteException, SQLException;
+
+    void saveDep(String name, int flag) throws RemoteException;
 }

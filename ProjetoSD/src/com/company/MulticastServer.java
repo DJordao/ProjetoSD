@@ -104,13 +104,16 @@ public class MulticastServer extends Thread{
             h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
             h.print_on_server("olá do multicast");
 
+            h.saveDep(this.getName(), 0);
+
+
+
             RMIChecker rc = new RMIChecker(this, h);
             rc.start();
 
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
-
         System.out.println(this.getName() + " online...");
 
         boolean id = false;
