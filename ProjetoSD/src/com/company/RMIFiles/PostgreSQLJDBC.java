@@ -1204,4 +1204,27 @@ public class PostgreSQLJDBC {
         System.out.println("Eleição Criada com sucesso");
         return eleicoes;
     }
+
+    public ResultSet getEleitoresTempoReal(int idEleicao) throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt;
+        ResultSet numVotos = null;
+        try {
+            stmt = c.createStatement();
+            String sql = "SELECT COUNT(eleicao_id), local_voto FROM voto WHERE eleicao_id = '" + idEleicao + "' AND hora_voto IS NOT NULL GROUP BY local_voto";
+
+            ResultSet rs = stmt.executeQuery(sql);
+            numVotos = rs;
+            //myStmt.close();
+            //stmt.close();
+            c.commit();
+
+            return rs;
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+            System.exit(0);
+        }
+        return numVotos;
+    }
 }

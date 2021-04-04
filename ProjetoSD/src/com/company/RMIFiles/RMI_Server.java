@@ -626,23 +626,22 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	}
 
 	@Override
-	public void tableAndTerminalState() throws RemoteException {
+	public void getEleitoresTempoReal(int idEleicao) throws RemoteException, SQLException {
+		//Listar o nº de votos de uma eleicao dos vários dep
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+		ResultSet rs = db.getEleitoresTempoReal(idEleicao);
 
-	}
+		String local_voto;
+		int numVotos;
 
-	@Override
-	public void getStatsEleicao(Eleicao e) throws RemoteException {
 
-	}
+		while (rs.next()) {
+			numVotos = rs.getInt(1);
+			local_voto = rs.getString(2);
 
-	@Override
-	public void encerraEleicao(Eleicao e) throws RemoteException {
-
-	}
-
-	@Override
-	public void listaResultadosAnteriores(Eleicao e) throws RemoteException {
-
+			client.displayEleitoresTempoReal(numVotos, local_voto);
+		}
 	}
 
 	@Override
@@ -657,7 +656,7 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		int SEC_PORT = 5000;
 		int TIMEOUT = 9000; //9s de timeout caso nao obtenha uma resposta
 
-		DatagramSocket aSocketRMI_sec = null;
+		/*DatagramSocket aSocketRMI_sec = null;
 		try {
 			aSocketRMI_sec = new DatagramSocket();
 			aSocketRMI_sec.setSoTimeout(TIMEOUT);
@@ -693,7 +692,7 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}*/
 
 		try {
 			RMI_Server h = new RMI_Server();

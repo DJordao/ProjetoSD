@@ -761,6 +761,13 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		System.out.println("Departamento: " + departameto);
 	}
 
+	@Override
+	public void displayEleitoresTempoReal(int numVotos, String local_voto) throws RemoteException {
+		System.out.println("-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-");
+		System.out.println("Local de voto: " + local_voto);
+		System.out.println("Número de votos: " + numVotos);
+	}
+
 	public static void alteraPropriedadesEleicao(RMInterface h) throws RemoteException, SQLException {
 		System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
 		System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
@@ -1102,6 +1109,43 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 
 	}
 
+	private static void eleitoresTempoReal(RMInterface h) throws RemoteException, SQLException {
+		System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
+		System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
+		h.ListaEleicoes();
+
+		int maxEleicoes, opcaoEleicao, flagOut = 0, idEleicao = 0;
+		maxEleicoes = h.maxEleicoes();
+
+		Scanner input;
+		while (true) {
+
+			try {
+				System.out.printf("Indique a eleição a visualizar: ");
+				input = new Scanner(System.in);
+				String eleicao = input.nextLine();
+				opcaoEleicao = Integer.parseInt(eleicao);
+				if (!(opcaoEleicao < 1 || opcaoEleicao > maxEleicoes)) {
+					//Depois de escolher uma eleicao a cada 2s vai mostrar os eleitores da eleição dos vários departamentos
+					Scanner inputExit = new Scanner(System.in);
+					idEleicao = opcaoEleicao;
+					int exit = 0;
+
+					while (exit != 5){
+						h.getEleitoresTempoReal(idEleicao);
+						Thread.sleep((2000));
+						exit++;
+					}
+				}break;
+
+			} catch (NumberFormatException | InterruptedException ex) {
+				System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
+			}
+		}
+	}
+
+
+
 		public static void main(String args[]) {
 
 		//System.getProperties().put("java.security.policy", "policy.all");
@@ -1153,6 +1197,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 								break;
 							case "8":
 								// Mostrar eleitores em tempo real
+								eleitoresTempoReal(h);
 								break;
 							case "9":
 								consultaEleicoesPassadas(h);
@@ -1174,7 +1219,6 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		}
 
 	}
-
 
 }
 

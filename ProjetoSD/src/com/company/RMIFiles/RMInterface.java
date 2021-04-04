@@ -16,14 +16,6 @@ public interface RMInterface extends Remote {
 
     Eleicao criaEleicao(Eleicao e) throws RemoteException, SQLClientInfoException;
 
-    void tableAndTerminalState() throws RemoteException;
-
-    void getStatsEleicao(Eleicao e) throws RemoteException;
-
-    void encerraEleicao(Eleicao e) throws RemoteException;
-
-    void listaResultadosAnteriores(Eleicao e) throws RemoteException;
-
     void print_on_server(String s) throws RemoteException;
 
     void subscribe(AdminConsoleInterface c) throws RemoteException;
@@ -85,4 +77,6 @@ public interface RMInterface extends Remote {
     void ListaEleicoesPassadas() throws RemoteException, SQLException;
 
     void ListaEleicoesNaoComecadas() throws RemoteException, SQLException;
+
+    void getEleitoresTempoReal(int idEleicao) throws RemoteException, SQLException;
 }
