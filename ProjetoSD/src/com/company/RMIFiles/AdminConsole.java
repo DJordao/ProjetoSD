@@ -25,8 +25,6 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 
 	AdminConsole() throws RemoteException {
 		super();
-		RMIChecker rc = new RMIChecker(this, h);
-		rc.start();
 	}
 
 	public int changeRMI() {
@@ -1171,7 +1169,8 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 
 			h.subscribe(admin);
 
-
+			RMIChecker rc = new RMIChecker(admin, h);
+			rc.start();
 
 			while(true){
 
