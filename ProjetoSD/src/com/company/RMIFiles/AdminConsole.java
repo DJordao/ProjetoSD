@@ -27,6 +27,14 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		super();
 	}
 
+	public RMInterface getRMInterface() {
+		return h;
+	}
+
+	public void setRMInterface(RMInterface h) {
+		this.h = h;
+	}
+
 	public int changeRMI() {
 		try {
 			h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
@@ -1167,9 +1175,11 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 			RMInterface h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
 			AdminConsole admin = new AdminConsole();
 
-			h.subscribe(admin);
+			admin.setRMInterface(h);
 
-			RMIChecker rc = new RMIChecker(admin, h);
+			admin.getRMInterface().subscribe(admin);
+
+			RMIChecker rc = new RMIChecker(admin, admin.getRMInterface());
 			rc.start();
 
 			while(true){
@@ -1185,38 +1195,38 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 						switch(opcao) {
 							case "1":
 								// Registar Pessoas
-								h.registaPessoa(registaPessoa());
+								admin.getRMInterface().registaPessoa(registaPessoa());
 								break;
 							case "2":
-								h.criaEleicao(criaEleicao());
+								admin.getRMInterface().criaEleicao(criaEleicao());
 								// Criar Eleição
 								break;
 							case "3":
-								gereCandidato(h);
+								gereCandidato(admin.getRMInterface());
 								// Gerir listas de candidatos a uma eleição
 								break;
 							case "4":
-								gereMesadeVoto(h);
+								gereMesadeVoto(admin.getRMInterface());
 								// Gerir mesas de voto
 								break;
 							case "5":
-								alteraPropriedadesEleicao(h);
+								alteraPropriedadesEleicao(admin.getRMInterface());
 								// Alterar propriedades de uma eleição
 								break;
 							case "6":
-								localVotoEleitores(h);
+								localVotoEleitores(admin.getRMInterface());
 								// Saber em que local votou cada eleitors
 								break;
 							case "7":
 								// Mostrar estado das mesas de voto
-								h.saveDep("", 1);
+								admin.getRMInterface().saveDep("", 1);
 								break;
 							case "8":
 								// Mostrar eleitores em tempo real
-								eleitoresTempoReal(h);
+								eleitoresTempoReal(admin.getRMInterface());
 								break;
 							case "9":
-								consultaEleicoesPassadas(h);
+								consultaEleicoesPassadas(admin.getRMInterface());
 								// Consultar resultados detalhados de eleições passadas
 								break;
 
