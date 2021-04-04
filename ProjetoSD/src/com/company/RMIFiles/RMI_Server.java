@@ -734,10 +734,10 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 					DatagramPacket request = new DatagramPacket(m, m.length, host, serverPort);
 					socket.send(request);
 
-					/*byte[] buffer = new byte[256];
+					byte[] buffer = new byte[256];
 					DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
 					socket.receive(reply);
-					System.out.println("Recebeu: " + new String(reply.getData(), 0, reply.getLength()));*/
+					System.out.println("Recebeu: " + new String(reply.getData(), 0, reply.getLength()));
 				}
 
 			} catch (IOException | InterruptedException e) {

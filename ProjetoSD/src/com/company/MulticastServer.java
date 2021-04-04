@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.rmi.ConnectException;
+import java.rmi.ConnectIOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -40,6 +41,7 @@ public class MulticastServer extends Thread{
             h.print_on_server("olá do multicast");
             lh.changeRMI(h);
             vr.changeRMI(h);
+            h.saveDep(this.getName(), 0);
             //RMIChecker rc = new RMIChecker(this, h);
             //rc.start();
             System.out.println("Liguei-me ao secundário");
@@ -175,7 +177,7 @@ public class MulticastServer extends Thread{
                         try {
                             p = h.findPessoa(input);
                             break;
-                        } catch (ConnectException ce) {
+                        } catch (ConnectException | ConnectIOException ce) {
                             changeRMI();
                         }
                     }
@@ -203,34 +205,36 @@ public class MulticastServer extends Thread{
                             }
 
                             if (l.size() == 0) {
+                                id = !id;
                                 System.out.println("Não existem eleições disponíveis para votar neste departamento.");
-                                break;
                             }
+                            else{
+                                String option;
+                                e = null;
 
-                            String option;
-                            e = null;
+                                while (e == null) {
+                                    System.out.println("Escolha uma eleição para votar: ");
+                                    int i;
 
-                            while (e == null) {
-                                System.out.println("Escolha uma eleição para votar: ");
-                                int i;
+                                    option = keyboard_scanner.nextLine();
+                                    try {
+                                        i = Integer.parseInt(option);
 
-                                option = keyboard_scanner.nextLine();
-                                try {
-                                    i = Integer.parseInt(option);
+                                        if (i > 0 && i <= l.size()) {
+                                            e = l.get(i - 1);
+                                            idEleicao = i;
+                                        } else {
+                                            System.out.println("Opção inválida.");
+                                        }
 
-                                    if (i > 0 && i <= l.size()) {
-                                        e = l.get(i - 1);
-                                        idEleicao = i;
-                                    } else {
+                                    } catch (NumberFormatException ne) {
                                         System.out.println("Opção inválida.");
                                     }
-
-                                } catch (NumberFormatException ne) {
-                                    System.out.println("Opção inválida.");
                                 }
+
+                                System.out.println("A procurar um terminal de voto...");
                             }
 
-                            System.out.println("A procurar um terminal de voto...");
                         }
                     }
 
