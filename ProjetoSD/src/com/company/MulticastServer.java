@@ -38,6 +38,7 @@ public class MulticastServer extends Thread{
 
             RMIChecker rc = new RMIChecker(this, h);
             rc.start();
+            System.out.println("Liguei-me ao secundário");
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
@@ -329,7 +330,8 @@ class RMIChecker extends Thread {
         while (true) {
             try {
                 h.print_on_server("Multicast Server check");
-            } catch (RemoteException e) {
+                Thread.sleep(1000);
+            } catch (RemoteException | InterruptedException e) {
                 s.changeRMI();
                 break;
             }

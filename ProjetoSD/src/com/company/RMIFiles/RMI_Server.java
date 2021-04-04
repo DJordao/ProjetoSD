@@ -652,15 +652,15 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	// =======================================================
 
 	public static void main(String args[]) {
+		String id = args[0];
 		DatagramSocket socket = null;
 
-
-		if(args[0].equals("2")) {
+		if(id.equals("2")) {
 			String s;
 
 			try{
 				socket = new DatagramSocket(6789);
-				socket.setSoTimeout(10000);
+				socket.setSoTimeout(9000);
 				System.out.println("Socket Datagram à escuta no porto 6789");
 
 				while(true){
@@ -668,21 +668,21 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 					DatagramPacket heartBeat = new DatagramPacket(buffer, buffer.length);
 					socket.receive(heartBeat);
 					s = new String(heartBeat.getData(), 0, heartBeat.getLength());
-					System.out.println("Server Recebeu: " + s);
+					System.out.println("Servidor secundário recebeu: " + s);
 
 					DatagramPacket reply = new DatagramPacket(heartBeat.getData(), heartBeat.getLength(), heartBeat.getAddress(), heartBeat.getPort());
 					socket.send(reply);
 				}
 
-			} catch (SocketException e) {
-				System.out.println("Socket: " + e.getMessage());
+			} catch (SocketTimeoutException e) {
+				System.out.println("Servidor primário crashou");
+				id = "1";
 			} catch (IOException e) {
-				System.out.println("IO: " + e.getMessage());
+				e.printStackTrace();
 			} finally {
 				socket.close();
 			}
 		}
-
 
 		try {
 			RMI_Server h = new RMI_Server();
@@ -700,10 +700,10 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 			throwables.printStackTrace();
 		}
 
-		if(args[0].equals("1")) {
+		if(id.equals("1")) {
 			try {
 				socket = new DatagramSocket();
-				String heartBeat = "Estou vivo!";
+				String heartBeat = "Servidor primário está vivo!";
 				byte[] m = heartBeat.getBytes();
 
 				while (true) {
