@@ -5,6 +5,7 @@ import com.company.RMIFiles.RMInterface;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -18,6 +19,8 @@ public class MulticastServer extends Thread{
     private final String MULTICAST_ADDRESS_TERM = "224.3.2.1";
     private final int PORT = 4321;
     private RMInterface h;
+    private LoginHandler lh;
+    private VoteReceiver vr;
 
 
     public static void main(String[] args) {
@@ -35,9 +38,10 @@ public class MulticastServer extends Thread{
         try {
             h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
             h.print_on_server("olá do multicast");
-
-            RMIChecker rc = new RMIChecker(this, h);
-            rc.start();
+            lh.changeRMI(h);
+            vr.changeRMI(h);
+            //RMIChecker rc = new RMIChecker(this, h);
+            //rc.start();
             System.out.println("Liguei-me ao secundário");
             return 1;
         } catch (RemoteException | NotBoundException e) {
@@ -48,7 +52,15 @@ public class MulticastServer extends Thread{
 
 
     private ArrayList<Eleicao> filterVotedElections(Pessoa p, ArrayList<Eleicao> aux_e) throws RemoteException, SQLException {
-        CopyOnWriteArrayList<Voto> v = h.getListaVotos();
+        CopyOnWriteArrayList<Voto> v = null;
+        while (true) {
+            try {
+                v = h.getListaVotos();
+                break;
+            } catch (ConnectException e) {
+                changeRMI();
+            }
+        }
         ArrayList<Eleicao> l = new ArrayList<>();
 
         if(v != null) {
@@ -65,7 +77,17 @@ public class MulticastServer extends Thread{
                 for (Voto voto : aux_v) {
                     int e_id = Integer.parseInt(voto.getEleicaoID());
 
-                    if (h.getEleicaoByID(e_id).getTitulo().equals(eleicao.getTitulo())) {
+                    Eleicao e = null;
+                    while (true) {
+                        try {
+                            e = h.getEleicaoByID(e_id);
+                            break;
+                        } catch (ConnectException ce) {
+                            changeRMI();
+                        }
+                    }
+
+                    if (e.getTitulo().equals(eleicao.getTitulo())) {
                         check = 1;
                         break;
                     }
@@ -86,7 +108,17 @@ public class MulticastServer extends Thread{
 
 
     private ArrayList<Eleicao> filterElectionsByRole(Pessoa p) throws RemoteException, SQLException {
-        CopyOnWriteArrayList<Eleicao> listaEleicao = h.getEleicao(getName());
+        CopyOnWriteArrayList<Eleicao> listaEleicao = null;
+
+        while (true) {
+            try {
+                listaEleicao = h.getEleicao(getName());
+                break;
+            } catch (ConnectException ce) {
+                changeRMI();
+            }
+        }
+
         ArrayList<Eleicao> aux_e = new ArrayList<>();
 
         for (Eleicao eleicao : listaEleicao) {
@@ -106,10 +138,8 @@ public class MulticastServer extends Thread{
 
             h.saveDep(this.getName(), 0);
 
-
-
-            RMIChecker rc = new RMIChecker(this, h);
-            rc.start();
+            //RMIChecker rc = new RMIChecker(this, h);
+            //rc.start();
 
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
@@ -124,10 +154,10 @@ public class MulticastServer extends Thread{
 
             Communication c = new Communication(socket, group);
 
-            LoginHandler lh = new LoginHandler(h); // Thread que trata dos logins
+            lh = new LoginHandler(h, this); // Thread que trata dos logins
             lh.start();
 
-            VoteReceiver vr = new VoteReceiver(h); // Thread que recebe os votos dos terminais
+            vr = new VoteReceiver(h, this); // Thread que recebe os votos dos terminais
             vr.start();
 
             Scanner keyboard_scanner = new Scanner(System.in);
@@ -141,7 +171,14 @@ public class MulticastServer extends Thread{
                     System.out.println("Indique o seu nª do cc:");
                     String input = keyboard_scanner.nextLine();
 
-                    p = h.findPessoa(input);
+                    while (true) {
+                        try {
+                            p = h.findPessoa(input);
+                            break;
+                        } catch (ConnectException ce) {
+                            changeRMI();
+                        }
+                    }
 
                     if (p != null) {
                         if (p.getNum_cc().equals(input)) {
@@ -213,11 +250,28 @@ public class MulticastServer extends Thread{
 
                     c.sendOperation("type|term_unlock;term|" + term + ";user|" + p.getNum_cc());
 
-                    CopyOnWriteArrayList<Candidato> listaCandidatos = h.getListaCandidatos(idEleicao);
+                    CopyOnWriteArrayList<Candidato> listaCandidatos = null;
+
+                    while (true) {
+                        try {
+                            listaCandidatos = h.getListaCandidatos(idEleicao);
+                            break;
+                        } catch (ConnectException ce) {
+                            changeRMI();
+                        }
+                    }
+
                     e.setListaCandidatos(listaCandidatos);
                     CopyOnWriteArrayList<Candidato> l = e.getListaCandidatos();
 
-                    h.recebeLocalVoto(getName(), p.getNum_cc(), e.getTitulo()); // Envia para o RMI o local e a eleição em que x pessoa vai votar
+                    while (true) {
+                        try {
+                            h.recebeLocalVoto(getName(), p.getNum_cc(), e.getTitulo()); // Envia para o RMI o local e a eleição em que x pessoa vai votar
+                            break;
+                        } catch (ConnectException ce) {
+                            changeRMI();
+                        }
+                    }
 
                     String election = "type|send_elec;elec_name|" + e.getTitulo() + ";item_count|" + l.size();
 
@@ -243,9 +297,15 @@ class LoginHandler extends Thread{
     private final String MULTICAST_ADDRESS_LOGIN = "224.3.2.2";
     private final int PORT = 4321;
     private RMInterface h;
+    private MulticastServer s;
 
-    public LoginHandler(RMInterface h) {
+    public LoginHandler(RMInterface h, MulticastServer s) {
         super();
+        this.h = h;
+        this.s = s;
+    }
+
+    public void changeRMI(RMInterface h) {
         this.h = h;
     }
 
@@ -265,7 +325,15 @@ class LoginHandler extends Thread{
                     String n_cc = message[2].split("\\|")[1];
                     String password = message[3].split("\\|")[1];
 
-                    Pessoa p = h.findPessoa(n_cc);
+                    Pessoa p = null;
+                    while (true) {
+                        try {
+                            p = h.findPessoa(n_cc);
+                            break;
+                        } catch (ConnectException ce) {
+                            s.changeRMI();
+                        }
+                    }
 
                     if (p.getPassword().equals(password)) {
                         c.sendOperation("type|login_accept;term|" + term);
@@ -277,7 +345,14 @@ class LoginHandler extends Thread{
                     String n_cc = message[2].split("\\|")[1];
                     Timestamp cur_date = new Timestamp(System.currentTimeMillis());
 
-                    h.updateVotoPessoaData(cur_date, n_cc, elec_name); // Depois da pessoa votar envia a data
+                    while(true) {
+                        try {
+                            h.updateVotoPessoaData(cur_date, n_cc, elec_name); // Depois da pessoa votar envia a data
+                            break;
+                        } catch (ConnectException ce) {
+                            s.changeRMI();
+                        }
+                    }
                 }
             }
 
@@ -292,9 +367,15 @@ class VoteReceiver extends Thread{
     private final String MULTICAST_ADDRESS_VOTE = "224.3.2.3";
     private final int PORT = 4321;
     private RMInterface h;
+    private MulticastServer s;
 
-    public VoteReceiver(RMInterface h) {
+    public VoteReceiver(RMInterface h, MulticastServer s) {
         super();
+        this.h = h;
+        this.s = s;
+    }
+
+    public void changeRMI(RMInterface h) {
         this.h = h;
     }
 
@@ -311,7 +392,15 @@ class VoteReceiver extends Thread{
                 if (message_type.equals("send_vote")) {
                     String elec_name = message[1].split("\\|")[1];
                     String list_name = message[2].split("\\|")[1];
-                    h.recebeVoto(list_name, elec_name);
+
+                    while(true) {
+                        try {
+                            h.recebeVoto(list_name, elec_name);
+                            break;
+                        } catch (ConnectException ce) {
+                            s.changeRMI();
+                        }
+                    }
                 }
 
             }
