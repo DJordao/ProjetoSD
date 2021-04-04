@@ -654,6 +654,52 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	public static void main(String args[]) {
 		DatagramSocket socket = null;
 
+
+		if(args[0].equals("2")) {
+			String s;
+
+			try{
+				socket = new DatagramSocket(6789);
+				socket.setSoTimeout(10000);
+				System.out.println("Socket Datagram à escuta no porto 6789");
+
+				while(true){
+					byte[] buffer = new byte[256];
+					DatagramPacket heartBeat = new DatagramPacket(buffer, buffer.length);
+					socket.receive(heartBeat);
+					s = new String(heartBeat.getData(), 0, heartBeat.getLength());
+					System.out.println("Server Recebeu: " + s);
+
+					DatagramPacket reply = new DatagramPacket(heartBeat.getData(), heartBeat.getLength(), heartBeat.getAddress(), heartBeat.getPort());
+					socket.send(reply);
+				}
+
+			} catch (SocketException e) {
+				System.out.println("Socket: " + e.getMessage());
+			} catch (IOException e) {
+				System.out.println("IO: " + e.getMessage());
+			} finally {
+				socket.close();
+			}
+		}
+
+
+		try {
+			RMI_Server h = new RMI_Server();
+			Registry r = LocateRegistry.createRegistry(7000);
+			r.rebind("RMIConnect", h);
+
+			PostgreSQLJDBC db = new PostgreSQLJDBC();
+			db.connectDB();
+
+			System.out.println("Hello Server ready.");
+
+		} catch (RemoteException re) {
+			System.out.println("Exception in HelloImpl.main: " + re);
+		} catch (SQLClientInfoException throwables) {
+			throwables.printStackTrace();
+		}
+
 		if(args[0].equals("1")) {
 			try {
 				socket = new DatagramSocket();
@@ -682,48 +728,5 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 			}
 		}
 
-		try {
-			RMI_Server h = new RMI_Server();
-			Registry r = LocateRegistry.createRegistry(7000);
-			r.rebind("RMIConnect", h);
-
-			PostgreSQLJDBC db = new PostgreSQLJDBC();
-			db.connectDB();
-
-			System.out.println("Hello Server ready.");
-
-		} catch (RemoteException re) {
-			System.out.println("Exception in HelloImpl.main: " + re);
-		} catch (SQLClientInfoException throwables) {
-			throwables.printStackTrace();
-		}
-
-		if(args[0].equals("2")) {
-			String s;
-
-			try{
-				socket = new DatagramSocket(6789);
-				socket.setSoTimeout(5000);
-				System.out.println("Socket Datagram à escuta no porto 6789");
-
-				while(true){
-					byte[] buffer = new byte[256];
-					DatagramPacket heartBeat = new DatagramPacket(buffer, buffer.length);
-					socket.receive(heartBeat);
-					s = new String(heartBeat.getData(), 0, heartBeat.getLength());
-					System.out.println("Server Recebeu: " + s);
-
-					DatagramPacket reply = new DatagramPacket(heartBeat.getData(), heartBeat.getLength(), heartBeat.getAddress(), heartBeat.getPort());
-					socket.send(reply);
-				}
-
-			} catch (SocketException e) {
-				System.out.println("Socket: " + e.getMessage());
-			} catch (IOException e) {
-				System.out.println("IO: " + e.getMessage());
-			} finally {
-				socket.close();
-			}
-		}
 	}
 }
