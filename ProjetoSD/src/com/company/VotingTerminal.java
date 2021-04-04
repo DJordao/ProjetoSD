@@ -85,13 +85,13 @@ public class VotingTerminal extends Thread {
                                 tt = new TimerThread(this);
                                 tt.start();
                                 input = keyboard_scanner.nextLine();
-                                tt.interrupt();
+                                tt.stop();
                             }
                             System.out.println("Introduza a sua password: ");
                             tt = new TimerThread(this);
                             tt.start();
                             String password = keyboard_scanner.nextLine();
-                            tt.interrupt();
+                            tt.stop();
 
                             login_c.sendOperation("type|login_request;term|" + getName() + ";n_cc|" + n_cc + ";passowrd|" + password);
 
@@ -126,7 +126,7 @@ public class VotingTerminal extends Thread {
                                             tt = new TimerThread(this);
                                             tt.start();
                                             String vote = keyboard_scanner.nextLine();
-                                            tt.interrupt();
+                                            tt.stop();
 
                                             if(vote.equals("")) {
                                                 vote = "Branco";
@@ -172,12 +172,12 @@ public class VotingTerminal extends Thread {
                                         tt = new TimerThread(this);
                                         tt.start();
                                         n_cc = keyboard_scanner.nextLine();
-                                        tt.interrupt();
+                                        tt.stop();
                                         System.out.println("Introduza a sua password: ");
                                         tt = new TimerThread(this);
                                         tt.start();
                                         password = keyboard_scanner.nextLine();
-                                        tt.interrupt();
+                                        tt.stop();
 
                                         login_c.sendOperation("type|login_request;term|" + getName() + ";n_cc|" + n_cc + ";passowrd|" + password);
 
@@ -205,7 +205,7 @@ public class VotingTerminal extends Thread {
 }
 
 class TimerThread extends Thread {
-    private long TIMEOUT = 2000;
+    private long TIMEOUT = 120000;
     private VotingTerminal vt;
 
     public TimerThread(VotingTerminal vt) {
