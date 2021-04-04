@@ -2,8 +2,10 @@ package com.company.RMIFiles;
 
 import com.company.Candidato;
 import com.company.Eleicao;
+import com.company.MulticastServer;
 import com.company.Pessoa;
 
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
@@ -19,10 +21,26 @@ import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInterface{
-
+	private RMInterface h;
 
 	AdminConsole() throws RemoteException {
 		super();
+		RMIChecker rc = new RMIChecker(this, h);
+		rc.start();
+	}
+
+	public int changeRMI() {
+		try {
+			h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
+			h.print_on_server("olá do multicast");
+
+			RMIChecker rc = new RMIChecker(this, h);
+			rc.start();
+			System.out.println("Liguei-me ao secundário");
+			return 1;
+		} catch (RemoteException | NotBoundException e) {
+			return -1;
+		}
 	}
 
 	public void print_on_client(String s) throws RemoteException {
@@ -1145,7 +1163,6 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 	}
 
 
-
 		public static void main(String args[]) {
 
 		try {
@@ -1153,6 +1170,8 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 			AdminConsole admin = new AdminConsole();
 
 			h.subscribe(admin);
+
+
 
 			while(true){
 
@@ -1221,5 +1240,28 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 }
 
 
+class RMIChecker extends Thread {
+	private RMInterface h;
+	private AdminConsole ac;
+
+	public RMIChecker (AdminConsole ac, RMInterface h) {
+		super();
+		this.ac = ac;
+		this.h = h;
+	}
+
+	public void run() {
+		while (true) {
+			try {
+				h.print_on_server("Admin Console check");
+				Thread.sleep(3000);
+			} catch (RemoteException | InterruptedException e) {
+				if (ac.changeRMI() == 1)
+					break;
+			}
+		}
+	}
+
+}
 
 

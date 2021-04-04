@@ -59,7 +59,7 @@ public class MulticastServer extends Thread{
             try {
                 v = h.getListaVotos();
                 break;
-            } catch (ConnectException e) {
+            } catch (ConnectException | ConnectIOException ce) {
                 changeRMI();
             }
         }
@@ -84,7 +84,7 @@ public class MulticastServer extends Thread{
                         try {
                             e = h.getEleicaoByID(e_id);
                             break;
-                        } catch (ConnectException ce) {
+                        } catch (ConnectException | ConnectIOException ce) {
                             changeRMI();
                         }
                     }
@@ -116,7 +116,7 @@ public class MulticastServer extends Thread{
             try {
                 listaEleicao = h.getEleicao(getName());
                 break;
-            } catch (ConnectException ce) {
+            } catch (ConnectException | ConnectIOException ce) {
                 changeRMI();
             }
         }
@@ -260,7 +260,7 @@ public class MulticastServer extends Thread{
                         try {
                             listaCandidatos = h.getListaCandidatos(idEleicao);
                             break;
-                        } catch (ConnectException ce) {
+                        } catch (ConnectException | ConnectIOException ce) {
                             changeRMI();
                         }
                     }
@@ -272,7 +272,7 @@ public class MulticastServer extends Thread{
                         try {
                             h.recebeLocalVoto(getName(), p.getNum_cc(), e.getTitulo()); // Envia para o RMI o local e a eleição em que x pessoa vai votar
                             break;
-                        } catch (ConnectException ce) {
+                        } catch (ConnectException | ConnectIOException ce) {
                             changeRMI();
                         }
                     }
@@ -334,7 +334,7 @@ class LoginHandler extends Thread{
                         try {
                             p = h.findPessoa(n_cc);
                             break;
-                        } catch (ConnectException ce) {
+                        } catch (ConnectException | ConnectIOException ce) {
                             s.changeRMI();
                         }
                     }
@@ -353,7 +353,7 @@ class LoginHandler extends Thread{
                         try {
                             h.updateVotoPessoaData(cur_date, n_cc, elec_name); // Depois da pessoa votar envia a data
                             break;
-                        } catch (ConnectException ce) {
+                        } catch (ConnectException | ConnectIOException ce) {
                             s.changeRMI();
                         }
                     }
@@ -401,7 +401,7 @@ class VoteReceiver extends Thread{
                         try {
                             h.recebeVoto(list_name, elec_name);
                             break;
-                        } catch (ConnectException ce) {
+                        } catch (ConnectException | ConnectIOException ce) {
                             s.changeRMI();
                         }
                     }
