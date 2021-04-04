@@ -652,59 +652,45 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	// =======================================================
 
 	public static void main(String args[]) {
-		int MAIN_PORT = 7000;
-		int SEC_PORT = 5000;
-		int TIMEOUT = 9000; //9s de timeout caso nao obtenha uma resposta
+		DatagramSocket socket = null;
 
-		/*DatagramSocket aSocketRMI_sec = null;
-		try {
-			aSocketRMI_sec = new DatagramSocket();
-			aSocketRMI_sec.setSoTimeout(TIMEOUT);
-
-			String heartBeat = "Estou vivo! ";
-			InputStreamReader input = new InputStreamReader(System.in);
-			BufferedReader reader = new BufferedReader(input);
-
-			while (true) {
-				Thread.sleep((3000)); //A cada 3s manda uma mensagem ao  de uma resposta
-				System.out.println(heartBeat);
-
+		if(args[0].equals("1")) {
+			try {
+				socket = new DatagramSocket();
+				String heartBeat = "Estou vivo!";
 				byte[] m = heartBeat.getBytes();
 
-				InetAddress aHost = InetAddress.getByName("localhost");
-				int serverPort = 6789;
-				DatagramPacket request = new DatagramPacket(m, m.length, aHost, serverPort);
-				aSocketRMI_sec.send(request);
+				while (true) {
+					Thread.sleep((3000)); //A cada 3s manda uma mensagem ao  de uma resposta
+					System.out.println(heartBeat);
 
-				byte[] buffer = new byte[1000];
-				DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
-				aSocketRMI_sec.receive(reply);
-				System.out.println("Recebeu: " + new String(reply.getData(), 0, reply.getLength()));
-			} // while
+					InetAddress host = InetAddress.getByName("localhost");
+					int serverPort = 6789;
+					DatagramPacket request = new DatagramPacket(m, m.length, host, serverPort);
+					socket.send(request);
 
+					byte[] buffer = new byte[256];
+					DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
+					socket.receive(reply);
+					System.out.println("Recebeu: " + new String(reply.getData(), 0, reply.getLength()));
+				}
 
-		} catch (SocketTimeoutException | SocketException s) {
-			System.out.println("Não recebi nada durante 15s.");
-
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}*/
+			} catch (IOException | InterruptedException e) {
+				e.printStackTrace();
+			} finally {
+				socket.close();
+			}
+		}
 
 		try {
 			RMI_Server h = new RMI_Server();
-			Registry r = LocateRegistry.createRegistry(MAIN_PORT);
+			Registry r = LocateRegistry.createRegistry(7000);
 			r.rebind("RMIConnect", h);
-
-			System.out.println("Hello Server ready.");
-
 
 			PostgreSQLJDBC db = new PostgreSQLJDBC();
 			db.connectDB();
 
+			System.out.println("Hello Server ready.");
 
 		} catch (RemoteException re) {
 			System.out.println("Exception in HelloImpl.main: " + re);
@@ -712,5 +698,32 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 			throwables.printStackTrace();
 		}
 
+		if(args[0].equals("2")) {
+			String s;
+
+			try{
+				socket = new DatagramSocket(6789);
+				socket.setSoTimeout(5000);
+				System.out.println("Socket Datagram à escuta no porto 6789");
+
+				while(true){
+					byte[] buffer = new byte[256];
+					DatagramPacket heartBeat = new DatagramPacket(buffer, buffer.length);
+					socket.receive(heartBeat);
+					s = new String(heartBeat.getData(), 0, heartBeat.getLength());
+					System.out.println("Server Recebeu: " + s);
+
+					DatagramPacket reply = new DatagramPacket(heartBeat.getData(), heartBeat.getLength(), heartBeat.getAddress(), heartBeat.getPort());
+					socket.send(reply);
+				}
+
+			} catch (SocketException e) {
+				System.out.println("Socket: " + e.getMessage());
+			} catch (IOException e) {
+				System.out.println("IO: " + e.getMessage());
+			} finally {
+				socket.close();
+			}
+		}
 	}
 }
