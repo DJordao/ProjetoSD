@@ -20,7 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	static AdminConsoleInterface client;
 	static MulticastServerInterface mClient;
-	private int MAIN_PORT = 7000;
+	private static int MAIN_PORT = 7000;
 	private int SEC_PORT = 5000;
 	ArrayList<String> listaMulticast = new ArrayList<>();
 
@@ -646,17 +646,10 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	}
 
 	@Override
-	public void saveDep(String name, int flag) throws RemoteException {
+	public void saveDep(String name) throws RemoteException {
 
 		System.out.println("\t\t\tDEPARTAMENTO MULTICAST: " + name);
-		if (flag == 0 && name.length()!= 0){
-			listaMulticast.add(name);
-		}
-		if (name == "" || flag == 1){
-			for (int i = 0; i < listaMulticast.size(); i++){
-				client.print_on_client("DEP:" +listaMulticast.get(i) );
-			}
-		}
+		client.print_on_client("\t\t\t\t\t" + name);
 	}
 
 	@Override
@@ -705,8 +698,7 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 
 		try {
 			RMI_Server h = new RMI_Server();
-			System.setProperty("java.rmi.server.hostname", "192.168.x.x");
-			Registry r = LocateRegistry.createRegistry(7000);
+			Registry r = LocateRegistry.createRegistry(MAIN_PORT);
 			r.rebind("RMIConnect", h);
 
 			PostgreSQLJDBC db = new PostgreSQLJDBC();

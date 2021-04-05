@@ -80,5 +80,5 @@ public interface RMInterface extends Remote {
 
     void getEleitoresTempoReal(int idEleicao) throws RemoteException, SQLException;
 
-    void saveDep(String name, int flag) throws RemoteException;
+    void saveDep(String name) throws RemoteException;
 }

@@ -1287,7 +1287,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 								// Mostrar estado das mesas de voto
 								while(true) {
 									try {
-										h.saveDep("", 1);
+										h.saveDep("");
 										break;
 									} catch (ConnectException | ConnectIOException ce) {
 										RMInterface aux = admin.changeRMI();
@@ -1302,7 +1302,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 								// Mostrar eleitores em tempo real
 								while(true) {
 									try {
-										h.registaPessoa(registaPessoa());
+										eleitoresTempoReal(h);
 										break;
 									} catch (ConnectException | ConnectIOException ce) {
 										RMInterface aux = admin.changeRMI();
@@ -1312,7 +1312,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 										}
 									}
 								}
-								eleitoresTempoReal(h);
+
 								break;
 							case "9":
 								// Consultar resultados detalhados de eleições passadas
