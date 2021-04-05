@@ -36,7 +36,7 @@ public class MulticastServer extends Thread{
     }
 
 
-    public int changeRMI() {
+    public void changeRMI() {
         try {
             // Liga-se ao servidor RMI secundário e altera as interfaces utilizadas
             h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
@@ -47,9 +47,8 @@ public class MulticastServer extends Thread{
             h.saveDep(getName());
 
             System.out.println("Liguei-me ao secundário.");
-            return 1;
         } catch (RemoteException | NotBoundException e) {
-            return -1;
+        } catch (NullPointerException e){
         }
     }
 
@@ -144,6 +143,8 @@ public class MulticastServer extends Thread{
 
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
+        }catch (NullPointerException e){
+
         }
         System.out.println(this.getName() + " online...");
 
@@ -450,6 +451,8 @@ class AdminNotifier extends Thread {
                 h.saveDep(s.getName());
             } catch (RemoteException ce) {
                 s.changeRMI();
+            } catch (NullPointerException e){
+
             }
             try {
                 Thread.sleep(2000);
