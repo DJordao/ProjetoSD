@@ -53,7 +53,7 @@ public class MulticastServer extends Thread{
 
 
     private ArrayList<Eleicao> filterVotedElections(Pessoa p, ArrayList<Eleicao> aux_e) throws RemoteException, SQLException {
-        CopyOnWriteArrayList<Voto> v = null;
+        CopyOnWriteArrayList<Voto> v;
         while (true) {
             try {
                 v = h.getListaVotos();
@@ -79,7 +79,7 @@ public class MulticastServer extends Thread{
                 for (Voto voto : aux_v) {
                     int e_id = Integer.parseInt(voto.getEleicaoID());
 
-                    Eleicao e = null;
+                    Eleicao e;
                     while (true) {
                         try {
                             e = h.getEleicaoByID(e_id);
@@ -111,7 +111,7 @@ public class MulticastServer extends Thread{
 
 
     private ArrayList<Eleicao> filterElectionsByRole(Pessoa p) throws RemoteException, SQLException {
-        CopyOnWriteArrayList<Eleicao> listaEleicao = null;
+        CopyOnWriteArrayList<Eleicao> listaEleicao;
 
         while (true) {
             try {
@@ -146,8 +146,10 @@ public class MulticastServer extends Thread{
         System.out.println(this.getName() + " online...");
 
         boolean id = false;
-        try (MulticastSocket socket = new MulticastSocket(PORT)) {
+        MulticastSocket socket = null;
+        try {
             // Socket para procurar terminais
+            socket = new MulticastSocket(PORT);
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_TERM);
             socket.joinGroup(group);
 
@@ -201,7 +203,7 @@ public class MulticastServer extends Thread{
                             }
 
                             if (l.size() == 0) {
-                                id = !id;
+                                id = false;
                                 System.out.println("Não existem eleições disponíveis para votar neste departamento.");
                             }
                             else{
@@ -250,7 +252,7 @@ public class MulticastServer extends Thread{
 
                     c.sendOperation("type|term_unlock;term|" + term + ";user|" + p.getNum_cc());
 
-                    CopyOnWriteArrayList<Candidato> listaCandidatos = null;
+                    CopyOnWriteArrayList<Candidato> listaCandidatos;
 
                     while (true) {
                         try {
@@ -288,6 +290,8 @@ public class MulticastServer extends Thread{
 
         } catch (IOException | SQLException e) {
             e.printStackTrace();
+        } finally {
+            if(socket != null) socket.close();
         }
     }
 }
@@ -311,8 +315,10 @@ class LoginHandler extends Thread{
     }
 
     public void run() {
-        try (MulticastSocket socket = new MulticastSocket(PORT)) {
+        MulticastSocket socket = null;
+        try {
             // Socket para tratar dos logins
+            socket = new MulticastSocket(PORT);
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_LOGIN);
             socket.joinGroup(group);
             Communication c = new Communication(socket, group);
@@ -326,7 +332,7 @@ class LoginHandler extends Thread{
                     String n_cc = message[2].split("\\|")[1];
                     String password = message[3].split("\\|")[1];
 
-                    Pessoa p = null;
+                    Pessoa p;
                     while (true) {
                         try {
                             p = h.findPessoa(n_cc);
@@ -359,6 +365,8 @@ class LoginHandler extends Thread{
 
         } catch (IOException | SQLException e) {
             e.printStackTrace();
+        } finally {
+            if(socket != null) socket.close();
         }
     }
 }
@@ -382,8 +390,10 @@ class VoteReceiver extends Thread{
     }
 
     public void run() {
-        try (MulticastSocket socket = new MulticastSocket(PORT)) {
+        MulticastSocket socket = null;
+        try {
             // Socket para receber os votos
+            socket = new MulticastSocket(PORT);
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_VOTE);
             socket.joinGroup(group);
             Communication c = new Communication(socket, group);
@@ -408,6 +418,8 @@ class VoteReceiver extends Thread{
             }
         } catch (IOException | SQLException e) {
             e.printStackTrace();
+        } finally {
+            if(socket != null) socket.close();
         }
     }
 }
