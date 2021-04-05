@@ -22,6 +22,7 @@ public class MulticastServer extends Thread{
     private RMInterface h;
     private LoginHandler lh;
     private VoteReceiver vr;
+    private AdminNotifier an;
 
 
     public static void main(String[] args) {
@@ -42,6 +43,7 @@ public class MulticastServer extends Thread{
             h.print_on_server("Olá da mesa de voto " + getName());
             lh.changeRMI(h);
             vr.changeRMI(h);
+            an.changeRMI(h);
             h.saveDep(getName(), 0);
 
             System.out.println("Liguei-me ao secundário.");
@@ -160,6 +162,9 @@ public class MulticastServer extends Thread{
 
             vr = new VoteReceiver(h, this); // Thread que recebe os votos dos terminais
             vr.start();
+
+            an = new AdminNotifier(h, this);
+            an.start();
 
             Scanner keyboard_scanner = new Scanner(System.in);
 
@@ -420,6 +425,38 @@ class VoteReceiver extends Thread{
             e.printStackTrace();
         } finally {
             if(socket != null) socket.close();
+        }
+    }
+}
+
+
+class AdminNotifier extends Thread {
+    private RMInterface h;
+    private MulticastServer s;
+
+    public AdminNotifier(RMInterface h, MulticastServer s) {
+        this.h = h;
+        this.s = s;
+    }
+
+    public void changeRMI(RMInterface h) {
+        // Altera a interface RMI caso haja ligação ao servidor secundário
+        this.h = h;
+    }
+
+    public void run() {
+        while(true) {
+            try {
+                h.saveDep(s.getName());
+                break;
+            } catch (ConnectException | ConnectIOException ce) {
+                s.changeRMI();
+            }
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
