@@ -448,7 +448,6 @@ class AdminNotifier extends Thread {
         while(true) {
             try {
                 h.saveDep(s.getName());
-                break;
             } catch (RemoteException ce) {
                 s.changeRMI();
             }

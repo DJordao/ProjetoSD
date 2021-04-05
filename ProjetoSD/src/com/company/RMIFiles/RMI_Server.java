@@ -648,8 +648,8 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	@Override
 	public void saveDep(String name) throws RemoteException {
 
-		System.out.println("\t\t\tDEPARTAMENTO MULTICAST: " + name);
-		client.print_on_client("\t\t\t\t\t" + name);
+		//System.out.println("\t\t\tDEPARTAMENTO MULTICAST: " + name);
+		client.print_on_client("\n\t\t\t\t\t> " + name + " em funcionamento");
 	}
 
 	@Override
