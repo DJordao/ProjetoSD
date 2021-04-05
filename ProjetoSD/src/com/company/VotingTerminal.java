@@ -40,12 +40,12 @@ public class VotingTerminal extends Thread {
 
         try {
             return future.get(TIMEOUT, TimeUnit.SECONDS);
-        } catch (TimeoutException | ExecutionException e){
+        } catch (TimeoutException | InterruptedException e){
             System.out.println("Terminal bloqueado por inatividade.");
             System.out.println("Identifique-se novamente na mesa de voto.");
             future.cancel(true); //this method will stop the running underlying task
             return null;
-        } catch (InterruptedException e) {
+        } catch ( ExecutionException e) {
             e.printStackTrace();
             return null;
         }
@@ -259,7 +259,7 @@ class ReadInput implements Callable {
     public String call() {
         Scanner keyboard_scanner = new Scanner(System.in);
         String input = keyboard_scanner.nextLine();
-        keyboard_scanner.close();
+        //keyboard_scanner.close();
 
         return input;
     }
