@@ -29,14 +29,6 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		super();
 	}
 
-	/*public RMInterface getRMInterface() {
-		return h;
-	}
-
-	public void setRMInterface(RMInterface h) {
-		this.h = h;
-	}*/
-
 	public RMInterface changeRMI() {
 		try {
 			RMInterface h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
@@ -1199,8 +1191,11 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 										h.registaPessoa(registaPessoa());
 										break;
 									} catch (ConnectException | ConnectIOException ce) {
-										h = admin.changeRMI();
-										h.subscribe(admin);
+										RMInterface aux = admin.changeRMI();
+										if(aux != null) {
+											h = aux;
+											h.subscribe(admin);
+										}
 									}
 								}
 								break;
@@ -1211,8 +1206,11 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 										h.criaEleicao(criaEleicao());
 										break;
 									} catch (ConnectException | ConnectIOException ce) {
-										h = admin.changeRMI();
-										h.subscribe(admin);
+										RMInterface aux = admin.changeRMI();
+										if(aux != null) {
+											h = aux;
+											h.subscribe(admin);
+										}
 									}
 								}
 								break;
@@ -1223,8 +1221,11 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 										gereCandidato(h);
 										break;
 									} catch (ConnectException | ConnectIOException ce) {
-										h = admin.changeRMI();
-										h.subscribe(admin);
+										RMInterface aux = admin.changeRMI();
+										if(aux != null) {
+											h = aux;
+											h.subscribe(admin);
+										}
 									}
 								}
 								break;
@@ -1235,8 +1236,11 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 										gereMesadeVoto(h);
 										break;
 									} catch (ConnectException | ConnectIOException ce) {
-										h = admin.changeRMI();
-										h.subscribe(admin);
+										RMInterface aux = admin.changeRMI();
+										if(aux != null) {
+											h = aux;
+											h.subscribe(admin);
+										}
 									}
 								}
 								break;
@@ -1247,8 +1251,11 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 										alteraPropriedadesEleicao(h);
 										break;
 									} catch (ConnectException | ConnectIOException ce) {
-										h = admin.changeRMI();
-										h.subscribe(admin);
+										RMInterface aux = admin.changeRMI();
+										if(aux != null) {
+											h = aux;
+											h.subscribe(admin);
+										}
 									}
 								}
 								break;
@@ -1259,8 +1266,11 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 										localVotoEleitores(h);
 										break;
 									} catch (ConnectException | ConnectIOException ce) {
-										h = admin.changeRMI();
-										h.subscribe(admin);
+										RMInterface aux = admin.changeRMI();
+										if(aux != null) {
+											h = aux;
+											h.subscribe(admin);
+										}
 									}
 								}
 								break;
@@ -1271,8 +1281,11 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 										h.saveDep("", 1);
 										break;
 									} catch (ConnectException | ConnectIOException ce) {
-										h = admin.changeRMI();
-										h.subscribe(admin);
+										RMInterface aux = admin.changeRMI();
+										if(aux != null) {
+											h = aux;
+											h.subscribe(admin);
+										}
 									}
 								}
 								break;
@@ -1283,8 +1296,11 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 										h.registaPessoa(registaPessoa());
 										break;
 									} catch (ConnectException | ConnectIOException ce) {
-										h = admin.changeRMI();
-										h.subscribe(admin);
+										RMInterface aux = admin.changeRMI();
+										if(aux != null) {
+											h = aux;
+											h.subscribe(admin);
+										}
 									}
 								}
 								eleitoresTempoReal(h);
@@ -1296,8 +1312,11 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 										consultaEleicoesPassadas(h);
 										break;
 									} catch (ConnectException | ConnectIOException ce) {
-										h = admin.changeRMI();
-										h.subscribe(admin);
+										RMInterface aux = admin.changeRMI();
+										if(aux != null) {
+											h = aux;
+											h.subscribe(admin);
+										}
 									}
 								}
 								break;
@@ -1319,30 +1338,5 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 	}
 
 }
-
-
-/*class RMIChecker extends Thread {
-	private RMInterface h;
-	private AdminConsole ac;
-
-	public RMIChecker (AdminConsole ac, RMInterface h) {
-		super();
-		this.ac = ac;
-		this.h = h;
-	}
-
-	public void run() {
-		while (true) {
-			try {
-				h.print_on_server("Admin Console check");
-				Thread.sleep(3000);
-			} catch (RemoteException | InterruptedException e) {
-				if (ac.changeRMI() == 1)
-					break;
-			}
-		}
-	}
-
-}*/
 
 
