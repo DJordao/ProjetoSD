@@ -37,18 +37,18 @@ public class VotingTerminal extends Thread {
     private String getInput() {
         ExecutorService es = Executors.newSingleThreadExecutor();
         Future<String> future = es.submit(new ReadInput());
-        String input = "";
+
         try {
-            input = future.get(TIMEOUT, TimeUnit.SECONDS);
+            return future.get(TIMEOUT, TimeUnit.SECONDS);
         } catch (TimeoutException | ExecutionException e){
             System.out.println("Terminal bloqueado por inatividade.");
             System.out.println("Identifique-se novamente na mesa de voto.");
             future.cancel(true); //this method will stop the running underlying task
+            return null;
         } catch (InterruptedException e) {
             e.printStackTrace();
+            return null;
         }
-
-        return input;
     }
 
     public void run() {
@@ -107,6 +107,9 @@ public class VotingTerminal extends Thread {
                             while(!input.equals(n_cc)) {
                                 System.out.println("Introduza o seu nº do cc: ");
                                 input = getInput();
+                                if(input == null) {
+                                    return;
+                                }
                             }
 
                             /*while (!input.equals(n_cc)) {
@@ -119,6 +122,9 @@ public class VotingTerminal extends Thread {
                             System.out.println("Introduza a sua password: ");
                             //startTimer();
                             String password = getInput();
+                            if(password == null) {
+                                return;
+                            }
                             //tt.stop();
 
                             login_c.sendOperation("type|login_request;term|" + getName() + ";n_cc|" + n_cc + ";passowrd|" + password);
@@ -153,6 +159,9 @@ public class VotingTerminal extends Thread {
                                             //keyboard_scanner = new Scanner(System.in);
                                             //startTimer();
                                             String vote = getInput();
+                                            if(vote == null) {
+                                                return;
+                                            }
                                             //tt.stop();
 
                                             if(vote.equals("")) {
@@ -209,11 +218,16 @@ public class VotingTerminal extends Thread {
                                         while(!input.equals(n_cc)) {
                                             System.out.println("Introduza o seu nº do cc: ");
                                             input = getInput();
+                                            if(input == null) {
+                                                return;
+                                            }
                                         }
 
                                         System.out.println("Introduza a sua password: ");
                                         password = getInput();
-
+                                        if(password == null) {
+                                            return;
+                                        }
                                         login_c.sendOperation("type|login_request;term|" + getName() + ";n_cc|" + n_cc + ";passowrd|" + password);
 
                                     }
