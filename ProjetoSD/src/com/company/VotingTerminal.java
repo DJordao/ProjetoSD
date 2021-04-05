@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.concurrent.*;
 
 
 public class VotingTerminal extends Thread {
@@ -13,7 +14,8 @@ public class VotingTerminal extends Thread {
     private String MULTICAST_ADDRESS_VOTE = "224.3.2.3";
     private int PORT = 4321;
     private boolean ready = true;
-    private TimerThread tt;
+    private final int TIMEOUT = 60;
+    //private TimerThread tt;
 
     public static void main(String[] args) throws InterruptedException {
         while(true) {
@@ -27,9 +29,26 @@ public class VotingTerminal extends Thread {
         super(id);
     }
 
-    private void startTimer() {
+    /*private void startTimer() {
         tt = new TimerThread(this);
         tt.start();
+    }*/
+
+    private String getInput() {
+        ExecutorService es = Executors.newSingleThreadExecutor();
+        Future<String> future = es.submit(new ReadInput());
+        String input = "";
+        try {
+            input = future.get(TIMEOUT, TimeUnit.SECONDS);
+        } catch (TimeoutException | ExecutionException e){
+            System.out.println("Terminal bloqueado por inatividade.");
+            System.out.println("Identifique-se novamente na mesa de voto.");
+            future.cancel(true); //this method will stop the running underlying task
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return input;
     }
 
     public void run() {
@@ -83,18 +102,24 @@ public class VotingTerminal extends Thread {
                             login_socket.joinGroup(login_group);
                             Communication login_c = new Communication(login_socket, login_group);
 
-                            Scanner keyboard_scanner = new Scanner(System.in);
+                            //Scanner keyboard_scanner = new Scanner(System.in);
                             String input = "";
-                            while (!input.equals(n_cc)) {
+                            while(!input.equals(n_cc)) {
+                                System.out.println("Introduza o seu nº do cc: ");
+                                input = getInput();
+                            }
+
+                            /*while (!input.equals(n_cc)) {
                                 System.out.println("Introduza o seu nº do cc: ");
                                 startTimer();
                                 input = keyboard_scanner.nextLine();
                                 tt.stop();
-                            }
+                            }*/
+
                             System.out.println("Introduza a sua password: ");
-                            startTimer();
-                            String password = keyboard_scanner.nextLine();
-                            tt.stop();
+                            //startTimer();
+                            String password = getInput();
+                            //tt.stop();
 
                             login_c.sendOperation("type|login_request;term|" + getName() + ";n_cc|" + n_cc + ";passowrd|" + password);
 
@@ -125,10 +150,10 @@ public class VotingTerminal extends Thread {
                                             System.out.println("Se não introduzir nenhum caracter o voto é contado como branco.");
                                             System.out.println("Se introduzir um caracter diferente dos números apresentados o voto é contado como nulo.");
                                             System.out.println("Introduza o número correspondente à sua escolha: ");
-                                            keyboard_scanner = new Scanner(System.in);
-                                            startTimer();
-                                            String vote = keyboard_scanner.nextLine();
-                                            tt.stop();
+                                            //keyboard_scanner = new Scanner(System.in);
+                                            //startTimer();
+                                            String vote = getInput();
+                                            //tt.stop();
 
                                             if(vote.equals("")) {
                                                 vote = "Branco";
@@ -170,7 +195,7 @@ public class VotingTerminal extends Thread {
                                     if (term.equals(getName())) {
                                         System.out.println("Dados incorretos.");
 
-                                        keyboard_scanner = new Scanner(System.in);
+                                       /* keyboard_scanner = new Scanner(System.in);
                                         System.out.println("Introduza o seu username: ");
                                         startTimer();
                                         n_cc = keyboard_scanner.nextLine();
@@ -178,7 +203,16 @@ public class VotingTerminal extends Thread {
                                         System.out.println("Introduza a sua password: ");
                                         startTimer();
                                         password = keyboard_scanner.nextLine();
-                                        tt.stop();
+                                        tt.stop();*/
+
+                                        input = "";
+                                        while(!input.equals(n_cc)) {
+                                            System.out.println("Introduza o seu nº do cc: ");
+                                            input = getInput();
+                                        }
+
+                                        System.out.println("Introduza a sua password: ");
+                                        password = getInput();
 
                                         login_c.sendOperation("type|login_request;term|" + getName() + ";n_cc|" + n_cc + ";passowrd|" + password);
 
@@ -206,7 +240,19 @@ public class VotingTerminal extends Thread {
 }
 
 
-class TimerThread extends Thread {
+class ReadInput implements Callable {
+
+    public String call() {
+        Scanner keyboard_scanner = new Scanner(System.in);
+        String input = keyboard_scanner.nextLine();
+        keyboard_scanner.close();
+
+        return input;
+    }
+
+}
+
+/*class TimerThread extends Thread {
     private long TIMEOUT = 15000;
     private VotingTerminal vt;
 
@@ -228,4 +274,4 @@ class TimerThread extends Thread {
             e.printStackTrace();
         }
     }
-}
+}*/
