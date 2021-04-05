@@ -23,7 +23,6 @@ import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInterface{
-	//private RMInterface h;
 
 	AdminConsole() throws RemoteException {
 		super();
@@ -32,7 +31,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 	public RMInterface changeRMI() {
 		try {
 			RMInterface h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
-			h.print_on_server("olá do multicast");
+			h.print_on_server("Olá da admin console");
 
 			System.out.println("Liguei-me ao secundário");
 			return h;

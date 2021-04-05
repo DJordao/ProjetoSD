@@ -17,7 +17,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class MulticastServer extends Thread{
-    private final String MULTICAST_ADDRESS_TERM = "224.3.2.1";
+    private final String MULTICAST_ADDRESS_TERM;
     private final int PORT = 4321;
     private RMInterface h;
     private LoginHandler lh;
@@ -26,13 +26,16 @@ public class MulticastServer extends Thread{
 
 
     public static void main(String[] args) {
-        MulticastServer server = new MulticastServer(args[0]);
+        MulticastServer server = new MulticastServer(args[0], args[1], args[2], args[3]);
         server.start();
     }
 
 
-    public MulticastServer(String department) {
+    public MulticastServer(String department, String group1, String group2, String group3) {
         super(department);
+        MULTICAST_ADDRESS_TERM = group1;
+        lh = new LoginHandler(null, this, group2); // Thread que trata dos logins
+        vr = new VoteReceiver(null, this, group3); // Thread que recebe os votos dos terminais
     }
 
 
@@ -158,10 +161,10 @@ public class MulticastServer extends Thread{
 
             Communication c = new Communication(socket, group);
 
-            lh = new LoginHandler(h, this); // Thread que trata dos logins
+            lh.changeRMI(h);
             lh.start();
 
-            vr = new VoteReceiver(h, this); // Thread que recebe os votos dos terminais
+            vr.changeRMI(h);
             vr.start();
 
             an = new AdminNotifier(h, this);
@@ -304,15 +307,16 @@ public class MulticastServer extends Thread{
 
 
 class LoginHandler extends Thread{
-    private final String MULTICAST_ADDRESS_LOGIN = "224.3.2.2";
+    private final String MULTICAST_ADDRESS_LOGIN;
     private final int PORT = 4321;
     private RMInterface h;
     private MulticastServer s;
 
-    public LoginHandler(RMInterface h, MulticastServer s) {
+    public LoginHandler(RMInterface h, MulticastServer s, String group) {
         super();
         this.h = h;
         this.s = s;
+        MULTICAST_ADDRESS_LOGIN = group;
     }
 
     public void changeRMI(RMInterface h) {
@@ -379,15 +383,16 @@ class LoginHandler extends Thread{
 
 
 class VoteReceiver extends Thread{
-    private final String MULTICAST_ADDRESS_VOTE = "224.3.2.3";
+    private final String MULTICAST_ADDRESS_VOTE;
     private final int PORT = 4321;
     private RMInterface h;
     private MulticastServer s;
 
-    public VoteReceiver(RMInterface h, MulticastServer s) {
+    public VoteReceiver(RMInterface h, MulticastServer s, String group) {
         super();
         this.h = h;
         this.s = s;
+        MULTICAST_ADDRESS_VOTE = group;
     }
 
     public void changeRMI(RMInterface h) {
