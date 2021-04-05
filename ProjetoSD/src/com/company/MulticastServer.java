@@ -42,12 +42,10 @@ public class MulticastServer extends Thread{
             lh.changeRMI(h);
             vr.changeRMI(h);
             h.saveDep(this.getName(), 0);
-            //RMIChecker rc = new RMIChecker(this, h);
-            //rc.start();
+
             System.out.println("Liguei-me ao secundário");
             return 1;
         } catch (RemoteException | NotBoundException e) {
-            //e.printStackTrace();
             return -1;
         }
     }
@@ -139,9 +137,6 @@ public class MulticastServer extends Thread{
             h.print_on_server("olá do multicast");
 
             h.saveDep(this.getName(), 0);
-
-            //RMIChecker rc = new RMIChecker(this, h);
-            //rc.start();
 
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
@@ -412,28 +407,4 @@ class VoteReceiver extends Thread{
             e.printStackTrace();
         }
     }
-}
-
-class RMIChecker extends Thread {
-    private MulticastServer s;
-    private RMInterface h;
-
-    public RMIChecker (MulticastServer s, RMInterface h) {
-        super();
-        this.s = s;
-        this.h = h;
-    }
-
-    public void run() {
-        while (true) {
-            try {
-                h.print_on_server("Multicast Server check");
-                Thread.sleep(3000);
-            } catch (RemoteException | InterruptedException e) {
-                if (s.changeRMI() == 1)
-                    break;
-            }
-        }
-    }
-
 }
