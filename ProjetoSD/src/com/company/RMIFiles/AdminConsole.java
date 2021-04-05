@@ -770,9 +770,11 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 
 		}
 		else{
-			System.out.println("----------------------");
-			System.out.println("Nome do candidato: " + nomeCandidato);
-			System.out.println("Votos: " + numVotos + "\t(" + percentagem + "%)");
+			if (totalVotos != 0){
+				System.out.println("----------------------");
+				System.out.println("Nome do candidato: " + nomeCandidato);
+				System.out.println("Votos: " + numVotos + "\t(" + percentagem + "%)");
+			}
 		}
 
 
@@ -1058,7 +1060,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		Scanner input;
 		Scanner inputDep;
 		String departamento;
-
+		int update = 0;
 		while (true){
 			flagOut = 0; // Ver se faz update
 			try {
@@ -1086,6 +1088,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 								listaDept.add(departamento);
 							}
 						}else if (opcaoDep.equalsIgnoreCase("N")){
+							update++;
 							break;
 						}else System.out.println("Insira uma resposta válida");
 					}
@@ -1112,10 +1115,11 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 
 							}
 						}else if (opcaoDep.equalsIgnoreCase("N")){
+							update++;
 							for(int i = 0; i < listaDept.size(); i++){
 								System.out.println(i + "-> " + listaDept.get(i));
 							}
-							h.updateListaDep(opcaoEleicao, listaDept);
+							if (update != 2) h.updateListaDep(opcaoEleicao, listaDept);
 							break;
 						}else System.out.println("Insira uma resposta válida");
 					}
@@ -1196,6 +1200,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 										break;
 									} catch (ConnectException | ConnectIOException ce) {
 										h = admin.changeRMI();
+										h.subscribe(admin);
 									}
 								}
 								break;
@@ -1207,6 +1212,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 										break;
 									} catch (ConnectException | ConnectIOException ce) {
 										h = admin.changeRMI();
+										h.subscribe(admin);
 									}
 								}
 								break;
@@ -1218,6 +1224,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 										break;
 									} catch (ConnectException | ConnectIOException ce) {
 										h = admin.changeRMI();
+										h.subscribe(admin);
 									}
 								}
 								break;
@@ -1229,6 +1236,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 										break;
 									} catch (ConnectException | ConnectIOException ce) {
 										h = admin.changeRMI();
+										h.subscribe(admin);
 									}
 								}
 								break;
@@ -1240,6 +1248,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 										break;
 									} catch (ConnectException | ConnectIOException ce) {
 										h = admin.changeRMI();
+										h.subscribe(admin);
 									}
 								}
 								break;
@@ -1251,6 +1260,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 										break;
 									} catch (ConnectException | ConnectIOException ce) {
 										h = admin.changeRMI();
+										h.subscribe(admin);
 									}
 								}
 								break;
@@ -1262,6 +1272,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 										break;
 									} catch (ConnectException | ConnectIOException ce) {
 										h = admin.changeRMI();
+										h.subscribe(admin);
 									}
 								}
 								break;
@@ -1273,6 +1284,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 										break;
 									} catch (ConnectException | ConnectIOException ce) {
 										h = admin.changeRMI();
+										h.subscribe(admin);
 									}
 								}
 								eleitoresTempoReal(h);
@@ -1285,6 +1297,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 										break;
 									} catch (ConnectException | ConnectIOException ce) {
 										h = admin.changeRMI();
+										h.subscribe(admin);
 									}
 								}
 								break;
