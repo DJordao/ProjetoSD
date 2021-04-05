@@ -48,7 +48,7 @@ public class VotingTerminal extends Thread {
                 String message_type = c.getMessageType(message[0]);
 
                 if (message_type.equals("term_fetch") && ready) {
-                    ready = !ready;
+                    ready = false;
 
                     c.sendOperation("type|term_ready;term|" + getName());
                 }
@@ -155,7 +155,7 @@ public class VotingTerminal extends Thread {
                                         } catch (IOException e) {
                                             e.printStackTrace();
                                         } finally {
-                                            vote_socket.close();
+                                            if(vote_socket != null) vote_socket.close();
                                         }
 
                                         break;
@@ -188,7 +188,7 @@ public class VotingTerminal extends Thread {
                         } catch (IOException e) {
                             e.printStackTrace();
                         } finally {
-                            login_socket.close();
+                            if(login_socket != null) login_socket.close();
                         }
 
                         ready = !ready;
@@ -199,7 +199,7 @@ public class VotingTerminal extends Thread {
         } catch(IOException e){
                 e.printStackTrace();
         } finally{
-                socket.close();
+            if(socket != null) socket.close();
         }
     }
 }
