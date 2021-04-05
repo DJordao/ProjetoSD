@@ -21,7 +21,6 @@ public class VotingTerminal extends Thread {
             term.start();
             term.join();
         }
-
     }
 
     public VotingTerminal(String id) {
@@ -29,7 +28,7 @@ public class VotingTerminal extends Thread {
     }
 
     public void run() {
-        System.out.println("Terminal de voto " + getName());
+        System.out.println("Terminal de voto " + getName() + " bloqueado.");
         MulticastSocket socket = null;
 
         try {
@@ -52,7 +51,7 @@ public class VotingTerminal extends Thread {
                     String term = message[1].split("\\|")[1];
 
                     if (term.equals(getName())) {
-                        System.out.println("Terminal de voto " + getName());
+                        System.out.println("Terminal de voto " + getName() + " desbloqueado");
 
                         String n_cc = message[2].split("\\|")[1];
 
@@ -217,6 +216,7 @@ class TimerThread extends Thread {
         try {
             Thread.sleep(TIMEOUT);
             System.out.println("Terminal bloqueado por inatividade.");
+            System.out.println("Dirija-se outra vez à mesa de voto.");
             vt.stop();
         } catch (InterruptedException e) {
             e.printStackTrace();
