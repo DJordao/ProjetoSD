@@ -26,8 +26,13 @@ public class MulticastServer extends Thread{
 
 
     public static void main(String[] args) {
-        MulticastServer server = new MulticastServer(args[0], args[1], args[2], args[3]);
-        server.start();
+        if(args.length == 4) {
+            MulticastServer server = new MulticastServer(args[0], args[1], args[2], args[3]);
+            server.start();
+        }
+        else {
+            System.out.println("Args");
+        }
     }
 
 

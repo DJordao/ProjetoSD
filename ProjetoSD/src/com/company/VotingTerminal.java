@@ -9,24 +9,32 @@ import java.util.concurrent.*;
 
 
 public class VotingTerminal extends Thread {
-    private String MULTICAST_ADDRESS_TERM = "224.3.2.1";
-    private String MULTICAST_ADDRESS_LOGIN = "224.3.2.2";
-    private String MULTICAST_ADDRESS_VOTE = "224.3.2.3";
+    private String MULTICAST_ADDRESS_TERM;
+    private String MULTICAST_ADDRESS_LOGIN;
+    private String MULTICAST_ADDRESS_VOTE;
     private int PORT = 4321;
     private boolean ready = true;
     private final int TIMEOUT = 60;
 
 
     public static void main(String[] args) throws InterruptedException {
-        while(true) {
-            VotingTerminal term = new VotingTerminal(args[0]);
-            term.start();
-            term.join();
+        if(args.length == 4) {
+            while(true) {
+                VotingTerminal term = new VotingTerminal(args[0], args[1], args[2], args[3]);
+                term.start();
+                term.join();
+            }
+        }
+        else {
+            System.out.println("Args");
         }
     }
 
-    public VotingTerminal(String id) {
+    public VotingTerminal(String id, String group1, String group2, String group3) {
         super(id);
+        MULTICAST_ADDRESS_TERM = group1;
+        MULTICAST_ADDRESS_LOGIN = group2;
+        MULTICAST_ADDRESS_VOTE = group3;
     }
 
 
