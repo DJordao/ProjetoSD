@@ -5,6 +5,8 @@ import com.company.Eleicao;
 import com.company.MulticastServer;
 import com.company.Pessoa;
 
+import java.rmi.ConnectException;
+import java.rmi.ConnectIOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -21,31 +23,29 @@ import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInterface{
-	private RMInterface h;
+	//private RMInterface h;
 
 	AdminConsole() throws RemoteException {
 		super();
 	}
 
-	public RMInterface getRMInterface() {
+	/*public RMInterface getRMInterface() {
 		return h;
 	}
 
 	public void setRMInterface(RMInterface h) {
 		this.h = h;
-	}
+	}*/
 
-	public int changeRMI() {
+	public RMInterface changeRMI() {
 		try {
-			h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
+			RMInterface h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
 			h.print_on_server("olá do multicast");
 
-			RMIChecker rc = new RMIChecker(this, h);
-			rc.start();
 			System.out.println("Liguei-me ao secundário");
-			return 1;
+			return h;
 		} catch (RemoteException | NotBoundException e) {
-			return -1;
+			return null;
 		}
 	}
 
@@ -1175,12 +1175,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 			RMInterface h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
 			AdminConsole admin = new AdminConsole();
 
-			admin.setRMInterface(h);
-
-			admin.getRMInterface().subscribe(admin);
-
-			RMIChecker rc = new RMIChecker(admin, admin.getRMInterface());
-			rc.start();
+			h.subscribe(admin);
 
 			while(true){
 
@@ -1195,39 +1190,103 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 						switch(opcao) {
 							case "1":
 								// Registar Pessoas
-								admin.getRMInterface().registaPessoa(registaPessoa());
+								while(true) {
+									try {
+										h.registaPessoa(registaPessoa());
+										break;
+									} catch (ConnectException | ConnectIOException ce) {
+										h = admin.changeRMI();
+									}
+								}
 								break;
 							case "2":
-								admin.getRMInterface().criaEleicao(criaEleicao());
 								// Criar Eleição
+								while(true) {
+									try {
+										h.criaEleicao(criaEleicao());
+										break;
+									} catch (ConnectException | ConnectIOException ce) {
+										h = admin.changeRMI();
+									}
+								}
 								break;
 							case "3":
-								gereCandidato(admin.getRMInterface());
 								// Gerir listas de candidatos a uma eleição
+								while(true) {
+									try {
+										gereCandidato(h);
+										break;
+									} catch (ConnectException | ConnectIOException ce) {
+										h = admin.changeRMI();
+									}
+								}
 								break;
 							case "4":
-								gereMesadeVoto(admin.getRMInterface());
 								// Gerir mesas de voto
+								while(true) {
+									try {
+										gereMesadeVoto(h);
+										break;
+									} catch (ConnectException | ConnectIOException ce) {
+										h = admin.changeRMI();
+									}
+								}
 								break;
 							case "5":
-								alteraPropriedadesEleicao(admin.getRMInterface());
 								// Alterar propriedades de uma eleição
+								while(true) {
+									try {
+										alteraPropriedadesEleicao(h);
+										break;
+									} catch (ConnectException | ConnectIOException ce) {
+										h = admin.changeRMI();
+									}
+								}
 								break;
 							case "6":
-								localVotoEleitores(admin.getRMInterface());
 								// Saber em que local votou cada eleitors
+								while(true) {
+									try {
+										localVotoEleitores(h);
+										break;
+									} catch (ConnectException | ConnectIOException ce) {
+										h = admin.changeRMI();
+									}
+								}
 								break;
 							case "7":
 								// Mostrar estado das mesas de voto
-								admin.getRMInterface().saveDep("", 1);
+								while(true) {
+									try {
+										h.saveDep("", 1);
+										break;
+									} catch (ConnectException | ConnectIOException ce) {
+										h = admin.changeRMI();
+									}
+								}
 								break;
 							case "8":
 								// Mostrar eleitores em tempo real
-								eleitoresTempoReal(admin.getRMInterface());
+								while(true) {
+									try {
+										h.registaPessoa(registaPessoa());
+										break;
+									} catch (ConnectException | ConnectIOException ce) {
+										h = admin.changeRMI();
+									}
+								}
+								eleitoresTempoReal(h);
 								break;
 							case "9":
-								consultaEleicoesPassadas(admin.getRMInterface());
 								// Consultar resultados detalhados de eleições passadas
+								while(true) {
+									try {
+										consultaEleicoesPassadas(h);
+										break;
+									} catch (ConnectException | ConnectIOException ce) {
+										h = admin.changeRMI();
+									}
+								}
 								break;
 
 						}
@@ -1249,7 +1308,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 }
 
 
-class RMIChecker extends Thread {
+/*class RMIChecker extends Thread {
 	private RMInterface h;
 	private AdminConsole ac;
 
@@ -1271,6 +1330,6 @@ class RMIChecker extends Thread {
 		}
 	}
 
-}
+}*/
 
 
