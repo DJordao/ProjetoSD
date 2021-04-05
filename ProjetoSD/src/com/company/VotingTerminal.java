@@ -48,6 +48,7 @@ public class VotingTerminal extends Thread {
                 String message_type = c.getMessageType(message[0]);
 
                 if (message_type.equals("term_fetch") && ready) {
+                    System.out.println("entrei");
                     ready = false;
 
                     c.sendOperation("type|term_ready;term|" + getName());
@@ -206,7 +207,7 @@ public class VotingTerminal extends Thread {
 
 
 class TimerThread extends Thread {
-    private long TIMEOUT = 60000;
+    private long TIMEOUT = 15000;
     private VotingTerminal vt;
 
     public TimerThread(VotingTerminal vt) {

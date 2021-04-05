@@ -430,8 +430,6 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		//2-> Para o tipo de eleicao mostrar a todas as pessoas que estão na tabela das pessoas - DONE
 		//3-> Adicionar uma certa pessoa a uma determinada candidatura -DONE
 		//4-> Remover uma pessoa de uma certa lista se ela lá estiver -DONE
-		System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
-		System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
 		h.ListaEleicoes();
 
 		int maxEleicoes, opcaoEleicao, flagOut = 0;
@@ -787,8 +785,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 	}
 
 	public static void alteraPropriedadesEleicao(RMInterface h) throws RemoteException, SQLException {
-		System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
-		System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
+
 		h.ListaEleicoes();
 
 		int maxEleicoes, opcaoEleicao,flagOut, idEleicao = 0;
@@ -950,8 +947,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 	}
 
 	public static void consultaEleicoesPassadas(RMInterface h) throws RemoteException, SQLException {
-		System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
-		System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
+
 		h.ListaEleicoesPassadas();
 
 		int maxEleicoes, opcaoEleicao,flagOut, eleicaoID;
@@ -1008,7 +1004,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 	}
 
 	public static void localVotoEleitores(RMInterface h) throws RemoteException, SQLException {
-		System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
+
 		h.ListaEleicoes();
 
 		int maxEleicoes, opcaoEleicao,flagOut, idEleicao = 0;
@@ -1041,8 +1037,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 	}
 
 	private static void gereMesadeVoto(RMInterface h) throws RemoteException, SQLException {
-		System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
-		System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
+
 		h.ListaEleicoesNaoComecadas();
 
 		int maxEleicoes, opcaoEleicao,flagOut, eleicaoID;
@@ -1221,6 +1216,8 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 								break;
 							case "3":
 								// Gerir listas de candidatos a uma eleição
+								System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
+								System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
 								while(true) {
 									try {
 										gereCandidato(h);
@@ -1236,8 +1233,11 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 								break;
 							case "4":
 								// Gerir mesas de voto
+								System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
+								System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
 								while(true) {
 									try {
+
 										gereMesadeVoto(h);
 										break;
 									} catch (ConnectException | ConnectIOException | NullPointerException ce) {
@@ -1251,6 +1251,8 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 								break;
 							case "5":
 								// Alterar propriedades de uma eleição
+								System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
+								System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
 								while(true) {
 									try {
 										alteraPropriedadesEleicao(h);
@@ -1266,6 +1268,8 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 								break;
 							case "6":
 								// Saber em que local votou cada eleitors
+								System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
+								System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
 								while(true) {
 									try {
 										localVotoEleitores(h);
@@ -1312,6 +1316,8 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 								break;
 							case "9":
 								// Consultar resultados detalhados de eleições passadas
+								System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
+								System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
 								while(true) {
 									try {
 										consultaEleicoesPassadas(h);
