@@ -1067,12 +1067,15 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 					eleicaoID = opcaoEleicao;
 					listaDept = h.gereMesadeVoto(eleicaoID);
 
+					for (int i = 0; i < listaDept.size(); i++) System.out.println("ATUAL: " + listaDept.get(i));
+
 					//ADICIONAR DEP
 					while (true){
 						System.out.printf("Deseja Inserir algum departamento? (S/N)");
 						inputDep = new Scanner(System.in);
 						String opcaoDep = inputDep.nextLine();
 						if (opcaoDep.equalsIgnoreCase("S")){
+							update++;
 							System.out.printf("Departamento: ");
 							inputDep = new Scanner(System.in);
 							departamento = inputDep.nextLine();
@@ -1092,6 +1095,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 						inputDep = new Scanner(System.in);
 						String opcaoDep = inputDep.nextLine();
 						if (opcaoDep.equalsIgnoreCase("S")){
+							update++;
 							System.out.printf("Departamento: ");
 							inputDep = new Scanner(System.in);
 							departamento = inputDep.nextLine();
@@ -1108,6 +1112,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 							}
 						}else if (opcaoDep.equalsIgnoreCase("N")){
 							update++;
+							System.out.println("VALOR: " + update);
 							for(int i = 0; i < listaDept.size(); i++){
 								System.out.println(i + "-> " + listaDept.get(i));
 							}
@@ -1235,7 +1240,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 									try {
 										gereMesadeVoto(h);
 										break;
-									} catch (ConnectException | ConnectIOException ce) {
+									} catch (ConnectException | ConnectIOException | NullPointerException ce) {
 										RMInterface aux = admin.changeRMI();
 										if(aux != null) {
 											h = aux;

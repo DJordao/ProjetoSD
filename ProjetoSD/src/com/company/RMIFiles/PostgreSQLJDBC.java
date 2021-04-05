@@ -1089,7 +1089,7 @@ public class PostgreSQLJDBC {
                     "WHERE eleicao.id IN (SELECT eleicao_id  FROM departamento) " +
                     "AND eleicao.id = departamento.eleicao_id " +
                     "AND eleicao.id = '" + eleicaoID +
-                    "' AND CURRENT_TIMESTAMP BETWEEN data_inicio AND data_fim ORDER BY eleicao.id";
+                    "' AND CURRENT_TIMESTAMP < data_inicio ORDER BY eleicao.id";
 
             ResultSet rs = stmt.executeQuery(sql);
             mesasVoto = rs;
