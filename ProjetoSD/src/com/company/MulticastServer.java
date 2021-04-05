@@ -1,7 +1,6 @@
 package com.company;
 
 import com.company.RMIFiles.RMInterface;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
@@ -15,6 +14,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
+
 
 public class MulticastServer extends Thread{
     private final String MULTICAST_ADDRESS_TERM = "224.3.2.1";
@@ -37,13 +37,14 @@ public class MulticastServer extends Thread{
 
     public int changeRMI() {
         try {
+            // Liga-se ao servidor RMI secundário e altera as interfaces utilizadas
             h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
-            h.print_on_server("olá do multicast");
+            h.print_on_server("Olá da mesa de voto " + getName());
             lh.changeRMI(h);
             vr.changeRMI(h);
-            h.saveDep(this.getName(), 0);
+            h.saveDep(getName(), 0);
 
-            System.out.println("Liguei-me ao secundário");
+            System.out.println("Liguei-me ao secundário.");
             return 1;
         } catch (RemoteException | NotBoundException e) {
             return -1;
@@ -66,6 +67,7 @@ public class MulticastServer extends Thread{
         if(v != null) {
             ArrayList<Voto> aux_v = new ArrayList<>();
 
+            // Vai buscar os votos já submetidos pela pessoa
             for (Voto voto : v) {
                 if (voto.getNum_cc().equals(p.getNum_cc()) && voto.getHoraVoto() != null) {
                     aux_v.add(voto);
@@ -87,6 +89,7 @@ public class MulticastServer extends Thread{
                         }
                     }
 
+                    // Verifica se a pessoa já tem voto submetido nas eleições disponíveis
                     if (e.getTitulo().equals(eleicao.getTitulo())) {
                         check = 1;
                         break;
@@ -120,7 +123,7 @@ public class MulticastServer extends Thread{
         }
 
         ArrayList<Eleicao> aux_e = new ArrayList<>();
-
+        // Verifica se a função da pessoa corresponde às eleições disponíveis
         for (Eleicao eleicao : listaEleicao) {
             if (eleicao.getTipoEleicao().equals(p.getFuncao())) {
                 aux_e.add(eleicao);
@@ -134,8 +137,7 @@ public class MulticastServer extends Thread{
     public void run() {
         try {
             h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
-            h.print_on_server("olá do multicast");
-
+            h.print_on_server("Olá da mesa de voto " + getName());
             h.saveDep(this.getName(), 0);
 
         } catch (RemoteException | NotBoundException e) {
@@ -145,7 +147,7 @@ public class MulticastServer extends Thread{
 
         boolean id = false;
         try (MulticastSocket socket = new MulticastSocket(PORT)) {
-            // Socket para comunicar com os terminais
+            // Socket para procurar terminais
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS_TERM);
             socket.joinGroup(group);
 
@@ -158,7 +160,6 @@ public class MulticastServer extends Thread{
             vr.start();
 
             Scanner keyboard_scanner = new Scanner(System.in);
-            //Scanner keyboard_scanner1 = new Scanner(System.in);
 
             Pessoa p = null;
             Eleicao e = null;
@@ -265,7 +266,7 @@ public class MulticastServer extends Thread{
 
                     while (true) {
                         try {
-                            h.recebeLocalVoto(getName(), p.getNum_cc(), e.getTitulo()); // Envia para o RMI o local e a eleição em que x pessoa vai votar
+                            h.recebeLocalVoto(getName(), p.getNum_cc(), e.getTitulo()); // Envia para o RMI o local e a eleição em que a pessoa vai votar
                             break;
                         } catch (ConnectException | ConnectIOException ce) {
                             changeRMI();
@@ -305,6 +306,7 @@ class LoginHandler extends Thread{
     }
 
     public void changeRMI(RMInterface h) {
+        // Altera a interface RMI caso haja ligação ao servidor secundário
         this.h = h;
     }
 
@@ -375,6 +377,7 @@ class VoteReceiver extends Thread{
     }
 
     public void changeRMI(RMInterface h) {
+        // Altera a interface RMI caso haja ligação ao servidor secundário
         this.h = h;
     }
 

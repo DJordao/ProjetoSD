@@ -27,6 +27,11 @@ public class VotingTerminal extends Thread {
         super(id);
     }
 
+    private void startTimer() {
+        tt = new TimerThread(this);
+        tt.start();
+    }
+
     public void run() {
         System.out.println("Terminal de voto " + getName() + " bloqueado.");
         MulticastSocket socket = null;
@@ -81,14 +86,12 @@ public class VotingTerminal extends Thread {
                             String input = "";
                             while (!input.equals(n_cc)) {
                                 System.out.println("Introduza o seu nº do cc: ");
-                                tt = new TimerThread(this);
-                                tt.start();
+                                startTimer();
                                 input = keyboard_scanner.nextLine();
                                 tt.stop();
                             }
                             System.out.println("Introduza a sua password: ");
-                            tt = new TimerThread(this);
-                            tt.start();
+                            startTimer();
                             String password = keyboard_scanner.nextLine();
                             tt.stop();
 
@@ -122,8 +125,7 @@ public class VotingTerminal extends Thread {
                                             System.out.println("Se introduzir um caracter diferente dos números apresentados o voto é contado como nulo.");
                                             System.out.println("Introduza o número correspondente à sua escolha: ");
                                             keyboard_scanner = new Scanner(System.in);
-                                            tt = new TimerThread(this);
-                                            tt.start();
+                                            startTimer();
                                             String vote = keyboard_scanner.nextLine();
                                             tt.stop();
 
@@ -163,18 +165,17 @@ public class VotingTerminal extends Thread {
                                 else if (message_type.equals("login_deny")) {
                                     term = message[1].split("\\|")[1];
 
+                                    // Nova tentativa de login
                                     if (term.equals(getName())) {
                                         System.out.println("Dados incorretos.");
 
                                         keyboard_scanner = new Scanner(System.in);
                                         System.out.println("Introduza o seu username: ");
-                                        tt = new TimerThread(this);
-                                        tt.start();
+                                        startTimer();
                                         n_cc = keyboard_scanner.nextLine();
                                         tt.stop();
                                         System.out.println("Introduza a sua password: ");
-                                        tt = new TimerThread(this);
-                                        tt.start();
+                                        startTimer();
                                         password = keyboard_scanner.nextLine();
                                         tt.stop();
 
@@ -203,8 +204,9 @@ public class VotingTerminal extends Thread {
     }
 }
 
+
 class TimerThread extends Thread {
-    private long TIMEOUT = 120000;
+    private long TIMEOUT = 60000;
     private VotingTerminal vt;
 
     public TimerThread(VotingTerminal vt) {
@@ -213,11 +215,14 @@ class TimerThread extends Thread {
     }
 
     public void run() {
+        // É iniciada antes de uma espera de input do utilizador
         try {
+            // Se o input for recebido antes do sleep acabar, a thread principal para esta thread
             Thread.sleep(TIMEOUT);
             System.out.println("Terminal bloqueado por inatividade.");
             System.out.println("Dirija-se outra vez à mesa de voto.");
             vt.stop();
+            // Para a thread principal se não receber input durante TIMEOUT segundos
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
