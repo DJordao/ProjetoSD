@@ -1168,7 +1168,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		public static void main(String args[]) {
 
 		try {
-			RMInterface h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
+			RMInterface h = (RMInterface) LocateRegistry.getRegistry("192.168.x.x", 7000).lookup("RMIConnect");
 			AdminConsole admin = new AdminConsole();
 
 			h.subscribe(admin);

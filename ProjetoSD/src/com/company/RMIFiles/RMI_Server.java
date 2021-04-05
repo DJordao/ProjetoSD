@@ -705,6 +705,7 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 
 		try {
 			RMI_Server h = new RMI_Server();
+			System.setProperty("java.rmi.server.hostname", "192.168.x.x");
 			Registry r = LocateRegistry.createRegistry(7000);
 			r.rebind("RMIConnect", h);
 
