@@ -44,7 +44,7 @@ public class MulticastServer extends Thread{
             lh.changeRMI(h);
             vr.changeRMI(h);
             an.changeRMI(h);
-            h.saveDep(getName(), 0);
+            h.saveDep(getName());
 
             System.out.println("Liguei-me ao secundário.");
             return 1;
@@ -140,7 +140,7 @@ public class MulticastServer extends Thread{
         try {
             h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
             h.print_on_server("Olá da mesa de voto " + getName());
-            h.saveDep(this.getName(), 0);
+            h.saveDep(getName());
 
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
@@ -449,7 +449,7 @@ class AdminNotifier extends Thread {
             try {
                 h.saveDep(s.getName());
                 break;
-            } catch (ConnectException | ConnectIOException ce) {
+            } catch (RemoteException ce) {
                 s.changeRMI();
             }
             try {
