@@ -50,11 +50,11 @@ public class MulticastServer extends Thread{
             try {
                 // Liga-se ao servidor RMI e atualiza as interfaces utilizadas
                 h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
-                h.print_on_server("Olá da mesa de voto " + getName());
+                //h.print_on_server("Olá da mesa de voto " + getName());
                 lh.setRMI(h);
                 vr.setRMI(h);
                 an.setRMI(h);
-                h.saveDep(getName());
+                //h.saveDep(getName());
 
                 System.out.println("Ligação ao servidor RMI estabelecida.");
                 return;
@@ -135,6 +135,10 @@ public class MulticastServer extends Thread{
             }
         }
 
+        if(listaEleicao == null) {
+            return null;
+        }
+
         ArrayList<Eleicao> aux_e = new ArrayList<>();
         // Verifica se a função da pessoa corresponde às eleições disponíveis
         for (Eleicao eleicao : listaEleicao) {
@@ -212,52 +216,51 @@ public class MulticastServer extends Thread{
                             // Filtra as eleições já votadas
                             ArrayList<Eleicao> l = filterVotedElections(p, aux_e);
 
-                            // Lista as eleições válidas para votar
-                            if (l != null) {
-
-                                for (int i = 0; i < l.size(); i++) {
-                                    System.out.println((i + 1) + "-> " + l.get(i).getTitulo());
+                            if(l != null) {
+                                if (l.size() == 0) {
+                                    id = false;
+                                    System.out.println("Não existem eleições disponíveis para votar neste departamento.");
                                 }
-                            } else {
-                                System.out.println("Não existem eleições a decorrer neste departamento.");
-                                break;
-                            }
+                                else{
+                                    // Lista as eleições válidas para votar
+                                    for (int i = 0; i < l.size(); i++) {
+                                        System.out.println((i + 1) + "-> " + l.get(i).getTitulo());
+                                    }
 
-                            if (l.size() == 0) {
-                                id = false;
-                                System.out.println("Não existem eleições disponíveis para votar neste departamento.");
-                            }
-                            else{
-                                String option;
-                                e = null;
+                                    String option;
+                                    e = null;
 
-                                while (e == null) {
-                                    System.out.println("Escolha uma eleição para votar: ");
-                                    int i;
+                                    while (e == null) {
+                                        System.out.println("Escolha uma eleição para votar: ");
+                                        int i;
 
-                                    option = keyboard_scanner.nextLine();
-                                    try {
-                                        i = Integer.parseInt(option);
+                                        option = keyboard_scanner.nextLine();
+                                        try {
+                                            i = Integer.parseInt(option);
 
-                                        if (i > 0 && i <= l.size()) {
-                                            e = l.get(i - 1);
-                                            idEleicao = i;
-                                        } else {
+                                            if (i > 0 && i <= l.size()) {
+                                                e = l.get(i - 1);
+                                                idEleicao = i;
+                                            } else {
+                                                System.out.println("Opção inválida.");
+                                            }
+
+                                        } catch (NumberFormatException ne) {
                                             System.out.println("Opção inválida.");
                                         }
-
-                                    } catch (NumberFormatException ne) {
-                                        System.out.println("Opção inválida.");
                                     }
-                                }
 
-                                System.out.println("A procurar um terminal de voto...");
+                                    System.out.println("A procurar um terminal de voto...");
+                                }
                             }
 
+                            else {
+                                id = false;
+                                System.out.println("Não existem eleições a decorrer neste departamento.");
+                            }
                         }
                     }
-
-                    if (!id) {
+                    else {
                         System.out.println("Identificação falhada.");
                     }
                 }
