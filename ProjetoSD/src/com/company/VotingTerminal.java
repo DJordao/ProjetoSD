@@ -143,7 +143,7 @@ public class VotingTerminal extends Thread {
                                             InetAddress vote_group = InetAddress.getByName(MULTICAST_ADDRESS_VOTE);
                                             Communication vote_c = new Communication(vote_socket, vote_group);
 
-                                            System.out.println(elec_name);
+                                            System.out.println("Eleição: " + elec_name);
                                             for(int i = 2; i < n; i++) {
                                                 System.out.println(i-1 + "-> " + candidates.get(i));
                                             }

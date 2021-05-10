@@ -88,7 +88,7 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	}
 
 	@Override
-	public void ListaEleicoesNaoComecadas() throws RemoteException, SQLException {
+	public boolean ListaEleicoesNaoComecadas() throws RemoteException, SQLException {
 		//Lista todas as eleicoes a decorrer
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
 		db.connectDB();
@@ -96,17 +96,22 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		int id;
 		String titulo, tipo, departamento;
 		Timestamp data_inicio;
+		boolean val = rs.next();
 
-		while (rs.next()) {
-			id = rs.getInt(1);
-			titulo = rs.getString("titulo");
-			tipo = rs.getString("tipo");
-			departamento = rs.getString("departamento");
-			data_inicio = rs.getTimestamp("data_inicio");
+		if (val == false) return false;
+		else {
+			while (val) {
+				id = rs.getInt(1);
+				titulo = rs.getString("titulo");
+				tipo = rs.getString("tipo");
+				departamento = rs.getString("departamento");
+				data_inicio = rs.getTimestamp("data_inicio");
 
-			client.displayEleicoes(String.valueOf(id), titulo, tipo, departamento, data_inicio.toString());
+				val = rs.next();
+				client.displayEleicoes(String.valueOf(id), titulo, tipo, departamento, data_inicio.toString());
+			}
 		}
-
+		return true;
 	}
 
 	@Override
@@ -151,36 +156,43 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		ResultSet rs = db.listaCandidaturas(opcaoEleicao); //Retorna a lista de candidaturas
 		int id, i = 0;
 		String nomeCandidato, categoria, numEleicao, titulo;
+		boolean val = rs.next();
+		System.out.println("VAL: " + val);
+		if (val == false) return null;
+		else {
+			while (val) {
+				String listaCandidatosArray = "";
+				id = rs.getInt(1);
+				nomeCandidato = rs.getString("nomecandidato");
+				categoria = rs.getString("categoria");
+				numEleicao = rs.getString("eleicao_id");
+				titulo = rs.getString("titulo");
 
-		while (rs.next()) {
-			String listaCandidatosArray = "";
-			id = rs.getInt(1);
-			nomeCandidato = rs.getString("nomecandidato");
-			categoria = rs.getString("categoria");
-			numEleicao = rs.getString("eleicao_id");
-			titulo = rs.getString("titulo");
-
-			//[1=Partido Chega][2=PS]
-			listaCandidatosArray += id;
-			listaCandidatosArray += "=";
-			listaCandidatosArray += nomeCandidato;
-			returnCantidatos[i] = listaCandidatosArray;
-			i++;
-
-			if (!(nomeCandidato.equals("Branco") || nomeCandidato.equals("Nulo"))) {
-				client.displayCandidatura(String.valueOf(id), nomeCandidato, categoria, numEleicao, titulo);
+				//[1=Partido Chega][2=PS]
+				listaCandidatosArray += id;
+				listaCandidatosArray += "=";
+				listaCandidatosArray += nomeCandidato;
+				returnCantidatos[i] = listaCandidatosArray;
+				i++;
+				if (!(nomeCandidato.equals("Branco") || nomeCandidato.equals("Nulo"))) {
+					client.displayCandidatura(String.valueOf(id), nomeCandidato, categoria, numEleicao, titulo);
+				}
+				System.out.println("NOME: " + nomeCandidato + "I: " + i);
+				val = rs.next();
 			}
 
+			if(i == 2) return null; //significa que só tem os candidatos Branco e Nulo
+
+			return returnCantidatos;
 		}
-		return returnCantidatos;
 	}
 
 	@Override
-	public String ListaPessoasParaCandidatura(int opcaoEleicao) throws SQLException, RemoteException {
+	public String[] ListaPessoasParaCandidatura(int opcaoEleicao) throws SQLException, RemoteException {
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
 		db.connectDB();
-		String numCC_pessoas = "";
-
+		String[] numCC_pessoas = new String[10];
+		int i = 0;
 		ResultSet rs = db.listaPessoasParaCandidatura(opcaoEleicao); //Retorna a lista de pessoas que podem ser adicionadas a uma certa candidatura
 
 		String nomeCandidato, num_cc;
@@ -188,8 +200,9 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		while (rs.next()) {
 			num_cc = rs.getString(1);
 			nomeCandidato = rs.getString("nome");
-			numCC_pessoas += num_cc;
-			numCC_pessoas += "-";
+			//numCC_pessoas += num_cc;
+			numCC_pessoas[i] = num_cc;
+			i++;
 
 			client.displayListaPessoasParaCandidatura(num_cc, nomeCandidato);
 		}
@@ -283,7 +296,7 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
 		db.connectDB();
 		db.UpdatePropriedadesEleicao(opcaoEleicao, tituloAlteracao, descricaoAlteracao, data_inicio, data_fim);
-		client.print_on_client("Update com sucesso");
+		client.print_on_client("Update com sucesso\n");
 	}
 
 	@Override
@@ -649,7 +662,7 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	public void saveDep(String name) throws RemoteException {
 
 		//System.out.println("\t\t\tDEPARTAMENTO MULTICAST: " + name);
-		client.print_on_client("\n\t\t\t\t\t> " + name + " em funcionamento");
+		//client.print_on_client("\n\t\t\t\t\t> " + name + " em funcionamento");
 	}
 
 	@Override

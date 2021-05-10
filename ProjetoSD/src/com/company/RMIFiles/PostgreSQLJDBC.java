@@ -251,7 +251,7 @@ public class PostgreSQLJDBC {
 
             c.commit();
 
-            System.out.println("BD-entei");
+            //System.out.println("BD-entei");
 
             return rs;
         } catch (Exception ex) {
@@ -299,7 +299,6 @@ public class PostgreSQLJDBC {
         Statement stmt = null;
         PreparedStatement myStmt;
         ResultSet candidatos = null;
-
         try {
             //1->Preciso de verificar o tipo de eleicao (Estudante, Docente, Funcionário) e comparar com a funcao do aluno
             //2->Depois verificar em que departamento a eleicao vai ocorrer e comparar com o departamento da pessoa
@@ -318,7 +317,8 @@ public class PostgreSQLJDBC {
                 String sqlPessoasEleicao =  "SELECT pessoa.num_cc, pessoa.nome " +
                         "FROM pessoa " +
                         "WHERE pessoa.num_cc NOT IN (SELECT pessoa_lista_candidatos.pessoa_num_cc " +
-                                                    "FROM pessoa_lista_candidatos) " +
+                        "FROM pessoa_lista_candidatos WHERE pessoa_lista_candidatos.lista_candidatos_id NOT IN" +
+                        "(SELECT lista_candidatos.eleicao_id FROM lista_candidatos )) " +
                         "AND pessoa.departamento = '" + departamento + "' AND pessoa.funcao = '" + tipo + "'";
 
                 myStmt = c.prepareStatement(sqlPessoasEleicao);
@@ -1184,7 +1184,7 @@ public class PostgreSQLJDBC {
             //Retorna todas as eleições a decorrer
             stmt = c.createStatement();
             String sqlIDEleicao = "SELECT eleicao.id, titulo, tipo, data_inicio, departamento " + "FROM eleicao, departamento " +
-                    "WHERE eleicao.id = departamento.eleicao_id AND CURRENT_TIMESTAMP NOT BETWEEN data_inicio AND data_fim ORDER BY eleicao.id";
+                    "WHERE eleicao.id = departamento.eleicao_id AND CURRENT_TIMESTAMP > data_fim ORDER BY eleicao.id";
             ResultSet rs = stmt.executeQuery(sqlIDEleicao);
 
             eleicoes = rs;
