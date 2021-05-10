@@ -144,16 +144,19 @@ public class MulticastServer extends Thread{
 
 
     public void run() {
-        try {
-            h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
-            h.print_on_server("Olá da mesa de voto " + getName());
-            h.saveDep(getName());
-
-        } catch (RemoteException | NotBoundException e) {
-            e.printStackTrace();
-        }catch (NullPointerException e){
-
+        while (true) {
+            try {
+                h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
+                h.print_on_server("Olá da mesa de voto " + getName());
+                h.saveDep(getName());
+                break;
+            } catch (ConnectException e) {
+                System.out.println("Conectando ao servidor RMI...");
+            } catch (RemoteException | NotBoundException e) {
+                e.printStackTrace();
+            }
         }
+
         System.out.println(this.getName() + " online...");
 
         boolean id = false;

@@ -9,6 +9,7 @@ import java.net.*;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.ExportException;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.ResultSet;
 import java.sql.SQLClientInfoException;
@@ -664,80 +665,83 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	// =======================================================
 
 	public static void main(String args[]) {
-		String id = args[0];
 		DatagramSocket socket = null;
 
-		if(id.equals("2")) {
-			String s;
+		while (true) {
+			try {
+				RMI_Server h = new RMI_Server();
+				Registry r = LocateRegistry.createRegistry(MAIN_PORT);
+				r.rebind("RMIConnect", h);
 
-			try{
-				socket = new DatagramSocket(6789);
-				socket.setSoTimeout(9000);
-				System.out.println("Socket Datagram à escuta no porto 6789");
+				PostgreSQLJDBC db = new PostgreSQLJDBC();
+				db.connectDB();
 
-				while(true){
-					byte[] buffer = new byte[256];
-					DatagramPacket heartBeat = new DatagramPacket(buffer, buffer.length);
-					socket.receive(heartBeat);
-					s = new String(heartBeat.getData(), 0, heartBeat.getLength());
-					System.out.println("Servidor secundário recebeu: " + s);
+				System.out.println("Hello Server ready.");
+				break;
 
-					DatagramPacket reply = new DatagramPacket(heartBeat.getData(), heartBeat.getLength(), heartBeat.getAddress(), heartBeat.getPort());
-					socket.send(reply);
+			} catch (ExportException e) {
+				String s;
+
+				try{
+					socket = new DatagramSocket(6789);
+					socket.setSoTimeout(9000);
+					System.out.println("Socket Datagram à escuta no porto 6789");
+
+					while(true){
+						byte[] buffer = new byte[256];
+						DatagramPacket heartBeat = new DatagramPacket(buffer, buffer.length);
+						socket.receive(heartBeat);
+						s = new String(heartBeat.getData(), 0, heartBeat.getLength());
+						System.out.println("Servidor secundário recebeu: " + s);
+
+						DatagramPacket reply = new DatagramPacket(heartBeat.getData(), heartBeat.getLength(), heartBeat.getAddress(), heartBeat.getPort());
+						socket.send(reply);
+					}
+
+				} catch (SocketTimeoutException e1) {
+					System.out.println("Servidor primário crashou");
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				} finally {
+					socket.close();
 				}
 
-			} catch (SocketTimeoutException e) {
-				System.out.println("Servidor primário crashou");
-				id = "1";
-			} catch (IOException e) {
+			} catch (RemoteException e) {
 				e.printStackTrace();
-			} finally {
-				socket.close();
+			} catch (SQLClientInfoException e) {
+				e.printStackTrace();
 			}
 		}
 
 		try {
-			RMI_Server h = new RMI_Server();
-			Registry r = LocateRegistry.createRegistry(MAIN_PORT);
-			r.rebind("RMIConnect", h);
+			socket = new DatagramSocket();
+			socket.setSoTimeout(3000);
+			String heartBeat = "Servidor primário está vivo!";
+			byte[] m = heartBeat.getBytes();
 
-			PostgreSQLJDBC db = new PostgreSQLJDBC();
-			db.connectDB();
+			while (true) {
+				Thread.sleep((3000)); //A cada 3s manda uma mensagem ao  de uma resposta
+				System.out.println(heartBeat);
 
-			System.out.println("Hello Server ready.");
+				InetAddress host = InetAddress.getByName("localhost");
+				int serverPort = 6789;
+				DatagramPacket request = new DatagramPacket(m, m.length, host, serverPort);
+				socket.send(request);
 
-		} catch (RemoteException re) {
-			System.out.println("Exception in HelloImpl.main: " + re);
-		} catch (SQLClientInfoException throwables) {
-			throwables.printStackTrace();
-		}
-
-		if(id.equals("1")) {
-			try {
-				socket = new DatagramSocket();
-				String heartBeat = "Servidor primário está vivo!";
-				byte[] m = heartBeat.getBytes();
-
-				while (true) {
-					Thread.sleep((3000)); //A cada 3s manda uma mensagem ao  de uma resposta
-					System.out.println(heartBeat);
-
-					InetAddress host = InetAddress.getByName("localhost");
-					int serverPort = 6789;
-					DatagramPacket request = new DatagramPacket(m, m.length, host, serverPort);
-					socket.send(request);
-
-					byte[] buffer = new byte[256];
-					DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
+				byte[] buffer = new byte[256];
+				DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
+				try {
 					socket.receive(reply);
 					System.out.println("Recebeu: " + new String(reply.getData(), 0, reply.getLength()));
+				} catch (SocketTimeoutException s) {
+					System.out.println("Não recebeu resposta...");
 				}
-
-			} catch (IOException | InterruptedException e) {
-				e.printStackTrace();
-			} finally {
-				socket.close();
 			}
+
+		} catch (IOException | InterruptedException e) {
+			e.printStackTrace();
+		} finally {
+			socket.close();
 		}
 
 	}
