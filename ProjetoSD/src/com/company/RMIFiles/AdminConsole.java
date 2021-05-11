@@ -41,7 +41,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 	}
 
 	public void print_on_client(String s) throws RemoteException {
-		System.out.printf(s);
+		System.out.println(s);
 	}
 
 
