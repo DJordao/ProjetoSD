@@ -21,7 +21,7 @@ public class PostgreSQLJDBC {
             Class.forName("org.postgresql.Driver");
             c = DriverManager
                     .getConnection("jdbc:postgresql://localhost:5432/SD-Project",
-                            "postgres", "postgres");
+                            "postgres", "josemiguel1910");
             c.setAutoCommit(false);
             //System.out.println("Opened database successfully");
 
@@ -226,6 +226,37 @@ public class PostgreSQLJDBC {
             System.exit(0);
         }
         return maxEleicao;
+
+    }
+
+
+    public int[] numEleicoesNaoComecadas() throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        int[] idEleicao = new int[10];
+        int i = 0;
+
+        try {
+            //Buscar o valor do último Id que está na tabela
+            stmt = c.createStatement();
+            String sqlIDEleicao = "SELECT id " + "FROM eleicao WHERE CURRENT_TIMESTAMP < data_inicio";
+            ResultSet rs = stmt.executeQuery(sqlIDEleicao);
+
+            while (rs.next()){
+                idEleicao[i] = rs.getInt(1);
+                i++;
+            }
+
+
+
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch (Exception ex) {
+            System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
+            System.exit(0);
+        }
+        return idEleicao;
 
     }
 
@@ -1060,7 +1091,9 @@ public class PostgreSQLJDBC {
         ResultSet listaVotos = null;
         try {
             stmt = c.createStatement();
-            String sql = "SELECT * FROM voto ORDER BY id_voto";
+            String sql = "SELECT local_voto, hora_voto, pessoa_num_cc, nome, titulo FROM voto, pessoa, eleicao " +
+                    "WHERE pessoa_num_cc = num_cc AND eleicao_id = id " +
+                    "ORDER BY id_voto, eleicao_id";
 
             ResultSet rs = stmt.executeQuery(sql);
             listaVotos = rs;

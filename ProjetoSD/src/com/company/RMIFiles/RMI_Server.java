@@ -148,6 +148,16 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	}
 
 	@Override
+	public int[] numEleicoesNaoComecadas() throws RemoteException, SQLException {
+		//Vê o número max de eleicoes que existe
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+		int[] idEleicao = db.numEleicoesNaoComecadas();
+		return idEleicao;
+	}
+
+
+	@Override
 	public String[] ListaCandidaturas(int opcaoEleicao) throws SQLException, RemoteException {
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
 		db.connectDB();
@@ -509,22 +519,29 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	}
 
 	@Override
-	public void getlocalVotoEleitores(int opcaoEleicao) throws RemoteException, SQLException {
+	public boolean getlocalVotoEleitores() throws RemoteException, SQLException {
 		//Listar todos os votos de cada eleitor de uma certa eleicao
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
 		db.connectDB();
-		ResultSet rs = db.getlocalVotoEleitores(opcaoEleicao);
+		ResultSet rs = db.getListaVotos();
 
-		String num_cc, nome, local_voto, hora_voto;
+		String num_cc, nomeEleicao, local_voto, hora_voto, nomePessoa;
+		boolean val = rs.next();
+		if (val == false) return false;
+		else{
+			while (val) {
+				local_voto = rs.getString(1);
+				hora_voto = String.valueOf(rs.getTimestamp(2));
+				num_cc = rs.getString(3);
+				nomePessoa = rs.getString(4);
+				nomeEleicao = rs.getString(5);
 
-		while (rs.next()) {
-			local_voto = rs.getString(1);
-			hora_voto = String.valueOf(rs.getTimestamp(2));
-			nome = rs.getString(3);
-			num_cc = rs.getString(4);
+				client.displaylocalVotoEleitores(local_voto, hora_voto, nomePessoa, num_cc, nomeEleicao);
+				val = rs.next();
+			}
 
-			client.displaylocalVotoEleitores(local_voto, hora_voto, nome, num_cc);
 		}
+		return true;
 	}
 
 	@Override

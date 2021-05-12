@@ -52,7 +52,7 @@ public interface RMInterface extends Remote {
 
     int getIdEleicao(String nomeEleicao) throws RemoteException, SQLException;
 
-    void getlocalVotoEleitores(int opcaoEleicao) throws RemoteException, SQLException;
+    boolean getlocalVotoEleitores() throws RemoteException, SQLException;
 
     int getMaxCandidato() throws RemoteException, SQLException;
 
@@ -81,4 +81,7 @@ public interface RMInterface extends Remote {
     void getEleitoresTempoReal(int idEleicao) throws RemoteException, SQLException;
 
     void saveDep(String name) throws RemoteException;
+
+    public int[] numEleicoesNaoComecadas() throws RemoteException, SQLException;
+
 }

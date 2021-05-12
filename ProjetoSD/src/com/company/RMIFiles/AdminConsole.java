@@ -421,6 +421,21 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		System.out.println("Nome: " + nome);
 	}
 
+	private static boolean checkopcaoEleicao(int opcaoEleicao, int[] listaEleicoes){
+		int check = 0;
+		for (int i = 0; i < listaEleicoes.length; i++){
+			if(listaEleicoes[i] == opcaoEleicao){
+				System.out.println("É igual");
+				check++;
+				break;
+			}
+		}
+		if(check != 0){
+			return true;
+		}
+		return false;
+	}
+
 
 	public static void gereCandidato(RMInterface h) throws RemoteException, SQLException {
 		//TODO
@@ -433,8 +448,9 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 			System.out.println("Não existem eleições disponíveis para alterar a lista de candidatos");
 		}
 		else{
-			int maxEleicoes, opcaoEleicao, flagOut = 0;
-			maxEleicoes = h.maxEleicoes();
+			int opcaoEleicao, flagOut = 0;
+			int[] listaEleicaoNaoComecada = h.numEleicoesNaoComecadas();
+			int opcaoEleicaoGlobal;
 
 			Scanner input;
 
@@ -445,7 +461,8 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 					input = new Scanner(System.in);
 					String eleicao = input.nextLine();
 					opcaoEleicao = Integer.parseInt(eleicao);
-					if(!(opcaoEleicao < 1 || opcaoEleicao > maxEleicoes)) { //Ele selecionou uma eleicao valida
+					opcaoEleicaoGlobal = opcaoEleicao;
+					if(!(opcaoEleicao < 1 || checkopcaoEleicao(opcaoEleicao, listaEleicaoNaoComecada) == false)) { //Ele selecionou uma eleicao valida
 
 						//TODO
 						//Fazer um menu para as seguintes opções:
@@ -684,14 +701,16 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 
 											//Eleicao a participar
 											while (true){
-												try {
-													System.out.printf("Escolha uma eleição a participar: ");
-													Scanner eleicaoNovaCandidatura = new Scanner(System.in);
-													String novaCandidatura = eleicaoNovaCandidatura.nextLine();
-													opcaoEleicao = Integer.parseInt(novaCandidatura);
-													if(!(opcaoEleicao < 1 || opcaoEleicao > maxEleicoes)) { //Verificar se o tipo de eleição é igual ao tipo da candidatura
-														Eleicao e = h.getEleicaoByID(opcaoEleicao);
+												//try {
+													//System.out.printf("Escolha uma eleição a participar: ");
+													//Scanner eleicaoNovaCandidatura = new Scanner(System.in);
+													//String novaCandidatura = eleicaoNovaCandidatura.nextLine();
+													//opcaoEleicao = Integer.parseInt(novaCandidatura);
+													//if(!(opcaoEleicao < 1 || checkopcaoEleicao(opcaoEleicao, listaEleicaoNaoComecada) == false)) { //Verificar se o tipo de eleição é igual ao tipo da candidatura
+													//	System.out.println("Entrei");
+														Eleicao e = h.getEleicaoByID(opcaoEleicaoGlobal);
 														if (e.getTipoEleicao().equals(tipoEleicao)){	//Pode adicionar
+															System.out.println("entrei na eleicao");
 															Candidato c = new Candidato(nomenovoCandidato, tipoEleicao, null);
 															h.criaNovoCandidato(maxCandidato + 1, c, opcaoEleicao);
 															break;
@@ -699,12 +718,12 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 															System.out.println("Insira uma eleição do tipo " + tipoEleicao);
 														}
 
-													}else{
-														System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
-													}
-												}catch (NumberFormatException ex){
-													System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
-												}
+													//}else{
+														System.out.println("Insira uma Eleição válida.");
+													//}
+												//}catch (NumberFormatException ex){
+												//	System.out.println("Insira uma Eleição válida");
+												//}
 											}
 											break;
 
@@ -722,10 +741,10 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 							}
 						}
 					}else{
-						System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
+						System.out.println("Insira uma Eleição válida");
 					}
 				}catch (NumberFormatException ex){
-					System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
+					System.out.println("Insira uma Eleição válida");
 				}
 			}
 		}
@@ -734,6 +753,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 
 
 	}
+
 
 	@Override
 	public void displayDetalhesEleicao(String titulo, String descricao, Timestamp data_inicio, Timestamp data_fim) throws RemoteException {
@@ -745,8 +765,9 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 	}
 
 	@Override
-	public void displaylocalVotoEleitores(String local_voto, String hora_voto, String nome, String num_cc) throws RemoteException {
+	public void displaylocalVotoEleitores(String local_voto, String hora_voto, String nome, String num_cc, String titulo) throws RemoteException {
 		System.out.println("== == == == == == == == == == ==");
+		System.out.println("Eleição: " + titulo);
 		System.out.println("Nome: " + nome);
 		System.out.println("Número de CC: " + num_cc);
 		System.out.println("Local de Voto: " + local_voto);
@@ -1022,7 +1043,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 
 	public static void localVotoEleitores(RMInterface h) throws RemoteException, SQLException {
 
-		h.ListaEleicoes();
+		/*h.ListaEleicoes();
 
 		int maxEleicoes, opcaoEleicao,flagOut, idEleicao = 0;
 		Scanner input;
@@ -1047,7 +1068,12 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 			} catch (NumberFormatException ex) {
 				System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
 			}
-		}
+		}*/
+		h.getlocalVotoEleitores();
+		/*if(h.getlocalVotoEleitores() == false){
+			System.out.println("Não há votos disponíveis.");
+		}*/
+
 
 
 
@@ -1285,7 +1311,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 							case "6":
 								// Saber em que local votou cada eleitors
 								System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
-								System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
+								System.out.println("\t\t\t\tCONSULTA DE VOTOS");
 								while(true) {
 									try {
 										localVotoEleitores(h);
