@@ -45,14 +45,14 @@ false Africa/Blantyre
 false Africa/Brazzaville
 false Africa/Bujumbura
 false Africa/Cairo
-false Africa/Casablanca
+true Africa/Casablanca
 true Africa/Ceuta
 false Africa/Conakry
 false Africa/Dakar
 false Africa/Dar_es_Salaam
 false Africa/Djibouti
 false Africa/Douala
-false Africa/El_Aaiun
+true Africa/El_Aaiun
 false Africa/Freetown
 false Africa/Gaborone
 false Africa/Harare
@@ -108,7 +108,7 @@ false America/Asuncion
 false America/Atikokan
 true America/Atka
 false America/Bahia
-false America/Bahia_Banderas
+true America/Bahia_Banderas
 false America/Barbados
 false America/Belem
 false America/Belize
@@ -125,7 +125,7 @@ false America/Catamarca
 false America/Cayenne
 false America/Cayman
 true America/Chicago
-false America/Chihuahua
+true America/Chihuahua
 false America/Coral_Harbour
 false America/Cordoba
 false America/Costa_Rica
@@ -186,15 +186,15 @@ false America/Manaus
 false America/Marigot
 false America/Martinique
 true America/Matamoros
-false America/Mazatlan
+true America/Mazatlan
 false America/Mendoza
 true America/Menominee
-false America/Merida
+true America/Merida
 true America/Metlakatla
-false America/Mexico_City
+true America/Mexico_City
 true America/Miquelon
 true America/Moncton
-false America/Monterrey
+true America/Monterrey
 false America/Montevideo
 true America/Montreal
 false America/Montserrat
@@ -227,7 +227,7 @@ false America/Rio_Branco
 false America/Rosario
 true America/Santa_Isabel
 false America/Santarem
-true America/Santiago
+false America/Santiago
 false America/Santo_Domingo
 false America/Sao_Paulo
 true America/Scoresbysund
@@ -255,12 +255,12 @@ true America/Yellowknife
 false Antarctica/Casey
 false Antarctica/Davis
 false Antarctica/DumontDUrville
-true Antarctica/Macquarie
+false Antarctica/Macquarie
 false Antarctica/Mawson
-true Antarctica/McMurdo
+false Antarctica/McMurdo
 false Antarctica/Palmer
 false Antarctica/Rothera
-true Antarctica/South_Pole
+false Antarctica/South_Pole
 false Antarctica/Syowa
 true Antarctica/Troll
 false Antarctica/Vostok
@@ -376,29 +376,29 @@ false Atlantic/Reykjavik
 false Atlantic/South_Georgia
 false Atlantic/St_Helena
 false Atlantic/Stanley
-true Australia/ACT
-true Australia/Adelaide
+false Australia/ACT
+false Australia/Adelaide
 false Australia/Brisbane
-true Australia/Broken_Hill
-true Australia/Canberra
-true Australia/Currie
+false Australia/Broken_Hill
+false Australia/Canberra
+false Australia/Currie
 false Australia/Darwin
 false Australia/Eucla
-true Australia/Hobart
-true Australia/LHI
+false Australia/Hobart
+false Australia/LHI
 false Australia/Lindeman
-true Australia/Lord_Howe
-true Australia/Melbourne
-true Australia/NSW
+false Australia/Lord_Howe
+false Australia/Melbourne
+false Australia/NSW
 false Australia/North
 false Australia/Perth
 false Australia/Queensland
-true Australia/South
-true Australia/Sydney
-true Australia/Tasmania
-true Australia/Victoria
+false Australia/South
+false Australia/Sydney
+false Australia/Tasmania
+false Australia/Victoria
 false Australia/West
-true Australia/Yancowinna
+false Australia/Yancowinna
 true BDST
 false BDT
 false BNT
@@ -425,7 +425,7 @@ false CHAST
 false CHUT
 false CKT
 true CLST
-true CLT
+false CLT
 false COT
 false CST
 true CST6CDT
@@ -438,13 +438,13 @@ true Canada/Newfoundland
 true Canada/Pacific
 false Canada/Saskatchewan
 false Canada/Yukon
-true Chile/Continental
-true Chile/EasterIsland
+false Chile/Continental
+false Chile/EasterIsland
 true Cuba
 false DAVT
 false DDUT
-true EASST
-true EAST
+false EASST
+false EAST
 false EAT
 true EDT
 true EEST
@@ -612,7 +612,7 @@ false KRAST
 false KRAT
 false KST
 false Kwajalein
-true LHDT
+false LHDT
 false LHST
 false LIGT
 false LINT
@@ -640,8 +640,8 @@ false MUT
 false MVT
 false MYT
 true Mexico/BajaNorte
-false Mexico/BajaSur
-false Mexico/General
+true Mexico/BajaSur
+true Mexico/General
 true NDT
 false NFT
 false NOVST
@@ -649,8 +649,8 @@ false NOVT
 false NPT
 false NST
 false NUT
-true NZ
-true NZ-CHAT
+false NZ
+false NZ-CHAT
 true NZDT
 false NZST
 false NZT
@@ -675,12 +675,12 @@ true PST8PDT
 false PWT
 true PYST
 false PYT
-true Pacific/Apia
-true Pacific/Auckland
+false Pacific/Apia
+false Pacific/Auckland
 false Pacific/Bougainville
-true Pacific/Chatham
+false Pacific/Chatham
 false Pacific/Chuuk
-true Pacific/Easter
+false Pacific/Easter
 false Pacific/Efate
 false Pacific/Enderbury
 false Pacific/Fakaofo
@@ -700,7 +700,7 @@ false Pacific/Marquesas
 false Pacific/Midway
 false Pacific/Nauru
 false Pacific/Niue
-true Pacific/Norfolk
+false Pacific/Norfolk
 false Pacific/Noumea
 false Pacific/Pago_Pago
 false Pacific/Palau
@@ -784,12 +784,12 @@ false YEKT
 false Z
 false Zulu
 </TimeZones>
-      <StartupTime>1617440654</StartupTime>
+      <StartupTime>1620552086</StartupTime>
     </root>
     <database id="2" parent="1" name="SD-Project">
       <ObjectId>16447</ObjectId>
       <Owner>postgres</Owner>
-      <IntrospectionStateNumber>804</IntrospectionStateNumber>
+      <IntrospectionStateNumber>1144</IntrospectionStateNumber>
       <Current>1</Current>
     </database>
     <database id="3" parent="1" name="dbfichas">
@@ -873,7 +873,7 @@ UC/10
 </Acl>
       <StateNumber>287</StateNumber>
       <Owner>postgres</Owner>
-      <IntrospectionStateNumber>805</IntrospectionStateNumber>
+      <IntrospectionStateNumber>1145</IntrospectionStateNumber>
       <Current>1</Current>
     </schema>
     <extension id="20" parent="2" name="plpgsql">
@@ -1265,25 +1265,7 @@ UC/10
       <StateNumber>573</StateNumber>
       <TypeId>20</TypeId>
     </column>
-    <index id="73" parent="36" name="pessoa_lista_candidatos_pkey">
-      <ObjectId>16543</ObjectId>
-      <StateNumber>573</StateNumber>
-      <ColNames>pessoa_num_cc</ColNames>
-      <Unique>1</Unique>
-      <Primary>1</Primary>
-      <AccessMethodId>403</AccessMethodId>
-      <CollationIds>100</CollationIds>
-      <CollationNames>default</CollationNames>
-      <ClassIds>3126</ClassIds>
-    </index>
-    <key id="74" parent="36" name="pessoa_lista_candidatos_pkey">
-      <ObjectId>16544</ObjectId>
-      <StateNumber>573</StateNumber>
-      <ColNames>pessoa_num_cc</ColNames>
-      <Primary>1</Primary>
-      <UnderlyingIndexName>pessoa_lista_candidatos_pkey</UnderlyingIndexName>
-    </key>
-    <foreign-key id="75" parent="36" name="pessoa_lista_candidatos_fk1">
+    <foreign-key id="73" parent="36" name="pessoa_lista_candidatos_fk1">
       <ObjectId>16550</ObjectId>
       <StateNumber>573</StateNumber>
       <ColNames>pessoa_num_cc</ColNames>
@@ -1293,7 +1275,7 @@ UC/10
       <RefKeyName>pessoa_pkey1</RefKeyName>
       <RefColNames>num_cc</RefColNames>
     </foreign-key>
-    <foreign-key id="76" parent="36" name="pessoa_lista_candidatos_fk2">
+    <foreign-key id="74" parent="36" name="pessoa_lista_candidatos_fk2">
       <ObjectId>16555</ObjectId>
       <StateNumber>573</StateNumber>
       <ColNames>lista_candidatos_id</ColNames>
@@ -1303,41 +1285,41 @@ UC/10
       <RefKeyName>lista_candidatos_pkey</RefKeyName>
       <RefColNames>id</RefColNames>
     </foreign-key>
-    <column id="77" parent="37" name="id_voto">
+    <column id="75" parent="37" name="id_voto">
       <Position>1</Position>
       <DataType>integer|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>665</StateNumber>
       <TypeId>23</TypeId>
     </column>
-    <column id="78" parent="37" name="local_voto">
+    <column id="76" parent="37" name="local_voto">
       <Position>2</Position>
       <DataType>varchar(20)|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>668</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="79" parent="37" name="hora_voto">
+    <column id="77" parent="37" name="hora_voto">
       <Position>3</Position>
       <DataType>timestamp|0s</DataType>
       <StateNumber>703</StateNumber>
       <TypeId>1114</TypeId>
     </column>
-    <column id="80" parent="37" name="eleicao_id">
+    <column id="78" parent="37" name="eleicao_id">
       <Position>4</Position>
       <DataType>bigint|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>659</StateNumber>
       <TypeId>20</TypeId>
     </column>
-    <column id="81" parent="37" name="pessoa_num_cc">
+    <column id="79" parent="37" name="pessoa_num_cc">
       <Position>5</Position>
       <DataType>varchar(8)|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>659</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <index id="82" parent="37" name="voto_pkey">
+    <index id="80" parent="37" name="voto_pkey">
       <ObjectId>16596</ObjectId>
       <StateNumber>659</StateNumber>
       <ColNames>id_voto</ColNames>
@@ -1347,14 +1329,14 @@ UC/10
       <CollationIds>0</CollationIds>
       <ClassIds>1978</ClassIds>
     </index>
-    <key id="83" parent="37" name="voto_pkey">
+    <key id="81" parent="37" name="voto_pkey">
       <ObjectId>16597</ObjectId>
       <StateNumber>659</StateNumber>
       <ColNames>id_voto</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>voto_pkey</UnderlyingIndexName>
     </key>
-    <foreign-key id="84" parent="37" name="voto_fk1">
+    <foreign-key id="82" parent="37" name="voto_fk1">
       <ObjectId>16598</ObjectId>
       <StateNumber>660</StateNumber>
       <ColNames>eleicao_id</ColNames>
@@ -1364,7 +1346,7 @@ UC/10
       <RefKeyName>eleicao_pkey</RefKeyName>
       <RefColNames>id</RefColNames>
     </foreign-key>
-    <foreign-key id="85" parent="37" name="voto_fk2">
+    <foreign-key id="83" parent="37" name="voto_fk2">
       <ObjectId>16603</ObjectId>
       <StateNumber>660</StateNumber>
       <ColNames>pessoa_num_cc</ColNames>

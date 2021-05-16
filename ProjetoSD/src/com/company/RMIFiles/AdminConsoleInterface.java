@@ -22,7 +22,7 @@ public interface AdminConsoleInterface extends Remote{
 
     void displayDetalhesEleicao(String titulo, String descricao, Timestamp data_inicio, Timestamp data_fim) throws RemoteException;
 
-    void displaylocalVotoEleitores(String local_voto, String hora_voto, String nome, String num_cc) throws RemoteException;
+    void displaylocalVotoEleitores(String local_voto, String hora_voto, String nome, String num_cc, String titulo) throws RemoteException;
 
     void displayEleicoesPassadas1(Eleicao e, int totalVotos, int votoBranco, int votoNulo, int flag, String nomeCandidato, int numVotos, float percentagem) throws RemoteException;
 

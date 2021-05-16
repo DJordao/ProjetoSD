@@ -28,7 +28,7 @@ public interface RMInterface extends Remote {
 
     String[] ListaCandidaturas(int opcaoEleicao) throws RemoteException, SQLException;
 
-    String ListaPessoasParaCandidatura(int opcaoEleicao) throws RemoteException, SQLException;
+    String[] ListaPessoasParaCandidatura(int opcaoEleicao) throws RemoteException, SQLException;
 
     void AdicionaPessoaCandidatura(int opcaoEleicao, String num_cc, String partido, String idPartido) throws RemoteException, SQLException;
 
@@ -52,7 +52,7 @@ public interface RMInterface extends Remote {
 
     int getIdEleicao(String nomeEleicao) throws RemoteException, SQLException;
 
-    void getlocalVotoEleitores(int opcaoEleicao) throws RemoteException, SQLException;
+    boolean getlocalVotoEleitores() throws RemoteException, SQLException;
 
     int getMaxCandidato() throws RemoteException, SQLException;
 
@@ -76,9 +76,12 @@ public interface RMInterface extends Remote {
 
     void ListaEleicoesPassadas() throws RemoteException, SQLException;
 
-    void ListaEleicoesNaoComecadas() throws RemoteException, SQLException;
+    boolean ListaEleicoesNaoComecadas() throws RemoteException, SQLException;
 
     void getEleitoresTempoReal(int idEleicao) throws RemoteException, SQLException;
 
     void saveDep(String name) throws RemoteException;
+
+    public int[] numEleicoesNaoComecadas() throws RemoteException, SQLException;
+
 }

@@ -41,7 +41,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 	}
 
 	public void print_on_client(String s) throws RemoteException {
-		System.out.printf(s);
+		System.out.println(s);
 	}
 
 
@@ -421,6 +421,21 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		System.out.println("Nome: " + nome);
 	}
 
+	private static boolean checkopcaoEleicao(int opcaoEleicao, int[] listaEleicoes){
+		int check = 0;
+		for (int i = 0; i < listaEleicoes.length; i++){
+			if(listaEleicoes[i] == opcaoEleicao){
+				System.out.println("É igual");
+				check++;
+				break;
+			}
+		}
+		if(check != 0){
+			return true;
+		}
+		return false;
+	}
+
 
 	public static void gereCandidato(RMInterface h) throws RemoteException, SQLException {
 		//TODO
@@ -429,302 +444,316 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 		//2-> Para o tipo de eleicao mostrar a todas as pessoas que estão na tabela das pessoas - DONE
 		//3-> Adicionar uma certa pessoa a uma determinada candidatura -DONE
 		//4-> Remover uma pessoa de uma certa lista se ela lá estiver -DONE
-		h.ListaEleicoes();
+		if(h.ListaEleicoesNaoComecadas() == false){
+			System.out.println("Não existem eleições disponíveis para alterar a lista de candidatos");
+		}
+		else{
+			int opcaoEleicao, flagOut = 0;
+			int[] listaEleicaoNaoComecada = h.numEleicoesNaoComecadas();
+			int opcaoEleicaoGlobal;
 
-		int maxEleicoes, opcaoEleicao, flagOut = 0;
-		maxEleicoes = h.maxEleicoes();
+			Scanner input;
 
-		Scanner input;
+			//Eleição a ver
+			while (flagOut != 1){
+				try{
+					System.out.printf("Indique a eleição a visualizar: ");
+					input = new Scanner(System.in);
+					String eleicao = input.nextLine();
+					opcaoEleicao = Integer.parseInt(eleicao);
+					opcaoEleicaoGlobal = opcaoEleicao;
+					if(!(opcaoEleicao < 1 || checkopcaoEleicao(opcaoEleicao, listaEleicaoNaoComecada) == false)) { //Ele selecionou uma eleicao valida
 
-		//Eleição a ver
-		while (flagOut != 1){
-			try{
-				System.out.printf("Indique a eleição a visualizar: ");
-				input = new Scanner(System.in);
-				String eleicao = input.nextLine();
-				opcaoEleicao = Integer.parseInt(eleicao);
-				if(!(opcaoEleicao < 1 || opcaoEleicao > maxEleicoes)) { //Ele selecionou uma eleicao valida
+						//TODO
+						//Fazer um menu para as seguintes opções:
+						//1-> Listar Candidaturas dessa eleicao - DONE
+						//2-> Listar pessoas aptas para serem adicionadas a essa candidatura - DONE
+						//3-> Adicionar pessoas a uma candidatura - DONE
+						//4-> Remover pessoas de uma candidatura - DONE
 
-					//TODO
-					//Fazer um menu para as seguintes opções:
-					//1-> Listar Candidaturas dessa eleicao - DONE
-					//2-> Listar pessoas aptas para serem adicionadas a essa candidatura - DONE
-					//3-> Adicionar pessoas a uma candidatura - DONE
-					//4-> Remover pessoas de uma candidatura - DONE
+						String[] listaNomeCandidatos = new String[10];  //Nome dos partidos dos candidatos
+						String[] numCCListaCandidatos = new String[10];
+						String idPartido = "";
 
-					String[] listaNomeCandidatos = new String[10];;  //Nome dos partidos dos candidatos
-					String numCCListaCandidatos = "";
-					String idPartido = "";
+						while (flagOut != 1){
+							displayOpcoesEleicoes();
+							String opcao = "";
 
-					while (flagOut != 1){
-						displayOpcoesEleicoes();
-						String opcao = "";
+							try{
+								System.out.printf("OPÇÃO: ");
+								Scanner inputOpcao = new Scanner(System.in);
+								opcao = input.nextLine();
+								Integer.parseInt(opcao);
+								if (Integer.parseInt(opcao) <= 7 && Integer.parseInt(opcao) > 0){
+									switch(opcao) {
+										case "1":
+											// Listar Candidaturas dessa eleicao
 
-						try{
-							System.out.printf("OPÇÃO: ");
-							Scanner inputOpcao = new Scanner(System.in);
-							opcao = input.nextLine();
-							Integer.parseInt(opcao);
-							if (Integer.parseInt(opcao) <= 7 && Integer.parseInt(opcao) > 0){
-								switch(opcao) {
-									case "1":
-										// Listar Candidaturas dessa eleicao
-
-										System.out.println("\n");
-										listaNomeCandidatos = h.ListaCandidaturas(opcaoEleicao);
-
-										break;
-									case "2":
-										// Listar pessoas aptas para serem adicionadas a essa candidatura
-
-										System.out.println("\t\t\tADICIONAR PESSOAS A UMA CANDIDATURA ");
-										numCCListaCandidatos = h.ListaPessoasParaCandidatura(opcaoEleicao);
-										break;
-									case "3":
-										// Adicionar pessoas a uma candidatura -
-
-										String num_cc = "";
-										while (true){
-											try {
-												//Pedir o CC
-												System.out.printf("Insira o número de cc da pessoa que deseja inserir: ");
-												Scanner num_Cc = new Scanner(System.in);
-												num_cc = num_Cc.nextLine();
-												int num_cc_error = Integer.parseInt(num_cc);
-												int valido = 0;
-												if (String.valueOf(num_cc_error).length() != 8){ //Verifica se tem 8 digitos
-													num_Cc = new Scanner(System.in);
-													num_cc = num_Cc.nextLine();
-												}
-												//Verificar se é um cc válido
-												for (int i = 0; i < numCCListaCandidatos.split("-").length; i++){ //Verifica se pode ser adicionado
-													//System.out.println("\n\n\n" + numCCListaCandidatos.split("-")[i] + "\n\n\n");
-													if (num_cc.equals(numCCListaCandidatos.split("-")[i])){
-														valido++;
-													}
-												}
-												if (valido > 0){
-													break;
-												}else{
-													System.out.printf("Insira o número de cc da lista ao qual se quer inserir: ");
-													num_Cc = new Scanner(System.in);
-													num_cc = num_Cc.nextLine();
-												}
-												break;
-											}catch (NumberFormatException ex){
-												System.out.println("Insira um número de CC válido");
+											System.out.println("\n");
+											if((listaNomeCandidatos = h.ListaCandidaturas(opcaoEleicao)) == null){
+												System.out.println("Não existem candidaturas para a eleição escolhida");
 											}
-										}
+											break;
+										case "2":
+											// Listar pessoas aptas para serem adicionadas a essa candidatura
 
-										String sPartido = "";
-										while (true){
-											try {
-												//Pedir o Partido a que se quer juntar
-												System.out.printf("Insira o nome da lista ao qual se quer inserir: ");
-												Scanner partido = new Scanner(System.in);
-												sPartido = partido.nextLine();
-												int valido = 0;
-												idPartido = "";
+											System.out.println("\t\t\tADICIONAR PESSOAS A UMA CANDIDATURA ");
+											numCCListaCandidatos = h.ListaPessoasParaCandidatura(opcaoEleicao);
 
-												System.out.println("CANDIDATOS: " + listaNomeCandidatos[0]);
-												//Verificar se é um partido válido atraves do parsing do output
-												//[1=Partido Chega][2=PS]
+											break;
+										case "3":
+											// Adicionar pessoas a uma candidatura -
 
-												for (int j = 0; j < listaNomeCandidatos.length; j++){
-													if(listaNomeCandidatos[j] != null){
-														if (sPartido.equals(listaNomeCandidatos[j].split("=")[1])){
-															valido++;
-															idPartido = listaNomeCandidatos[j].split("=")[0];
-														}
-													}
-
-												}
-												if (valido > 0){
-													break;
-												}else{
-													System.out.printf("Insira o nome da lista ao qual se quer inserir: ");
-
-												}
-											}catch (NumberFormatException ex){
-												System.out.println("Insira um nome de CC válido");
-											}
-										}
-
-										//Já tenho um num_cc, partido agora vamos adicionar à BD
-										h.AdicionaPessoaCandidatura(opcaoEleicao, num_cc, sPartido, idPartido);
-										break;
-
-									case "4":
-										// Remover pessoas de uma candidatura
-										//1-> Perguntar de que candidatura é que quer remover - DONE
-										//2-> Listar os elementos dessa candidatura - DONE
-										//3-> Perguntar que elementos deseja remover - DONE
-
-										String nomeLista = "";
-										while (true){
-											try {
-												//Pedir a Candidatura
-												System.out.printf("Insira o nome da lista: ");
-												Scanner Candidatura = new Scanner(System.in);
-												nomeLista = Candidatura.nextLine();
-												int valido = 0;
-
-
-												//Verificar se é um partido válido atraves do parsing do output
-												for (int j = 0; j < listaNomeCandidatos.length; j++){
-													if(listaNomeCandidatos[j] != null){
-														if (nomeLista.equals(listaNomeCandidatos[j].split("=")[1])){
-															valido++;
-															idPartido = listaNomeCandidatos[j].split("=")[0];
-														}
-													}
-
-												}
-												if (valido > 0){
-													break;
-												}else{
-													System.out.println("Insira o nome da lista que pretende aceder: ");
-												}break;
-											}catch (NumberFormatException ex){
-												System.out.println("Insira um número de CC válido");
-											}
-										}
-
-										//Listar os elementos dessa candidatura
-										System.out.println("########################");
-										System.out.println("Nome da Lista: " + nomeLista);
-										String dadosElementosCandidatura = h.ListaElementosCandidatura(opcaoEleicao, nomeLista, idPartido);
-										if (dadosElementosCandidatura.length() == 0){
-											System.out.println("A lista não tem elementos");
-
-										}else{
+											String num_cc = "";
 											while (true){
 												try {
-													//Pedir a o num CC a remover
-													System.out.printf("Insira numero de CC a remover: ");
-													Scanner numCC = new Scanner(System.in);
-													num_cc = numCC.nextLine();
+													//Pedir o CC
+													System.out.printf("Insira o número de cc da pessoa que deseja inserir: ");
+													Scanner num_Cc = new Scanner(System.in);
+													num_cc = num_Cc.nextLine();
+													int num_cc_error = Integer.parseInt(num_cc);
 													int valido = 0;
-
-													//Verificar se é um num_cc  válido atraves do parsing do output
-													for (int i = 0; i < dadosElementosCandidatura.split(" ").length; i++){
-														if (num_cc.equals(dadosElementosCandidatura.split(" ")[i])){
+													if (String.valueOf(num_cc_error).length() != 8){ //Verifica se tem 8 digitos
+														num_Cc = new Scanner(System.in);
+														num_cc = num_Cc.nextLine();
+													}
+													//Verificar se é um cc válido
+													for (int i = 0; i < numCCListaCandidatos.length; i++){ //Verifica se pode ser adicionado
+														//System.out.println("\n\n\n" + numCCListaCandidatos.split("-")[i] + "\n\n\n");
+														if (num_cc.equals(numCCListaCandidatos[i])){
 															valido++;
 														}
 													}
-													if (valido > 0){ //O numero que inseriu foi o correto agora vamos removê-lo
-														h.RemovePessoaCandidatura(num_cc, nomeLista);
+													if (valido > 0){
 														break;
 													}else{
-														System.out.println("Insira numero de CC a remover válido: ");
+														System.out.printf("Insira o número de cc da pessoa ao qual se quer inserir: ");
+														num_Cc = new Scanner(System.in);
+														num_cc = num_Cc.nextLine();
 													}
-
+													break;
 												}catch (NumberFormatException ex){
 													System.out.println("Insira um número de CC válido");
 												}
 											}
-										}
-										break;
-									case "5":
-										// Listar as Candidaturas e seus representantes
-										h.ListaTudoEleicao(opcaoEleicao);
-										break;
-									case "6":
-										// Criar Candidatura
-										//TODO verificar a hora da eleicao
-										int maxCandidato = h.getMaxCandidato();
-										String nomenovoCandidato;
-										String tipoEleicao;
 
-										Scanner inputCandidatura;
+											String sPartido = "";
+											while (true){
+												try {
+													//Pedir o Partido a que se quer juntar
+													System.out.printf("Insira o nome da lista ao qual se quer inserir: ");
+													Scanner partido = new Scanner(System.in);
+													sPartido = partido.nextLine();
+													int valido = 0;
+													idPartido = "";
 
-										//nome Candidato
-										while (true){
-											System.out.printf("Nome: ");
-											inputCandidatura = new Scanner(System.in);
-											nomenovoCandidato = inputCandidatura.nextLine();
-											try {
+													//System.out.println("CANDIDATOS: " + listaNomeCandidatos[0]);
+													//Verificar se é um partido válido atraves do parsing do output
+													//[1=Partido Chega][2=PS]
 
-												if (String.valueOf(nomenovoCandidato).length() != 0 && !nomenovoCandidato.isBlank()) {
-													break;
-												} else {
+													for (int j = 0; j < listaNomeCandidatos.length; j++){
+														if(listaNomeCandidatos[j] != null){
+															if (sPartido.equals(listaNomeCandidatos[j].split("=")[1])){
+																valido++;
+																idPartido = listaNomeCandidatos[j].split("=")[0];
+															}
+														}
+
+													}
+													if (valido > 0){
+														break;
+													}else{
+														System.out.printf("Insira o nome da lista ao qual se quer inserir: ");
+
+													}
+												}catch (NumberFormatException ex){
+													System.out.println("Insira um nome de CC válido");
+												}
+											}
+
+											//Já tenho um num_cc, partido agora vamos adicionar à BD
+											h.AdicionaPessoaCandidatura(opcaoEleicao, num_cc, sPartido, idPartido);
+											break;
+
+										case "4":
+											// Remover pessoas de uma candidatura
+											//1-> Perguntar de que candidatura é que quer remover - DONE
+											//2-> Listar os elementos dessa candidatura - DONE
+											//3-> Perguntar que elementos deseja remover - DONE
+
+											String nomeLista = "";
+											while (true){
+												try {
+													//Pedir a Candidatura
+													System.out.printf("Insira o nome da lista: ");
+													Scanner Candidatura = new Scanner(System.in);
+													nomeLista = Candidatura.nextLine();
+													int valido = 0;
+
+
+													//Verificar se é um partido válido atraves do parsing do output
+													for (int j = 0; j < listaNomeCandidatos.length; j++){
+														if(listaNomeCandidatos[j] != null){
+															if (nomeLista.equals(listaNomeCandidatos[j].split("=")[1])){
+																valido++;
+																idPartido = listaNomeCandidatos[j].split("=")[0];
+															}
+														}
+
+													}
+													if (valido > 0){
+														break;
+													}else{
+														System.out.println("Insira o nome da lista que pretende aceder: ");
+													}break;
+												}catch (NumberFormatException ex){
+													System.out.println("Insira um número de CC válido");
+												}
+											}
+
+											//Listar os elementos dessa candidatura
+											System.out.println("########################");
+											System.out.println("Nome da Lista: " + nomeLista);
+											String dadosElementosCandidatura = h.ListaElementosCandidatura(opcaoEleicao, nomeLista, idPartido);
+											if (dadosElementosCandidatura.length() == 0){
+												System.out.println("A lista não tem elementos");
+
+											}else{
+												while (true){
+													try {
+														//Pedir a o num CC a remover
+														System.out.printf("Insira numero de CC a remover: ");
+														Scanner numCC = new Scanner(System.in);
+														num_cc = numCC.nextLine();
+														int valido = 0;
+
+														//Verificar se é um num_cc  válido atraves do parsing do output
+														for (int i = 0; i < dadosElementosCandidatura.split(" ").length; i++){
+															if (num_cc.equals(dadosElementosCandidatura.split(" ")[i])){
+																valido++;
+															}
+														}
+														if (valido > 0){ //O numero que inseriu foi o correto agora vamos removê-lo
+															h.RemovePessoaCandidatura(num_cc, nomeLista);
+															break;
+														}else{
+															System.out.println("Insira numero de CC a remover válido: ");
+														}
+
+													}catch (NumberFormatException ex){
+														System.out.println("Insira um número de CC válido");
+													}
+												}
+											}
+											break;
+										case "5":
+											// Listar as Candidaturas e seus representantes
+											h.ListaTudoEleicao(opcaoEleicao);
+											break;
+										case "6":
+											// Criar Candidatura
+											//TODO verificar a hora da eleicao
+											int maxCandidato = h.getMaxCandidato();
+											String nomenovoCandidato;
+											String tipoEleicao;
+
+											Scanner inputCandidatura;
+
+											//nome Candidato
+											while (true){
+												System.out.printf("Nome: ");
+												inputCandidatura = new Scanner(System.in);
+												nomenovoCandidato = inputCandidatura.nextLine();
+												try {
+
+													if (String.valueOf(nomenovoCandidato).length() != 0 && !nomenovoCandidato.isBlank()) {
+														break;
+													} else {
+														System.out.println("Insira o nome do candidato");
+													}
+
+												}catch (InputMismatchException e){
 													System.out.println("Insira o nome do candidato");
 												}
 
-											}catch (InputMismatchException e){
-												System.out.println("Insira o nome do candidato");
 											}
 
-										}
+											//tipo eleicao
+											while (true){
+												System.out.printf("Tipo Eleição: ");
+												inputCandidatura = new Scanner(System.in);
+												tipoEleicao = inputCandidatura.nextLine();
+												try {
 
-										//tipo eleicao
-										while (true){
-											System.out.printf("Tipo Eleição: ");
-											inputCandidatura = new Scanner(System.in);
-											tipoEleicao = inputCandidatura.nextLine();
-											try {
-
-												if (String.valueOf(tipoEleicao).length() != 0 && !tipoEleicao.isBlank() &&
-														(tipoEleicao.equalsIgnoreCase("estudante")
-																|| tipoEleicao.equalsIgnoreCase("docente")
-																|| tipoEleicao.equalsIgnoreCase("funcionario"))) {
-													break;
-												} else {
-													System.out.println("Insira um tipo de Candidatura (Estudante/Docente/Funcionario)");
-												}
-
-											}catch (InputMismatchException e){
-												System.out.println("Insira um tipo de Candidatura (Estudante/Docente/Funcionario)");
-											}
-										}
-
-										//Eleicao a participar
-										while (true){
-											try {
-												System.out.printf("Escolha uma eleição a participar: ");
-												Scanner eleicaoNovaCandidatura = new Scanner(System.in);
-												String novaCandidatura = eleicaoNovaCandidatura.nextLine();
-												opcaoEleicao = Integer.parseInt(novaCandidatura);
-												if(!(opcaoEleicao < 1 || opcaoEleicao > maxEleicoes)) { //Verificar se o tipo de eleição é igual ao tipo da candidatura
-													Eleicao e = h.getEleicaoByID(opcaoEleicao);
-													if (e.getTipoEleicao().equals(tipoEleicao)){	//Pode adicionar
-														Candidato c = new Candidato(nomenovoCandidato, tipoEleicao, null);
-														h.criaNovoCandidato(maxCandidato + 1, c, opcaoEleicao);
+													if (String.valueOf(tipoEleicao).length() != 0 && !tipoEleicao.isBlank() &&
+															(tipoEleicao.equalsIgnoreCase("estudante")
+																	|| tipoEleicao.equalsIgnoreCase("docente")
+																	|| tipoEleicao.equalsIgnoreCase("funcionario"))) {
 														break;
-													}else{
-														System.out.println("Insira uma eleição do tipo " + tipoEleicao);
+													} else {
+														System.out.println("Insira um tipo de Candidatura (Estudante/Docente/Funcionario)");
 													}
 
-												}else{
-													System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
+												}catch (InputMismatchException e){
+													System.out.println("Insira um tipo de Candidatura (Estudante/Docente/Funcionario)");
 												}
-											}catch (NumberFormatException ex){
-												System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
 											}
-										}
-										break;
 
-									case "7":
-										// SAIR
-										flagOut++;
-										break;
+											//Eleicao a participar
+											while (true){
+												//try {
+													//System.out.printf("Escolha uma eleição a participar: ");
+													//Scanner eleicaoNovaCandidatura = new Scanner(System.in);
+													//String novaCandidatura = eleicaoNovaCandidatura.nextLine();
+													//opcaoEleicao = Integer.parseInt(novaCandidatura);
+													//if(!(opcaoEleicao < 1 || checkopcaoEleicao(opcaoEleicao, listaEleicaoNaoComecada) == false)) { //Verificar se o tipo de eleição é igual ao tipo da candidatura
+													//	System.out.println("Entrei");
+														Eleicao e = h.getEleicaoByID(opcaoEleicaoGlobal);
+														if (e.getTipoEleicao().equals(tipoEleicao)){	//Pode adicionar
+															System.out.println("entrei na eleicao");
+															Candidato c = new Candidato(nomenovoCandidato, tipoEleicao, null);
+															h.criaNovoCandidato(maxCandidato + 1, c, opcaoEleicao);
+															break;
+														}else{
+															System.out.println("Insira uma eleição do tipo " + tipoEleicao);
+														}
+
+													//}else{
+														System.out.println("Insira uma Eleição válida.");
+													//}
+												//}catch (NumberFormatException ex){
+												//	System.out.println("Insira uma Eleição válida");
+												//}
+											}
+											break;
+
+										case "7":
+											// SAIR
+											flagOut++;
+											break;
+									}
+								}else{ //Opção não incluída nas possíveis
+									System.out.println("Escolha uma opção válida");
 								}
-							}else{ //Opção não incluída nas possíveis
-								System.out.println("Escolha uma opção válida");
-							}
 
-						} catch(NumberFormatException ex){ // O que foi lido no input não foi um número
-							System.out.println("Insira um número válido");
+							} catch(NumberFormatException ex){ // O que foi lido no input não foi um número
+								System.out.println("Insira um número válido");
+							}
 						}
+					}else{
+						System.out.println("Insira uma Eleição válida");
 					}
-				}else{
-					System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
+				}catch (NumberFormatException ex){
+					System.out.println("Insira uma Eleição válida");
 				}
-			}catch (NumberFormatException ex){
-				System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
 			}
 		}
+
+
+
+
 	}
+
 
 	@Override
 	public void displayDetalhesEleicao(String titulo, String descricao, Timestamp data_inicio, Timestamp data_fim) throws RemoteException {
@@ -736,8 +765,9 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 	}
 
 	@Override
-	public void displaylocalVotoEleitores(String local_voto, String hora_voto, String nome, String num_cc) throws RemoteException {
+	public void displaylocalVotoEleitores(String local_voto, String hora_voto, String nome, String num_cc, String titulo) throws RemoteException {
 		System.out.println("== == == == == == == == == == ==");
+		System.out.println("Eleição: " + titulo);
 		System.out.println("Nome: " + nome);
 		System.out.println("Número de CC: " + num_cc);
 		System.out.println("Local de Voto: " + local_voto);
@@ -785,163 +815,172 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 
 	public static void alteraPropriedadesEleicao(RMInterface h) throws RemoteException, SQLException {
 
-		h.ListaEleicoes();
+		if(h.ListaEleicoesNaoComecadas() == false){
+			System.out.println("Não existem eleições disponíveis para alterar a lista de candidatos");
+		}
+		else{
+			int maxEleicoes, opcaoEleicao,flagOut, idEleicao = 0;
+			maxEleicoes = h.maxEleicoes();
+			int exitBreak = 0;
 
-		int maxEleicoes, opcaoEleicao,flagOut, idEleicao = 0;
-		maxEleicoes = h.maxEleicoes();
+			Scanner input;
+			String tituloAlteracao = "", descricaoAlteracao = "";
+			Timestamp Data_inicio = null, Data_fim = null;
 
-		Scanner input;
-		String tituloAlteracao = "", descricaoAlteracao = "";
-		Timestamp Data_inicio = null, Data_fim = null;
-
-		String currTitulo = "", currDescricao = "";
-		Timestamp currData_inicio = null, currData_fim = null;
-		String detalhes; //String com os detalhes iniciais da eleicao
-
-
-
-		while (true) {
-			flagOut = 0; // Ver se faz update
-			try {
-				System.out.println("==============================");
-				System.out.printf("(999)>Indique a eleição a visualizar: ");
-				input = new Scanner(System.in);
-				String eleicao = input.nextLine();
-				opcaoEleicao = Integer.parseInt(eleicao);
-				if (eleicao.equalsIgnoreCase("999")) break;
-				if (!(opcaoEleicao < 1 || opcaoEleicao > maxEleicoes)) {
-					idEleicao = opcaoEleicao;
-					detalhes = h.getDetalhesEleicao(idEleicao);
-
-					currTitulo = detalhes.split("#")[0];
-					currDescricao = detalhes.split("#")[1];
+			String currTitulo = "", currDescricao = "";
+			Timestamp currData_inicio = null, currData_fim = null;
+			String detalhes; //String com os detalhes iniciais da eleicao
 
 
-					//Passar a data de String para TimeStamp
 
-					currData_inicio = Timestamp.valueOf(detalhes.split("#")[2]);
-
-					currData_fim = Timestamp.valueOf(detalhes.split("#")[3]);
-
-					//VERIFICAR SE PODE FAZER ALTERAÇÂO NA ELEIÇÂO
-					//comparar a data atual com a data da eleicao
-					Timestamp checkhoraAtual = new Timestamp(System.currentTimeMillis());
-
-					int checkAlteracao = currData_inicio.compareTo(checkhoraAtual);
-
-					if (checkAlteracao < 0){ // >0 significa que a hora atual é superior e não se pode alterar
-						System.out.println("A eleição já começou e não se pode alterar o seu valor");
-						flagOut++;
-
+			while (true) {
+				flagOut = 0; // Ver se faz update
+				try {
+					System.out.println("==============================");
+					System.out.printf("(999)>Indique a eleição a visualizar: ");
+					input = new Scanner(System.in);
+					String eleicao = input.nextLine();
+					opcaoEleicao = Integer.parseInt(eleicao);
+					if (eleicao.equalsIgnoreCase("999")){
+						exitBreak++;
 						break;
-					}else{
-						while (true){
-							System.out.println("-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|");
-							System.out.printf("(999)Indique o campo a alterar: ");
-							Scanner campo = new Scanner(System.in);
-							String atributo = campo.nextLine();
-							if (atributo.equalsIgnoreCase("999")) break;
-							if (atributo.equalsIgnoreCase("Título")){
-								System.out.println("Insira o novo título");
-								Scanner alteração = new Scanner(System.in);
-								tituloAlteracao = alteração.nextLine();
-							}
-							else if (atributo.equalsIgnoreCase("Descrição")){
-								System.out.println("Insira a nova descrição");
-								Scanner alteração = new Scanner(System.in);
-								descricaoAlteracao = alteração.nextLine();
-							}
-							else if (atributo.equalsIgnoreCase("Data de Início")){
+					}
+					if (!(opcaoEleicao < 1 || opcaoEleicao > maxEleicoes)) {
+						idEleicao = opcaoEleicao;
+						detalhes = h.getDetalhesEleicao(idEleicao);
 
-								//comparar a data atual com a data da eleicao
-								SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyy HH:mm");
-								Timestamp horaAtual = new Timestamp(System.currentTimeMillis());
+						currTitulo = detalhes.split("#")[0];
+						currDescricao = detalhes.split("#")[1];
 
-								checkAlteracao = currData_inicio.compareTo(horaAtual);
 
-								if (checkAlteracao < 0){ // >0 significa que a hora atual é superior e não se pode alterar
-									System.out.println("A eleição já começou e não se pode alterar o seu valor");
+						//Passar a data de String para TimeStamp
 
-									break;
+						currData_inicio = Timestamp.valueOf(detalhes.split("#")[2]);
+
+						currData_fim = Timestamp.valueOf(detalhes.split("#")[3]);
+
+						//VERIFICAR SE PODE FAZER ALTERAÇÂO NA ELEIÇÂO
+						//comparar a data atual com a data da eleicao
+						Timestamp checkhoraAtual = new Timestamp(System.currentTimeMillis());
+
+						int checkAlteracao = currData_inicio.compareTo(checkhoraAtual);
+
+						if (checkAlteracao < 0){ // >0 significa que a hora atual é superior e não se pode alterar
+							System.out.println("A eleição já começou e não se pode alterar o seu valor");
+							flagOut++;
+
+							break;
+						}else{
+							while (true){
+								System.out.println("-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|");
+								System.out.printf("(999)Indique o campo a alterar: ");
+								Scanner campo = new Scanner(System.in);
+								String atributo = campo.nextLine();
+								if (atributo.equalsIgnoreCase("999")) break;
+								if (atributo.equalsIgnoreCase("Título")){
+									System.out.println("Insira o novo título");
+									Scanner alteração = new Scanner(System.in);
+									tituloAlteracao = alteração.nextLine();
 								}
-								else{ // A hora atual é inferior à hora da eleição e podemos alterar o seu campo
-									while (true){
-										try{
-											System.out.printf("Nova Data de Início da Eleicao (dd-MM-yyyy HH:mm):");
-											input = new Scanner(System.in);
-											String dataInput = input.nextLine();
-											Date dataError = new SimpleDateFormat("dd-MM-yyyy HH:mm").parse(dataInput);
+								else if (atributo.equalsIgnoreCase("Descrição")){
+									System.out.println("Insira a nova descrição");
+									Scanner alteração = new Scanner(System.in);
+									descricaoAlteracao = alteração.nextLine();
+								}
+								else if (atributo.equalsIgnoreCase("Data de Início")){
 
-											//TODO -> Verificar se a data inserida é superior à data que estava na eleicao
+									//comparar a data atual com a data da eleicao
+									SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyy HH:mm");
+									Timestamp horaAtual = new Timestamp(System.currentTimeMillis());
 
-											DateTimeFormatter format = DateTimeFormatter.ofPattern("dd-MM-yyy HH:mm");
-											LocalDateTime localTime = LocalDateTime.from(format.parse(dataInput));
-											Data_inicio = Timestamp.valueOf(localTime);
+									checkAlteracao = currData_inicio.compareTo(horaAtual);
 
+									if (checkAlteracao < 0){ // >0 significa que a hora atual é superior e não se pode alterar
+										System.out.println("A eleição já começou e não se pode alterar o seu valor");
 
-											break;
-										}catch (ParseException e) {
-											System.out.println("Insira uma data válida");
-										}
+										break;
 									}
+									else{ // A hora atual é inferior à hora da eleição e podemos alterar o seu campo
+										while (true){
+											try{
+												System.out.printf("Nova Data de Início da Eleicao (dd-MM-yyyy HH:mm):");
+												input = new Scanner(System.in);
+												String dataInput = input.nextLine();
+												Date dataError = new SimpleDateFormat("dd-MM-yyyy HH:mm").parse(dataInput);
 
-								}
-							}
-							else if (atributo.equalsIgnoreCase("Data de Fim")){
+												//TODO -> Verificar se a data inserida é superior à data que estava na eleicao
 
-								//comparar a data atual com a data da eleicao
-								SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyy HH:mm");
-								Timestamp horaAtual = new Timestamp(System.currentTimeMillis());
+												DateTimeFormatter format = DateTimeFormatter.ofPattern("dd-MM-yyy HH:mm");
+												LocalDateTime localTime = LocalDateTime.from(format.parse(dataInput));
+												Data_inicio = Timestamp.valueOf(localTime);
 
-								checkAlteracao = currData_inicio.compareTo(horaAtual);
 
-								if (checkAlteracao < 0){ // >0 significa que a hora atual é superior e não se pode alterar
-									System.out.println("A eleição já começou e não se pode alterar o seu valor");
-									break;
-								}
-								else{ // A hora atual é inferior à hora da eleição e podemos alterar o seu campo
-									while (true){
-										try{
-											System.out.printf("Nova Data de Fim da Eleicao (dd-MM-yyyy HH:mm):");
-											input = new Scanner(System.in);
-											String dataInput = input.nextLine();
-											Date dataError = new SimpleDateFormat("dd-MM-yyyy HH:mm").parse(dataInput);
-
-											//TODO -> Verificar se a data inserida é superior à data que estava na eleicao
-
-											DateTimeFormatter format = DateTimeFormatter.ofPattern("dd-MM-yyy HH:mm");
-											LocalDateTime localTime = LocalDateTime.from(format.parse(dataInput));
-											Data_fim = Timestamp.valueOf(localTime);
-											break;
-										}catch (ParseException e) {
-											System.out.println("Insira uma data válida");
+												break;
+											}catch (ParseException e) {
+												System.out.println("Insira uma data válida");
+											}
 										}
-									}
 
+									}
 								}
-							}
-							else{
-								System.out.println("Insira um campo válido");
+								else if (atributo.equalsIgnoreCase("Data de Fim")){
+
+									//comparar a data atual com a data da eleicao
+									SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyy HH:mm");
+									Timestamp horaAtual = new Timestamp(System.currentTimeMillis());
+
+									checkAlteracao = currData_inicio.compareTo(horaAtual);
+
+									if (checkAlteracao < 0){ // >0 significa que a hora atual é superior e não se pode alterar
+										System.out.println("A eleição já começou e não se pode alterar o seu valor");
+										break;
+									}
+									else{ // A hora atual é inferior à hora da eleição e podemos alterar o seu campo
+										while (true){
+											try{
+												System.out.printf("Nova Data de Fim da Eleicao (dd-MM-yyyy HH:mm):");
+												input = new Scanner(System.in);
+												String dataInput = input.nextLine();
+												Date dataError = new SimpleDateFormat("dd-MM-yyyy HH:mm").parse(dataInput);
+
+												//TODO -> Verificar se a data inserida é superior à data que estava na eleicao
+
+												DateTimeFormatter format = DateTimeFormatter.ofPattern("dd-MM-yyy HH:mm");
+												LocalDateTime localTime = LocalDateTime.from(format.parse(dataInput));
+												Data_fim = Timestamp.valueOf(localTime);
+												break;
+											}catch (ParseException e) {
+												System.out.println("Insira uma data válida");
+											}
+										}
+
+									}
+								}
+								else{
+									System.out.println("Insira um campo válido");
+								}
+
 							}
 
 						}
 
+					} else {
+						System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
 					}
-
-				} else {
+				} catch (NumberFormatException ex) {
 					System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
 				}
-			} catch (NumberFormatException ex) {
-				System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
+
 			}
+			if (Data_inicio == null) Data_inicio = currData_inicio;
+			if (Data_fim == null) Data_fim = currData_fim;
+			if (descricaoAlteracao == "") descricaoAlteracao = currDescricao;
+			if (tituloAlteracao == "") tituloAlteracao = currTitulo;
 
+			if (flagOut == 0 && exitBreak == 0) h.UpdatePropriedadesEleicao(idEleicao, tituloAlteracao, descricaoAlteracao, Data_inicio, Data_fim);
 		}
-		if (Data_inicio == null) Data_inicio = currData_inicio;
-		if (Data_fim == null) Data_fim = currData_fim;
-		if (descricaoAlteracao == "") descricaoAlteracao = currDescricao;
-		if (tituloAlteracao == "") tituloAlteracao = currTitulo;
 
-		if (flagOut == 0) h.UpdatePropriedadesEleicao(idEleicao, tituloAlteracao, descricaoAlteracao, Data_inicio, Data_fim);
+
 		//TODO fazer o update na BD - DONE
 	}
 
@@ -1004,7 +1043,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 
 	public static void localVotoEleitores(RMInterface h) throws RemoteException, SQLException {
 
-		h.ListaEleicoes();
+		/*h.ListaEleicoes();
 
 		int maxEleicoes, opcaoEleicao,flagOut, idEleicao = 0;
 		Scanner input;
@@ -1029,7 +1068,12 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 			} catch (NumberFormatException ex) {
 				System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
 			}
-		}
+		}*/
+		h.getlocalVotoEleitores();
+		/*if(h.getlocalVotoEleitores() == false){
+			System.out.println("Não há votos disponíveis.");
+		}*/
+
 
 
 
@@ -1106,7 +1150,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 							}
 						}else if (opcaoDep.equalsIgnoreCase("N")){
 							update++;
-							System.out.println("VALOR: " + update);
+							//System.out.println("VALOR: " + update);
 							for(int i = 0; i < listaDept.size(); i++){
 								System.out.println(i + "-> " + listaDept.get(i));
 							}
@@ -1115,7 +1159,6 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 						}else System.out.println("Insira uma resposta válida");
 					}
 					break;
-
 
 				}else {
 					System.out.println("Insira uma Eleição entre 1 e " + maxEleicoes);
@@ -1268,7 +1311,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 							case "6":
 								// Saber em que local votou cada eleitors
 								System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
-								System.out.println("\t\t\t\tLISTA DE ELEIÇÕES");
+								System.out.println("\t\t\t\tCONSULTA DE VOTOS");
 								while(true) {
 									try {
 										localVotoEleitores(h);

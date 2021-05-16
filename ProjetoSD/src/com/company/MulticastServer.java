@@ -41,22 +41,26 @@ public class MulticastServer extends Thread{
         MULTICAST_ADDRESS_TERM = group1;
         lh = new LoginHandler(null, this, group2); // Thread que trata dos logins
         vr = new VoteReceiver(null, this, group3); // Thread que recebe os votos dos terminais
+        an = new AdminNotifier(h, this); // Thread que notifica a consola o seu estado
     }
 
 
-    public void changeRMI() {
-        try {
-            // Liga-se ao servidor RMI secundário e altera as interfaces utilizadas
-            h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
-            h.print_on_server("Olá da mesa de voto " + getName());
-            lh.changeRMI(h);
-            vr.changeRMI(h);
-            an.changeRMI(h);
-            h.saveDep(getName());
+    public void connectRMI() {
+        while(true) {
+            try {
+                // Liga-se ao servidor RMI e atualiza as interfaces utilizadas
+                h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
+                //h.print_on_server("Olá da mesa de voto " + getName());
+                lh.setRMI(h);
+                vr.setRMI(h);
+                an.setRMI(h);
+                //h.saveDep(getName());
 
-            System.out.println("Liguei-me ao secundário.");
-        } catch (RemoteException | NotBoundException e) {
-        } catch (NullPointerException e){
+                System.out.println("Ligação ao servidor RMI estabelecida.");
+                return;
+            } catch (RemoteException | NotBoundException e) {
+            } catch (NullPointerException e) {
+            }
         }
     }
 
@@ -68,7 +72,7 @@ public class MulticastServer extends Thread{
                 v = h.getListaVotos();
                 break;
             } catch (ConnectException | ConnectIOException ce) {
-                changeRMI();
+                connectRMI();
             }
         }
         ArrayList<Eleicao> l = new ArrayList<>();
@@ -94,7 +98,7 @@ public class MulticastServer extends Thread{
                             e = h.getEleicaoByID(e_id);
                             break;
                         } catch (ConnectException | ConnectIOException ce) {
-                            changeRMI();
+                            connectRMI();
                         }
                     }
 
@@ -127,8 +131,12 @@ public class MulticastServer extends Thread{
                 listaEleicao = h.getEleicao(getName());
                 break;
             } catch (ConnectException | ConnectIOException ce) {
-                changeRMI();
+                connectRMI();
             }
+        }
+
+        if(listaEleicao == null) {
+            return null;
         }
 
         ArrayList<Eleicao> aux_e = new ArrayList<>();
@@ -144,16 +152,28 @@ public class MulticastServer extends Thread{
 
 
     public void run() {
-        try {
-            h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
-            h.print_on_server("Olá da mesa de voto " + getName());
-            h.saveDep(getName());
+        /*
+        while (true) {
+            try {
+                h = (RMInterface) LocateRegistry.getRegistry(7000).lookup("RMIConnect");
+                h.print_on_server("Olá da mesa de voto " + getName());
+                h.saveDep(getName());
+                break;
+            } catch (ConnectException e) {
+                System.out.println("Conectando ao servidor RMI...");
+            } catch (RemoteException | NotBoundException e) {
+                e.printStackTrace();
+            }
+        }*/
 
-        } catch (RemoteException | NotBoundException e) {
-            e.printStackTrace();
-        }catch (NullPointerException e){
+        lh.start();
 
-        }
+        vr.start();
+
+        an.start();
+
+        connectRMI();
+
         System.out.println(this.getName() + " online...");
 
         boolean id = false;
@@ -165,15 +185,6 @@ public class MulticastServer extends Thread{
             socket.joinGroup(group);
 
             Communication c = new Communication(socket, group);
-
-            lh.changeRMI(h);
-            lh.start();
-
-            vr.changeRMI(h);
-            vr.start();
-
-            an = new AdminNotifier(h, this);
-            an.start();
 
             Scanner keyboard_scanner = new Scanner(System.in);
 
@@ -190,7 +201,7 @@ public class MulticastServer extends Thread{
                             p = h.findPessoa(input);
                             break;
                         } catch (ConnectException | ConnectIOException ce) {
-                            changeRMI();
+                            connectRMI();
                         }
                     }
 
@@ -205,52 +216,51 @@ public class MulticastServer extends Thread{
                             // Filtra as eleições já votadas
                             ArrayList<Eleicao> l = filterVotedElections(p, aux_e);
 
-                            // Lista as eleições válidas para votar
-                            if (l != null) {
-
-                                for (int i = 0; i < l.size(); i++) {
-                                    System.out.println((i + 1) + "-> " + l.get(i).getTitulo());
+                            if(l != null) {
+                                if (l.size() == 0) {
+                                    id = false;
+                                    System.out.println("Não existem eleições disponíveis para votar neste departamento.");
                                 }
-                            } else {
-                                System.out.println("Não existem eleições a decorrer neste departamento.");
-                                break;
-                            }
+                                else{
+                                    // Lista as eleições válidas para votar
+                                    for (int i = 0; i < l.size(); i++) {
+                                        System.out.println((i + 1) + "-> " + l.get(i).getTitulo());
+                                    }
 
-                            if (l.size() == 0) {
-                                id = false;
-                                System.out.println("Não existem eleições disponíveis para votar neste departamento.");
-                            }
-                            else{
-                                String option;
-                                e = null;
+                                    String option;
+                                    e = null;
 
-                                while (e == null) {
-                                    System.out.println("Escolha uma eleição para votar: ");
-                                    int i;
+                                    while (e == null) {
+                                        System.out.println("Escolha uma eleição para votar: ");
+                                        int i;
 
-                                    option = keyboard_scanner.nextLine();
-                                    try {
-                                        i = Integer.parseInt(option);
+                                        option = keyboard_scanner.nextLine();
+                                        try {
+                                            i = Integer.parseInt(option);
 
-                                        if (i > 0 && i <= l.size()) {
-                                            e = l.get(i - 1);
-                                            idEleicao = i;
-                                        } else {
+                                            if (i > 0 && i <= l.size()) {
+                                                e = l.get(i - 1);
+                                                idEleicao = i;
+                                            } else {
+                                                System.out.println("Opção inválida.");
+                                            }
+
+                                        } catch (NumberFormatException ne) {
                                             System.out.println("Opção inválida.");
                                         }
-
-                                    } catch (NumberFormatException ne) {
-                                        System.out.println("Opção inválida.");
                                     }
-                                }
 
-                                System.out.println("A procurar um terminal de voto...");
+                                    System.out.println("A procurar um terminal de voto...");
+                                }
                             }
 
+                            else {
+                                id = false;
+                                System.out.println("Não existem eleições a decorrer neste departamento.");
+                            }
                         }
                     }
-
-                    if (!id) {
+                    else {
                         System.out.println("Identificação falhada.");
                     }
                 }
@@ -273,7 +283,7 @@ public class MulticastServer extends Thread{
                             listaCandidatos = h.getListaCandidatos(idEleicao);
                             break;
                         } catch (ConnectException | ConnectIOException ce) {
-                            changeRMI();
+                            connectRMI();
                         }
                     }
 
@@ -285,7 +295,7 @@ public class MulticastServer extends Thread{
                             h.recebeLocalVoto(getName(), p.getNum_cc(), e.getTitulo()); // Envia para o RMI o local e a eleição em que a pessoa vai votar
                             break;
                         } catch (ConnectException | ConnectIOException ce) {
-                            changeRMI();
+                            connectRMI();
                         }
                     }
 
@@ -324,8 +334,8 @@ class LoginHandler extends Thread{
         MULTICAST_ADDRESS_LOGIN = group;
     }
 
-    public void changeRMI(RMInterface h) {
-        // Altera a interface RMI caso haja ligação ao servidor secundário
+    public void setRMI(RMInterface h) {
+        // Define a interface RMI
         this.h = h;
     }
 
@@ -353,7 +363,7 @@ class LoginHandler extends Thread{
                             p = h.findPessoa(n_cc);
                             break;
                         } catch (ConnectException | ConnectIOException ce) {
-                            s.changeRMI();
+                            s.connectRMI();
                         }
                     }
 
@@ -372,7 +382,7 @@ class LoginHandler extends Thread{
                             h.updateVotoPessoaData(cur_date, n_cc, elec_name); // Depois da pessoa votar envia a data
                             break;
                         } catch (ConnectException | ConnectIOException ce) {
-                            s.changeRMI();
+                            s.connectRMI();
                         }
                     }
                 }
@@ -400,8 +410,8 @@ class VoteReceiver extends Thread{
         MULTICAST_ADDRESS_VOTE = group;
     }
 
-    public void changeRMI(RMInterface h) {
-        // Altera a interface RMI caso haja ligação ao servidor secundário
+    public void setRMI(RMInterface h) {
+        // Define a interface RMI
         this.h = h;
     }
 
@@ -426,7 +436,7 @@ class VoteReceiver extends Thread{
                             h.recebeVoto(list_name, elec_name);
                             break;
                         } catch (ConnectException | ConnectIOException ce) {
-                            s.changeRMI();
+                            s.connectRMI();
                         }
                     }
                 }
@@ -450,8 +460,8 @@ class AdminNotifier extends Thread {
         this.s = s;
     }
 
-    public void changeRMI(RMInterface h) {
-        // Altera a interface RMI caso haja ligação ao servidor secundário
+    public void setRMI(RMInterface h) {
+        // Define a interface RMI
         this.h = h;
     }
 
@@ -460,7 +470,7 @@ class AdminNotifier extends Thread {
             try {
                 h.saveDep(s.getName());
             } catch (RemoteException ce) {
-                s.changeRMI();
+                s.connectRMI();
             } catch (NullPointerException e){
 
             }

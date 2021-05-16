@@ -69,6 +69,7 @@ public class PostgreSQLJDBC {
             myStmt.close();
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception e) {
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.exit(0);
@@ -126,6 +127,7 @@ public class PostgreSQLJDBC {
             myStmt.close();
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
@@ -157,8 +159,8 @@ public class PostgreSQLJDBC {
             
             //stmt.close();
             c.commit();
-            
-            return rs;
+            c.close();
+
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
@@ -189,8 +191,8 @@ public class PostgreSQLJDBC {
 
             //stmt.close();
             c.commit();
+            c.close();
 
-            return rs;
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
@@ -218,11 +220,43 @@ public class PostgreSQLJDBC {
 
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
         }
         return maxEleicao;
+
+    }
+
+
+    public int[] numEleicoesNaoComecadas() throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        int[] idEleicao = new int[10];
+        int i = 0;
+
+        try {
+            //Buscar o valor do último Id que está na tabela
+            stmt = c.createStatement();
+            String sqlIDEleicao = "SELECT id " + "FROM eleicao WHERE CURRENT_TIMESTAMP < data_inicio";
+            ResultSet rs = stmt.executeQuery(sqlIDEleicao);
+
+            while (rs.next()){
+                idEleicao[i] = rs.getInt(1);
+                i++;
+            }
+
+
+
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch (Exception ex) {
+            System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
+            System.exit(0);
+        }
+        return idEleicao;
 
     }
 
@@ -250,10 +284,10 @@ public class PostgreSQLJDBC {
             candidatos = rs;
 
             c.commit();
+            c.close();
+            //System.out.println("BD-entei");
 
-            System.out.println("BD-entei");
 
-            return rs;
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
@@ -286,6 +320,7 @@ public class PostgreSQLJDBC {
 
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
@@ -299,7 +334,6 @@ public class PostgreSQLJDBC {
         Statement stmt = null;
         PreparedStatement myStmt;
         ResultSet candidatos = null;
-
         try {
             //1->Preciso de verificar o tipo de eleicao (Estudante, Docente, Funcionário) e comparar com a funcao do aluno
             //2->Depois verificar em que departamento a eleicao vai ocorrer e comparar com o departamento da pessoa
@@ -318,18 +352,22 @@ public class PostgreSQLJDBC {
                 String sqlPessoasEleicao =  "SELECT pessoa.num_cc, pessoa.nome " +
                         "FROM pessoa " +
                         "WHERE pessoa.num_cc NOT IN (SELECT pessoa_lista_candidatos.pessoa_num_cc " +
-                                                    "FROM pessoa_lista_candidatos) " +
+                        "FROM pessoa_lista_candidatos WHERE pessoa_lista_candidatos.lista_candidatos_id NOT IN" +
+                        "(SELECT lista_candidatos.eleicao_id FROM lista_candidatos )) " +
                         "AND pessoa.departamento = '" + departamento + "' AND pessoa.funcao = '" + tipo + "'";
 
                 myStmt = c.prepareStatement(sqlPessoasEleicao);
 
                 ResultSet rs = stmt.executeQuery(sqlPessoasEleicao);
                 boolean val = rs.next();
-                if (val == true) return rs;
+                if(val == true){
+                    candidatos = rs;
+                    return candidatos;
+                }
                 candidatos = rs;
             }
             c.commit();
-
+            c.close();
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
@@ -359,6 +397,7 @@ public class PostgreSQLJDBC {
             myStmt.close();
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception e) {
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.exit(0);
@@ -397,11 +436,14 @@ public class PostgreSQLJDBC {
 
                     ResultSet rs = stmt.executeQuery(sqlPessoasEleicao);
                     boolean val = rs.next();
-                    if (val == true) return rs;
+                    if(val == true){
+                        elementosCandidatura = rs;
+                        return elementosCandidatura;
+                    }
                     elementosCandidatura = rs;
 
                     c.commit();
-
+                    c.close();
                 }
 
             }
@@ -430,6 +472,7 @@ public class PostgreSQLJDBC {
             myStmt.close();
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception e) {
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.exit(0);
@@ -464,8 +507,7 @@ public class PostgreSQLJDBC {
             AllelementosCandidatura = rs;
 
             c.commit();
-
-            return rs;
+            c.close();
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
@@ -495,8 +537,7 @@ public class PostgreSQLJDBC {
             detalhesEleicao = rs;
 
             c.commit();
-
-            return rs;
+            c.close();
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
@@ -520,6 +561,7 @@ public class PostgreSQLJDBC {
             myStmt.close();
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception e) {
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.exit(0);
@@ -542,8 +584,8 @@ public class PostgreSQLJDBC {
             //myStmt.close();
             //stmt.close();
             c.commit();
+            c.close();
 
-            return rs;
         } catch (Exception e) {
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.exit(0);
@@ -566,8 +608,8 @@ public class PostgreSQLJDBC {
             //myStmt.close();
             //stmt.close();
             c.commit();
+            c.close();
 
-            return rs;
         } catch (Exception e) {
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.exit(0);
@@ -590,8 +632,8 @@ public class PostgreSQLJDBC {
             //myStmt.close();
             //stmt.close();
             c.commit();
+            c.close();
 
-            return rs;
         } catch (Exception e) {
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.exit(0);
@@ -619,6 +661,7 @@ public class PostgreSQLJDBC {
 
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
@@ -646,6 +689,7 @@ public class PostgreSQLJDBC {
 
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
@@ -670,8 +714,8 @@ public class PostgreSQLJDBC {
             //myStmt.close();
             //stmt.close();
             c.commit();
+            c.close();
 
-            return rs;
         } catch (Exception e) {
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.exit(0);
@@ -696,8 +740,8 @@ public class PostgreSQLJDBC {
             //myStmt.close();
             //stmt.close();
             c.commit();
+            c.close();
 
-            return rs;
         } catch (Exception e) {
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.exit(0);
@@ -732,6 +776,7 @@ public class PostgreSQLJDBC {
             myStmt.close();
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception e) {
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.exit(0);
@@ -760,6 +805,7 @@ public class PostgreSQLJDBC {
 
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
@@ -790,6 +836,7 @@ public class PostgreSQLJDBC {
             myStmt.close();
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception e) {
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.exit(0);
@@ -815,6 +862,7 @@ public class PostgreSQLJDBC {
 
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
@@ -839,6 +887,7 @@ public class PostgreSQLJDBC {
             myStmt.close();
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception e) {
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.exit(0);
@@ -877,6 +926,7 @@ public class PostgreSQLJDBC {
 
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
@@ -904,6 +954,7 @@ public class PostgreSQLJDBC {
 
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
@@ -931,6 +982,7 @@ public class PostgreSQLJDBC {
 
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
@@ -967,6 +1019,7 @@ public class PostgreSQLJDBC {
 
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
@@ -993,6 +1046,7 @@ public class PostgreSQLJDBC {
 
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
@@ -1021,6 +1075,7 @@ public class PostgreSQLJDBC {
             myStmt.close();
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception e) {
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.exit(0);
@@ -1036,7 +1091,9 @@ public class PostgreSQLJDBC {
         ResultSet listaVotos = null;
         try {
             stmt = c.createStatement();
-            String sql = "SELECT * FROM voto ORDER BY id_voto";
+            String sql = "SELECT local_voto, hora_voto, pessoa_num_cc, nome, titulo FROM voto, pessoa, eleicao " +
+                    "WHERE pessoa_num_cc = num_cc AND eleicao_id = id " +
+                    "ORDER BY id_voto, eleicao_id";
 
             ResultSet rs = stmt.executeQuery(sql);
             listaVotos = rs;
@@ -1044,8 +1101,8 @@ public class PostgreSQLJDBC {
             //myStmt.close();
             //stmt.close();
             c.commit();
+            c.close();
 
-            return rs;
         } catch (Exception e) {
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.exit(0);
@@ -1068,8 +1125,8 @@ public class PostgreSQLJDBC {
             //myStmt.close();
             //stmt.close();
             c.commit();
+            c.close();
 
-            return rs;
         } catch (Exception e) {
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.exit(0);
@@ -1097,8 +1154,8 @@ public class PostgreSQLJDBC {
             //myStmt.close();
             //stmt.close();
             c.commit();
+            c.close();
 
-            return rs;
         } catch (Exception e) {
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.exit(0);
@@ -1124,6 +1181,7 @@ public class PostgreSQLJDBC {
             myStmt.close();
             stmt.close();
             c.commit();
+            c.close();
         } catch (Exception e) {
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.exit(0);
@@ -1166,7 +1224,7 @@ public class PostgreSQLJDBC {
             myStmt.close();
             stmt.close();
             c.commit();
-
+            c.close();
         } catch (Exception e) {
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.exit(0);
@@ -1184,7 +1242,7 @@ public class PostgreSQLJDBC {
             //Retorna todas as eleições a decorrer
             stmt = c.createStatement();
             String sqlIDEleicao = "SELECT eleicao.id, titulo, tipo, data_inicio, departamento " + "FROM eleicao, departamento " +
-                    "WHERE eleicao.id = departamento.eleicao_id AND CURRENT_TIMESTAMP NOT BETWEEN data_inicio AND data_fim ORDER BY eleicao.id";
+                    "WHERE eleicao.id = departamento.eleicao_id AND CURRENT_TIMESTAMP > data_fim ORDER BY eleicao.id";
             ResultSet rs = stmt.executeQuery(sqlIDEleicao);
 
             eleicoes = rs;
@@ -1195,8 +1253,8 @@ public class PostgreSQLJDBC {
 
             //stmt.close();
             c.commit();
+            c.close();
 
-            return rs;
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
@@ -1219,8 +1277,8 @@ public class PostgreSQLJDBC {
             //myStmt.close();
             //stmt.close();
             c.commit();
+            c.close();
 
-            return rs;
         } catch (Exception e) {
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.exit(0);
