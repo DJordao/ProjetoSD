@@ -1,7 +1,6 @@
 package com.company;
 
 import java.io.Serializable;
-import java.util.Date;
 
 public class Pessoa implements Serializable{
     private String nome;
@@ -24,6 +23,8 @@ public class Pessoa implements Serializable{
         this.num_cc = num_cc;
         this.data_validade_cc = data_validade_cc;
     }
+
+    public Pessoa(){ this(null, null, null, null, -1, null, null, null);}
 
     public String getNome() {
         return nome;

@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dataSource name="SD-DB">
-  <database-model serializer="dbm" dbms="POSTGRES" family-id="POSTGRES" format-version="4.20">
+  <database-model serializer="dbm" dbms="POSTGRES" family-id="POSTGRES" format-version="4.21">
     <root id="1">
       <ServerVersion>13.2</ServerVersion>
-      <DateStyle>mdy</DateStyle>
+      <Grants>1||-9223372036854775808|c|G
+1||10|c|G
+1||10|C|G
+1||10|T|G
+13441||-9223372036854775808|c|G
+13441||10|c|G
+13441||10|C|G
+13441||10|T|G</Grants>
+      <DateStyle>dmy</DateStyle>
       <TimeZones>true ACDT
 true ACSST
 false ACST
@@ -45,14 +53,14 @@ false Africa/Blantyre
 false Africa/Brazzaville
 false Africa/Bujumbura
 false Africa/Cairo
-true Africa/Casablanca
+false Africa/Casablanca
 true Africa/Ceuta
 false Africa/Conakry
 false Africa/Dakar
 false Africa/Dar_es_Salaam
 false Africa/Djibouti
 false Africa/Douala
-true Africa/El_Aaiun
+false Africa/El_Aaiun
 false Africa/Freetown
 false Africa/Gaborone
 false Africa/Harare
@@ -784,52 +792,72 @@ false YEKT
 false Z
 false Zulu
 </TimeZones>
-      <StartupTime>1620552086</StartupTime>
+      <StartupTime>1621118324</StartupTime>
     </root>
     <database id="2" parent="1" name="SD-Project">
-      <ObjectId>16447</ObjectId>
+      <ObjectId>32903</ObjectId>
+      <Grants>11||10|C|G
+11||-9223372036854775808|U|G
+11||10|U|G
+2200||-9223372036854775808|C|G
+2200||10|C|G
+2200||-9223372036854775808|U|G
+2200||10|U|G
+13158||10|C|G
+13158||-9223372036854775808|U|G
+13158||10|U|G</Grants>
       <Owner>postgres</Owner>
-      <IntrospectionStateNumber>1144</IntrospectionStateNumber>
+      <IntrospectionStateNumber>847</IntrospectionStateNumber>
       <Current>1</Current>
+      <Relations>sequence|table|33102|32909|1
+sequence|table|33105|32917|1
+</Relations>
     </database>
     <database id="3" parent="1" name="dbfichas">
-      <ObjectId>16395</ObjectId>
+      <ObjectId>16394</ObjectId>
       <Owner>postgres</Owner>
     </database>
     <database id="4" parent="1" name="postgres">
-      <ObjectId>13707</ObjectId>
+      <ObjectId>13442</ObjectId>
       <Comment>default administrative connection database</Comment>
       <Owner>postgres</Owner>
     </database>
-    <role id="5" parent="1" name="aulaspl">
-      <ObjectId>16396</ObjectId>
+    <database id="5" parent="1" name="tpcc">
+      <ObjectId>32971</ObjectId>
+      <Owner>postgres</Owner>
+    </database>
+    <role id="6" parent="1" name="aulaspl">
+      <ObjectId>16395</ObjectId>
       <CanLogin>1</CanLogin>
     </role>
-    <role id="6" parent="1" name="pg_execute_server_program">
+    <role id="7" parent="1" name="pg_execute_server_program">
       <ObjectId>4571</ObjectId>
     </role>
-    <role id="7" parent="1" name="pg_monitor">
+    <role id="8" parent="1" name="pg_monitor">
       <ObjectId>3373</ObjectId>
+      <RoleGrants>3374
+3375
+3377</RoleGrants>
     </role>
-    <role id="8" parent="1" name="pg_read_all_settings">
+    <role id="9" parent="1" name="pg_read_all_settings">
       <ObjectId>3374</ObjectId>
     </role>
-    <role id="9" parent="1" name="pg_read_all_stats">
+    <role id="10" parent="1" name="pg_read_all_stats">
       <ObjectId>3375</ObjectId>
     </role>
-    <role id="10" parent="1" name="pg_read_server_files">
+    <role id="11" parent="1" name="pg_read_server_files">
       <ObjectId>4569</ObjectId>
     </role>
-    <role id="11" parent="1" name="pg_signal_backend">
+    <role id="12" parent="1" name="pg_signal_backend">
       <ObjectId>4200</ObjectId>
     </role>
-    <role id="12" parent="1" name="pg_stat_scan_tables">
+    <role id="13" parent="1" name="pg_stat_scan_tables">
       <ObjectId>3377</ObjectId>
     </role>
-    <role id="13" parent="1" name="pg_write_server_files">
+    <role id="14" parent="1" name="pg_write_server_files">
       <ObjectId>4570</ObjectId>
     </role>
-    <role id="14" parent="1" name="postgres">
+    <role id="15" parent="1" name="postgres">
       <ObjectId>10</ObjectId>
       <SuperRole>1</SuperRole>
       <CreateDb>1</CreateDb>
@@ -838,68 +866,63 @@ false Zulu
       <Replication>1</Replication>
       <BypassRls>1</BypassRls>
     </role>
-    <tablespace id="15" parent="1" name="pg_default">
+    <role id="16" parent="1" name="tpcc">
+      <ObjectId>32972</ObjectId>
+      <CanLogin>1</CanLogin>
+    </role>
+    <tablespace id="17" parent="1" name="pg_default">
       <ObjectId>1663</ObjectId>
       <Owner>postgres</Owner>
       <StateNumber>1</StateNumber>
     </tablespace>
-    <tablespace id="16" parent="1" name="pg_global">
+    <tablespace id="18" parent="1" name="pg_global">
       <ObjectId>1664</ObjectId>
       <Owner>postgres</Owner>
       <StateNumber>1</StateNumber>
     </tablespace>
-    <schema id="17" parent="2" name="information_schema">
-      <ObjectId>13423</ObjectId>
-      <Acl>10=UC/10
-U/10
-</Acl>
+    <schema id="19" parent="2" name="information_schema">
+      <ObjectId>13158</ObjectId>
       <StateNumber>293</StateNumber>
       <Owner>postgres</Owner>
     </schema>
-    <schema id="18" parent="2" name="pg_catalog">
+    <schema id="20" parent="2" name="pg_catalog">
       <ObjectId>11</ObjectId>
       <Comment>system catalog schema</Comment>
-      <Acl>10=UC/10
-U/10
-</Acl>
       <StateNumber>286</StateNumber>
       <Owner>postgres</Owner>
     </schema>
-    <schema id="19" parent="2" name="public">
+    <schema id="21" parent="2" name="public">
       <ObjectId>2200</ObjectId>
       <Comment>standard public schema</Comment>
-      <Acl>10=UC/10
-UC/10
-</Acl>
       <StateNumber>287</StateNumber>
       <Owner>postgres</Owner>
-      <IntrospectionStateNumber>1145</IntrospectionStateNumber>
+      <IntrospectionStateNumber>848</IntrospectionStateNumber>
       <Current>1</Current>
     </schema>
-    <extension id="20" parent="2" name="plpgsql">
-      <ObjectId>13693</ObjectId>
+    <extension id="22" parent="2" name="plpgsql">
+      <ObjectId>13428</ObjectId>
       <Comment>PL/pgSQL procedural language</Comment>
       <StateNumber>439</StateNumber>
       <Version>1.0</Version>
       <SchemaName>pg_catalog</SchemaName>
       <SchemaId>11</SchemaId>
     </extension>
-    <language id="21" parent="2" name="c">
+    <language id="23" parent="2" name="c">
       <ObjectId>13</ObjectId>
       <Comment>dynamically-loaded C functions</Comment>
       <StateNumber>1</StateNumber>
       <ValidatorName>fmgr_c_validator</ValidatorName>
       <ValidatorSchema>pg_catalog</ValidatorSchema>
     </language>
-    <language id="22" parent="2" name="internal">
+    <language id="24" parent="2" name="internal">
       <ObjectId>12</ObjectId>
       <Comment>built-in functions</Comment>
       <StateNumber>1</StateNumber>
       <ValidatorName>fmgr_internal_validator</ValidatorName>
       <ValidatorSchema>pg_catalog</ValidatorSchema>
     </language>
-    <language id="23" parent="2" name="plpgsql">
-      <ObjectId>13697</ObjectId>
+    <language id="25" parent="2" name="plpgsql">
+      <ObjectId>13432</ObjectId>
       <Comment>PL/pgSQL procedural language</Comment>
       <StateNumber>439</StateNumber>
       <Trusted>1</Trusted>
@@ -910,7 +933,7 @@ UC/10
       <ValidatorName>plpgsql_validator</ValidatorName>
       <ValidatorSchema>pg_catalog</ValidatorSchema>
     </language>
-    <language id="24" parent="2" name="sql">
+    <language id="26" parent="2" name="sql">
       <ObjectId>14</ObjectId>
       <Comment>SQL-language functions</Comment>
       <StateNumber>1</StateNumber>
@@ -918,14 +941,14 @@ UC/10
       <ValidatorName>fmgr_sql_validator</ValidatorName>
       <ValidatorSchema>pg_catalog</ValidatorSchema>
     </language>
-    <access-method id="25" parent="2" name="heap">
+    <access-method id="27" parent="2" name="heap">
       <ObjectId>2</ObjectId>
       <Comment>heap table access method</Comment>
       <StateNumber>1</StateNumber>
       <Handler>pg_catalog.heap_tableam_handler</Handler>
       <HandlerId>3</HandlerId>
     </access-method>
-    <access-method id="26" parent="2" name="btree">
+    <access-method id="28" parent="2" name="btree">
       <ObjectId>403</ObjectId>
       <Comment>b-tree index access method</Comment>
       <StateNumber>1</StateNumber>
@@ -933,7 +956,7 @@ UC/10
       <HandlerId>330</HandlerId>
       <Type>index</Type>
     </access-method>
-    <access-method id="27" parent="2" name="hash">
+    <access-method id="29" parent="2" name="hash">
       <ObjectId>405</ObjectId>
       <Comment>hash index access method</Comment>
       <StateNumber>1</StateNumber>
@@ -941,7 +964,7 @@ UC/10
       <HandlerId>331</HandlerId>
       <Type>index</Type>
     </access-method>
-    <access-method id="28" parent="2" name="gist">
+    <access-method id="30" parent="2" name="gist">
       <ObjectId>783</ObjectId>
       <Comment>GiST index access method</Comment>
       <StateNumber>1</StateNumber>
@@ -949,7 +972,7 @@ UC/10
       <HandlerId>332</HandlerId>
       <Type>index</Type>
     </access-method>
-    <access-method id="29" parent="2" name="gin">
+    <access-method id="31" parent="2" name="gin">
       <ObjectId>2742</ObjectId>
       <Comment>GIN index access method</Comment>
       <StateNumber>1</StateNumber>
@@ -957,7 +980,7 @@ UC/10
       <HandlerId>333</HandlerId>
       <Type>index</Type>
     </access-method>
-    <access-method id="30" parent="2" name="spgist">
+    <access-method id="32" parent="2" name="spgist">
       <ObjectId>4000</ObjectId>
       <Comment>SP-GiST index access method</Comment>
       <StateNumber>1</StateNumber>
@@ -965,7 +988,7 @@ UC/10
       <HandlerId>334</HandlerId>
       <Type>index</Type>
     </access-method>
-    <access-method id="31" parent="2" name="brin">
+    <access-method id="33" parent="2" name="brin">
       <ObjectId>3580</ObjectId>
       <Comment>block range index (BRIN) access method</Comment>
       <StateNumber>1</StateNumber>
@@ -973,59 +996,71 @@ UC/10
       <HandlerId>335</HandlerId>
       <Type>index</Type>
     </access-method>
-    <table id="32" parent="19" name="departamento">
-      <ObjectId>16609</ObjectId>
+    <sequence id="34" parent="21" name="eleicao_id_seq">
+      <ObjectId>33102</ObjectId>
       <Owner>postgres</Owner>
-      <StateNumber>760</StateNumber>
-    </table>
-    <table id="33" parent="19" name="eleicao">
-      <ObjectId>16527</ObjectId>
+      <StateNumber>826</StateNumber>
+      <DataType>bigint|0s</DataType>
+    </sequence>
+    <sequence id="35" parent="21" name="lista_candidatos_id_seq">
+      <ObjectId>33105</ObjectId>
       <Owner>postgres</Owner>
-      <StateNumber>608</StateNumber>
-    </table>
-    <table id="34" parent="19" name="lista_candidatos">
-      <ObjectId>16535</ObjectId>
+      <StateNumber>838</StateNumber>
+      <DataType>bigint|0s</DataType>
+    </sequence>
+    <table id="36" parent="21" name="departamento">
+      <ObjectId>32943</ObjectId>
       <Owner>postgres</Owner>
-      <StateNumber>693</StateNumber>
+      <StateNumber>640</StateNumber>
     </table>
-    <table id="35" parent="19" name="pessoa">
-      <ObjectId>16522</ObjectId>
+    <table id="37" parent="21" name="eleicao">
+      <ObjectId>32909</ObjectId>
       <Owner>postgres</Owner>
-      <StateNumber>593</StateNumber>
+      <StateNumber>640</StateNumber>
     </table>
-    <table id="36" parent="19" name="pessoa_lista_candidatos">
-      <ObjectId>16540</ObjectId>
+    <table id="38" parent="21" name="lista_candidatos">
+      <ObjectId>32917</ObjectId>
       <Owner>postgres</Owner>
-      <StateNumber>573</StateNumber>
+      <StateNumber>640</StateNumber>
     </table>
-    <table id="37" parent="19" name="voto">
-      <ObjectId>16593</ObjectId>
+    <table id="39" parent="21" name="pessoa">
+      <ObjectId>32904</ObjectId>
       <Owner>postgres</Owner>
-      <StateNumber>660</StateNumber>
+      <StateNumber>640</StateNumber>
     </table>
-    <column id="38" parent="32" name="id">
+    <table id="40" parent="21" name="pessoa_lista_candidatos">
+      <ObjectId>32953</ObjectId>
+      <Owner>postgres</Owner>
+      <StateNumber>640</StateNumber>
+    </table>
+    <table id="41" parent="21" name="voto">
+      <ObjectId>32928</ObjectId>
+      <Owner>postgres</Owner>
+      <StateNumber>640</StateNumber>
+    </table>
+    <column id="42" parent="36" name="id">
       <Position>1</Position>
       <DataType>bigint|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>802</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>20</TypeId>
     </column>
-    <column id="39" parent="32" name="departamento">
+    <column id="43" parent="36" name="departamento">
       <Position>2</Position>
       <DataType>varchar(20)|0s</DataType>
-      <StateNumber>759</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="40" parent="32" name="eleicao_id">
+    <column id="44" parent="36" name="eleicao_id">
       <Position>3</Position>
       <DataType>bigint|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>759</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>20</TypeId>
     </column>
-    <index id="41" parent="32" name="departamento_pkey">
-      <ObjectId>16612</ObjectId>
-      <StateNumber>759</StateNumber>
+    <index id="45" parent="36" name="departamento_pkey">
+      <ObjectId>32946</ObjectId>
+      <StateNumber>640</StateNumber>
       <ColNames>id</ColNames>
       <Unique>1</Unique>
       <Primary>1</Primary>
@@ -1033,74 +1068,75 @@ UC/10
       <CollationIds>0</CollationIds>
       <ClassIds>3124</ClassIds>
     </index>
-    <key id="42" parent="32" name="departamento_pkey">
-      <ObjectId>16613</ObjectId>
-      <StateNumber>759</StateNumber>
+    <key id="46" parent="36" name="departamento_pkey">
+      <ObjectId>32947</ObjectId>
+      <StateNumber>640</StateNumber>
       <ColNames>id</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>departamento_pkey</UnderlyingIndexName>
     </key>
-    <foreign-key id="43" parent="32" name="departamento_fk1">
-      <ObjectId>16614</ObjectId>
-      <StateNumber>760</StateNumber>
+    <foreign-key id="47" parent="36" name="departamento_fk1">
+      <ObjectId>32948</ObjectId>
+      <StateNumber>640</StateNumber>
       <ColNames>eleicao_id</ColNames>
-      <RefTableId>16527</RefTableId>
+      <RefTableId>32909</RefTableId>
       <RefColPositions>1</RefColPositions>
       <RefTableName>eleicao</RefTableName>
       <RefKeyName>eleicao_pkey</RefKeyName>
       <RefColNames>id</RefColNames>
     </foreign-key>
-    <column id="44" parent="33" name="id">
+    <column id="48" parent="37" name="id">
       <Position>1</Position>
       <DataType>bigint|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>573</StateNumber>
+      <StateNumber>827</StateNumber>
+      <DefaultExpression>nextval(&apos;eleicao_id_seq&apos;::regclass)</DefaultExpression>
       <TypeId>20</TypeId>
     </column>
-    <column id="45" parent="33" name="data_inicio">
+    <column id="49" parent="37" name="data_inicio">
       <Position>2</Position>
       <DataType>timestamp(0) with time zone|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>608</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>1184</TypeId>
     </column>
-    <column id="46" parent="33" name="data_fim">
+    <column id="50" parent="37" name="data_fim">
       <Position>3</Position>
       <DataType>timestamp(0) with time zone|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>608</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>1184</TypeId>
     </column>
-    <column id="47" parent="33" name="titulo">
+    <column id="51" parent="37" name="titulo">
       <Position>4</Position>
       <DataType>varchar(100)|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>573</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="48" parent="33" name="descricao">
+    <column id="52" parent="37" name="descricao">
       <Position>5</Position>
       <DataType>varchar(512)|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>573</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="49" parent="33" name="tipo">
+    <column id="53" parent="37" name="tipo">
       <Position>6</Position>
       <DataType>varchar(100)|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>573</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="50" parent="33" name="resultado">
-      <Position>8</Position>
+    <column id="54" parent="37" name="resultado">
+      <Position>7</Position>
       <DataType>integer|0s</DataType>
-      <StateNumber>573</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>23</TypeId>
     </column>
-    <index id="51" parent="33" name="eleicao_pkey">
-      <ObjectId>16533</ObjectId>
-      <StateNumber>608</StateNumber>
+    <index id="55" parent="37" name="eleicao_pkey">
+      <ObjectId>32915</ObjectId>
+      <StateNumber>640</StateNumber>
       <ColNames>id</ColNames>
       <Unique>1</Unique>
       <Primary>1</Primary>
@@ -1108,51 +1144,52 @@ UC/10
       <CollationIds>0</CollationIds>
       <ClassIds>3124</ClassIds>
     </index>
-    <key id="52" parent="33" name="eleicao_pkey">
-      <ObjectId>16534</ObjectId>
-      <StateNumber>573</StateNumber>
+    <key id="56" parent="37" name="eleicao_pkey">
+      <ObjectId>32916</ObjectId>
+      <StateNumber>640</StateNumber>
       <ColNames>id</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>eleicao_pkey</UnderlyingIndexName>
     </key>
-    <column id="53" parent="34" name="id">
+    <column id="57" parent="38" name="id">
       <Position>1</Position>
       <DataType>bigint|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>573</StateNumber>
+      <StateNumber>839</StateNumber>
+      <DefaultExpression>nextval(&apos;lista_candidatos_id_seq&apos;::regclass)</DefaultExpression>
       <TypeId>20</TypeId>
     </column>
-    <column id="54" parent="34" name="nomecandidato">
+    <column id="58" parent="38" name="nomecandidato">
       <Position>2</Position>
       <DataType>varchar(50)|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>573</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="55" parent="34" name="categoria">
+    <column id="59" parent="38" name="categoria">
       <Position>3</Position>
       <DataType>varchar(30)|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>573</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="56" parent="34" name="eleicao_id">
+    <column id="60" parent="38" name="eleicao_id">
       <Position>4</Position>
       <DataType>bigint|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>573</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>20</TypeId>
     </column>
-    <column id="57" parent="34" name="num_votos">
+    <column id="61" parent="38" name="num_votos">
       <Position>5</Position>
       <DataType>integer|0s</DataType>
-      <StateNumber>693</StateNumber>
+      <StateNumber>640</StateNumber>
       <DefaultExpression>0</DefaultExpression>
       <TypeId>23</TypeId>
     </column>
-    <index id="58" parent="34" name="lista_candidatos_pkey">
-      <ObjectId>16538</ObjectId>
-      <StateNumber>573</StateNumber>
+    <index id="62" parent="38" name="lista_candidatos_pkey">
+      <ObjectId>32921</ObjectId>
+      <StateNumber>640</StateNumber>
       <ColNames>id</ColNames>
       <Unique>1</Unique>
       <Primary>1</Primary>
@@ -1160,82 +1197,82 @@ UC/10
       <CollationIds>0</CollationIds>
       <ClassIds>3124</ClassIds>
     </index>
-    <key id="59" parent="34" name="lista_candidatos_pkey">
-      <ObjectId>16539</ObjectId>
-      <StateNumber>573</StateNumber>
+    <key id="63" parent="38" name="lista_candidatos_pkey">
+      <ObjectId>32922</ObjectId>
+      <StateNumber>640</StateNumber>
       <ColNames>id</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>lista_candidatos_pkey</UnderlyingIndexName>
     </key>
-    <foreign-key id="60" parent="34" name="lista_candidatos_fk1">
-      <ObjectId>16545</ObjectId>
-      <StateNumber>573</StateNumber>
+    <foreign-key id="64" parent="38" name="lista_candidatos_fk1">
+      <ObjectId>32923</ObjectId>
+      <StateNumber>640</StateNumber>
       <ColNames>eleicao_id</ColNames>
-      <RefTableId>16527</RefTableId>
+      <RefTableId>32909</RefTableId>
       <RefColPositions>1</RefColPositions>
       <RefTableName>eleicao</RefTableName>
       <RefKeyName>eleicao_pkey</RefKeyName>
       <RefColNames>id</RefColNames>
     </foreign-key>
-    <column id="61" parent="35" name="num_cc">
+    <column id="65" parent="39" name="num_cc">
       <Position>1</Position>
       <DataType>varchar(8)|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>573</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="62" parent="35" name="nome">
+    <column id="66" parent="39" name="nome">
       <Position>2</Position>
       <DataType>varchar(50)|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>573</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="63" parent="35" name="password">
+    <column id="67" parent="39" name="password">
       <Position>3</Position>
       <DataType>varchar(30)|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>573</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="64" parent="35" name="funcao">
+    <column id="68" parent="39" name="funcao">
       <Position>4</Position>
       <DataType>varchar(20)|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>573</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="65" parent="35" name="departamento">
+    <column id="69" parent="39" name="departamento">
       <Position>5</Position>
       <DataType>varchar(15)|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>573</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="66" parent="35" name="num_telefone">
+    <column id="70" parent="39" name="num_telefone">
       <Position>6</Position>
       <DataType>numeric(9)|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>593</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>1700</TypeId>
     </column>
-    <column id="67" parent="35" name="morada">
+    <column id="71" parent="39" name="morada">
       <Position>7</Position>
       <DataType>varchar(100)|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>573</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="68" parent="35" name="data_validade">
+    <column id="72" parent="39" name="data_validade">
       <Position>8</Position>
       <DataType>date|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>573</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>1082</TypeId>
     </column>
-    <index id="69" parent="35" name="pessoa_pkey1">
-      <ObjectId>16525</ObjectId>
-      <StateNumber>593</StateNumber>
+    <index id="73" parent="39" name="pessoa_pkey1">
+      <ObjectId>32907</ObjectId>
+      <StateNumber>640</StateNumber>
       <ColNames>num_cc</ColNames>
       <Unique>1</Unique>
       <Primary>1</Primary>
@@ -1244,84 +1281,84 @@ UC/10
       <CollationNames>default</CollationNames>
       <ClassIds>3126</ClassIds>
     </index>
-    <key id="70" parent="35" name="pessoa_pkey1">
-      <ObjectId>16526</ObjectId>
-      <StateNumber>573</StateNumber>
+    <key id="74" parent="39" name="pessoa_pkey1">
+      <ObjectId>32908</ObjectId>
+      <StateNumber>640</StateNumber>
       <ColNames>num_cc</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>pessoa_pkey1</UnderlyingIndexName>
     </key>
-    <column id="71" parent="36" name="pessoa_num_cc">
+    <column id="75" parent="40" name="pessoa_num_cc">
       <Position>1</Position>
       <DataType>varchar(8)|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>573</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="72" parent="36" name="lista_candidatos_id">
+    <column id="76" parent="40" name="lista_candidatos_id">
       <Position>2</Position>
       <DataType>bigint|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>573</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>20</TypeId>
     </column>
-    <foreign-key id="73" parent="36" name="pessoa_lista_candidatos_fk1">
-      <ObjectId>16550</ObjectId>
-      <StateNumber>573</StateNumber>
+    <foreign-key id="77" parent="40" name="pessoa_lista_candidatos_fk1">
+      <ObjectId>32956</ObjectId>
+      <StateNumber>640</StateNumber>
       <ColNames>pessoa_num_cc</ColNames>
-      <RefTableId>16522</RefTableId>
+      <RefTableId>32904</RefTableId>
       <RefColPositions>1</RefColPositions>
       <RefTableName>pessoa</RefTableName>
       <RefKeyName>pessoa_pkey1</RefKeyName>
       <RefColNames>num_cc</RefColNames>
     </foreign-key>
-    <foreign-key id="74" parent="36" name="pessoa_lista_candidatos_fk2">
-      <ObjectId>16555</ObjectId>
-      <StateNumber>573</StateNumber>
+    <foreign-key id="78" parent="40" name="pessoa_lista_candidatos_fk2">
+      <ObjectId>32961</ObjectId>
+      <StateNumber>640</StateNumber>
       <ColNames>lista_candidatos_id</ColNames>
-      <RefTableId>16535</RefTableId>
+      <RefTableId>32917</RefTableId>
       <RefColPositions>1</RefColPositions>
       <RefTableName>lista_candidatos</RefTableName>
       <RefKeyName>lista_candidatos_pkey</RefKeyName>
       <RefColNames>id</RefColNames>
     </foreign-key>
-    <column id="75" parent="37" name="id_voto">
+    <column id="79" parent="41" name="id_voto">
       <Position>1</Position>
       <DataType>integer|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>665</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>23</TypeId>
     </column>
-    <column id="76" parent="37" name="local_voto">
+    <column id="80" parent="41" name="local_voto">
       <Position>2</Position>
       <DataType>varchar(20)|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>668</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="77" parent="37" name="hora_voto">
+    <column id="81" parent="41" name="hora_voto">
       <Position>3</Position>
       <DataType>timestamp|0s</DataType>
-      <StateNumber>703</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>1114</TypeId>
     </column>
-    <column id="78" parent="37" name="eleicao_id">
+    <column id="82" parent="41" name="eleicao_id">
       <Position>4</Position>
       <DataType>bigint|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>659</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>20</TypeId>
     </column>
-    <column id="79" parent="37" name="pessoa_num_cc">
+    <column id="83" parent="41" name="pessoa_num_cc">
       <Position>5</Position>
       <DataType>varchar(8)|0s</DataType>
       <NotNull>1</NotNull>
-      <StateNumber>659</StateNumber>
+      <StateNumber>640</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <index id="80" parent="37" name="voto_pkey">
-      <ObjectId>16596</ObjectId>
-      <StateNumber>659</StateNumber>
+    <index id="84" parent="41" name="voto_pkey">
+      <ObjectId>32931</ObjectId>
+      <StateNumber>640</StateNumber>
       <ColNames>id_voto</ColNames>
       <Unique>1</Unique>
       <Primary>1</Primary>
@@ -1329,28 +1366,28 @@ UC/10
       <CollationIds>0</CollationIds>
       <ClassIds>1978</ClassIds>
     </index>
-    <key id="81" parent="37" name="voto_pkey">
-      <ObjectId>16597</ObjectId>
-      <StateNumber>659</StateNumber>
+    <key id="85" parent="41" name="voto_pkey">
+      <ObjectId>32932</ObjectId>
+      <StateNumber>640</StateNumber>
       <ColNames>id_voto</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>voto_pkey</UnderlyingIndexName>
     </key>
-    <foreign-key id="82" parent="37" name="voto_fk1">
-      <ObjectId>16598</ObjectId>
-      <StateNumber>660</StateNumber>
+    <foreign-key id="86" parent="41" name="voto_fk1">
+      <ObjectId>32933</ObjectId>
+      <StateNumber>640</StateNumber>
       <ColNames>eleicao_id</ColNames>
-      <RefTableId>16527</RefTableId>
+      <RefTableId>32909</RefTableId>
       <RefColPositions>1</RefColPositions>
       <RefTableName>eleicao</RefTableName>
       <RefKeyName>eleicao_pkey</RefKeyName>
       <RefColNames>id</RefColNames>
     </foreign-key>
-    <foreign-key id="83" parent="37" name="voto_fk2">
-      <ObjectId>16603</ObjectId>
-      <StateNumber>660</StateNumber>
+    <foreign-key id="87" parent="41" name="voto_fk2">
+      <ObjectId>32938</ObjectId>
+      <StateNumber>640</StateNumber>
       <ColNames>pessoa_num_cc</ColNames>
-      <RefTableId>16522</RefTableId>
+      <RefTableId>32904</RefTableId>
       <RefColPositions>1</RefColPositions>
       <RefTableName>pessoa</RefTableName>
       <RefKeyName>pessoa_pkey1</RefKeyName>

@@ -498,7 +498,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 											// Listar pessoas aptas para serem adicionadas a essa candidatura
 
 											System.out.println("\t\t\tADICIONAR PESSOAS A UMA CANDIDATURA ");
-											numCCListaCandidatos = h.ListaPessoasParaCandidatura(opcaoEleicao);
+											numCCListaCandidatos = h.ListaPessoasParaCandidatura();
 
 											break;
 										case "3":
@@ -634,7 +634,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 															}
 														}
 														if (valido > 0){ //O numero que inseriu foi o correto agora vamos removê-lo
-															h.RemovePessoaCandidatura(num_cc, nomeLista);
+															h.RemovePessoaCandidatura(num_cc);
 															break;
 														}else{
 															System.out.println("Insira numero de CC a remover válido: ");
@@ -712,7 +712,7 @@ public class AdminConsole extends UnicastRemoteObject implements AdminConsoleInt
 														if (e.getTipoEleicao().equals(tipoEleicao)){	//Pode adicionar
 															System.out.println("entrei na eleicao");
 															Candidato c = new Candidato(nomenovoCandidato, tipoEleicao, null);
-															h.criaNovoCandidato(maxCandidato + 1, c, opcaoEleicao);
+															h.criaNovoCandidato(c, opcaoEleicao);
 															break;
 														}else{
 															System.out.println("Insira uma eleição do tipo " + tipoEleicao);

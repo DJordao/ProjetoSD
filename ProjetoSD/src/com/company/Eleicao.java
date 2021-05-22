@@ -1,8 +1,6 @@
 package com.company;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Eleicao implements Serializable{
@@ -26,6 +24,10 @@ public class Eleicao implements Serializable{
         this.listaCandidatos.add(new Candidato("Branco", tipoEleicao, null));
         this.listaCandidatos.add(new Candidato("Nulo", tipoEleicao, null));
         this.resultado = resultado;
+    }
+
+    public Eleicao() {
+        this(null, null, null, null, null, null, -1);
     }
 
     public String getData_inicio() {

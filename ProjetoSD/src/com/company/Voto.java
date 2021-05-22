@@ -17,6 +17,8 @@ public class Voto implements Serializable {
         this.horaVoto = horaVoto;
     }
 
+    public Voto() {this(null, null, null, null);}
+
     public String getEleicaoID() {
         return eleicaoID;
     }

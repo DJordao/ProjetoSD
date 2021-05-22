@@ -8,6 +8,7 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -21,7 +22,7 @@ public class PostgreSQLJDBC {
             Class.forName("org.postgresql.Driver");
             c = DriverManager
                     .getConnection("jdbc:postgresql://localhost:5432/SD-Project",
-                            "postgres", "josemiguel1910");
+                            "postgres", "postgres");
             c.setAutoCommit(false);
             //System.out.println("Opened database successfully");
 
@@ -167,6 +168,101 @@ public class PostgreSQLJDBC {
         }
         //System.out.println("Eleição Criada com sucesso");
         return eleicoes;
+    }
+
+    public ArrayList<Integer> listaEleicoesNaoComecadasSpring() throws SQLClientInfoException {
+
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt;
+        ArrayList<Integer> listaIDEleicao = new ArrayList<>();
+
+        try {
+            //Retorna todas as eleições a decorrer
+            stmt = c.createStatement();
+            String sqlIDEleicao = "SELECT eleicao.id, titulo, tipo, data_inicio " + "FROM eleicao " +
+                    "WHERE CURRENT_TIMESTAMP < data_inicio  ORDER BY eleicao.id";
+            ResultSet rs = stmt.executeQuery(sqlIDEleicao);
+
+            int eleicaoId;
+            String titulo, tipo;
+
+
+            boolean val = rs.next();
+            if (val == false) return listaIDEleicao;
+            else{
+                while (val){
+                    eleicaoId = rs.getInt(1);
+                    listaIDEleicao.add(eleicaoId);
+
+                    val = rs.next();
+                }
+            }
+            //stmt.close();
+            c.commit();
+            c.close();
+
+        } catch (Exception ex) {
+            System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
+            System.exit(0);
+        }
+        //System.out.println("Eleição Criada com sucesso");
+        return listaIDEleicao;
+    }
+
+    public ArrayList<Integer> getEleicoesparaVotoSpring(Pessoa p) throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt;
+        ArrayList<Integer> IDlistaEleicoesdisponiveis = new ArrayList<>();
+
+        System.out.println("FUNCAO: " + p.getFuncao());
+
+        try {
+            //Retorna todas as eleições a decorrer
+            stmt = c.createStatement();
+            String sqlEleioesDisponiveis = "SELECT  DISTINCT id, titulo FROM eleicao, voto WHERE tipo = '" + p.getFuncao() + "' AND CURRENT_TIMESTAMP BETWEEN data_inicio AND data_fim" +
+                    " AND '" + p.getNum_cc()+ "' NOT IN (SELECT pessoa_num_cc FROM voto where eleicao_id = id) order by id";
+
+            ResultSet rs = stmt.executeQuery(sqlEleioesDisponiveis);
+
+            String titulo, nome;
+            int num_cc, id;
+
+            String num_ccPessoa;
+
+
+            boolean val = rs.next();
+            if (val == false){ //Se retornar FALSE significa que nao ha eleicoes
+
+                System.out.println("É NULL");
+                return IDlistaEleicoesdisponiveis;
+            }
+            else{
+                while (val) {
+                    id = rs.getInt(1);
+                    titulo = rs.getString("titulo");
+
+
+                    IDlistaEleicoesdisponiveis.add(id);
+                    val = rs.next();
+
+                }
+
+            }
+
+
+            c.commit();
+            c.close();
+
+        } catch (Exception ex) {
+            System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
+            System.exit(0);
+        }
+
+
+        return IDlistaEleicoesdisponiveis;
+
     }
 
     public ResultSet listaEleicoesNaoComecadas() throws SQLClientInfoException {
@@ -329,7 +425,7 @@ public class PostgreSQLJDBC {
 
     }
 
-    public ResultSet listaPessoasParaCandidatura(int opcaoEleicao) throws SQLClientInfoException{
+    public ResultSet listaPessoasParaCandidatura() throws SQLClientInfoException{
         Connection c = connectDB();
         Statement stmt = null;
         PreparedStatement myStmt;
@@ -340,32 +436,18 @@ public class PostgreSQLJDBC {
             //Se verificar estas 2 condições é feito o display da pessoa            stmt = c.createStatement();
 
             //Obter o Tipo e Departamento da Eleicao
-            String[] listaTipoDep =  getTipoEleicaoAndDepartamento(opcaoEleicao);
-            for (int i = 0; i < listaTipoDep.length; i++){
-                String[] output = listaTipoDep[i].split(" ");
-                String tipo = output[0];
-                String departamento = output[1];
-
                 stmt = c.createStatement();
 
 
                 String sqlPessoasEleicao =  "SELECT pessoa.num_cc, pessoa.nome " +
-                        "FROM pessoa " +
-                        "WHERE pessoa.num_cc NOT IN (SELECT pessoa_lista_candidatos.pessoa_num_cc " +
-                        "FROM pessoa_lista_candidatos WHERE pessoa_lista_candidatos.lista_candidatos_id NOT IN" +
-                        "(SELECT lista_candidatos.eleicao_id FROM lista_candidatos )) " +
-                        "AND pessoa.departamento = '" + departamento + "' AND pessoa.funcao = '" + tipo + "'";
+                        "FROM pessoa WHERE pessoa.num_cc NOT IN " +
+                        "(SELECT pessoa_lista_candidatos.pessoa_num_cc FROM pessoa_lista_candidatos) ";
 
                 myStmt = c.prepareStatement(sqlPessoasEleicao);
 
                 ResultSet rs = stmt.executeQuery(sqlPessoasEleicao);
-                boolean val = rs.next();
-                if(val == true){
-                    candidatos = rs;
-                    return candidatos;
-                }
                 candidatos = rs;
-            }
+
             c.commit();
             c.close();
         } catch (Exception ex) {
@@ -455,7 +537,7 @@ public class PostgreSQLJDBC {
         return elementosCandidatura;
     }
 
-    public void RemovePessoaCandidatura(String num_cc, String nomeLista) throws SQLClientInfoException {
+    public void RemovePessoaCandidatura(String num_cc) throws SQLClientInfoException {
         Connection c = connectDB();
         Statement stmt = null;
         PreparedStatement myStmt;
@@ -551,9 +633,27 @@ public class PostgreSQLJDBC {
         PreparedStatement myStmt;
         try {
             stmt = c.createStatement();
-            String sql = "UPDATE eleicao " +
-                    "SET titulo = '" + tituloAlteracao + "', descricao = '" + descricaoAlteracao + "', data_inicio = '" + data_inicio + "', data_fim = '" + data_fim + "'" +
-                    "WHERE id = '" + opcaoEleicao + "'";
+            String sql;
+            if(data_inicio != null && data_fim != null) {
+                sql = "UPDATE eleicao " +
+                        "SET titulo = '" + tituloAlteracao + "', descricao = '" + descricaoAlteracao + "', data_inicio = '" + data_inicio + "', data_fim = '" + data_fim + "'" +
+                        "WHERE id = '" + opcaoEleicao + "'";
+            }
+            else if(data_inicio != null) {
+                sql = "UPDATE eleicao " +
+                        "SET titulo = '" + tituloAlteracao + "', descricao = '" + descricaoAlteracao + "', data_inicio = '" + data_inicio + "'" +
+                        "WHERE id = '" + opcaoEleicao + "'";
+            }
+            else if(data_fim != null) {
+                sql = "UPDATE eleicao " +
+                        "SET titulo = '" + tituloAlteracao + "', descricao = '" + descricaoAlteracao + "', data_fim = '" + data_fim + "'" +
+                        "WHERE id = '" + opcaoEleicao + "'";
+            }
+            else {
+                sql = "UPDATE eleicao " +
+                        "SET titulo = '" + tituloAlteracao + "', descricao = '" + descricaoAlteracao + "'" +
+                        "WHERE id = '" + opcaoEleicao + "'";
+            }
 
             myStmt = c.prepareStatement(sql);
             myStmt.executeUpdate();
@@ -566,6 +666,34 @@ public class PostgreSQLJDBC {
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.exit(0);
         }
+    }
+
+    public int getIdPartido(String nomePartido) throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        int idPartido = 0;
+
+        try {
+            //Buscar o valor do último Id que está na tabela
+            stmt = c.createStatement();
+            String sqlIDEleicao = "SELECT id " + "FROM lista_candidatos " + "WHERE nomecandidato = '" + nomePartido + "'";
+            ResultSet rs = stmt.executeQuery(sqlIDEleicao);
+
+            while (rs.next()){
+                idPartido = rs.getInt(1);
+            }
+
+
+
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch (Exception ex) {
+            System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
+            System.exit(0);
+        }
+        return idPartido;
+
     }
 
     public ResultSet findPessoa(String num_cc) throws SQLClientInfoException{
@@ -750,26 +878,31 @@ public class PostgreSQLJDBC {
 
     }
 
-    public void criaNovoCandidato(int idCandidato, Candidato cand, int opcaoEleicao) throws SQLClientInfoException {
+    public void criaNovoCandidato(Candidato cand, int opcaoEleicao) throws SQLClientInfoException {
         Connection c = connectDB();
         Statement stmt = null;
         PreparedStatement myStmt;
         try {
 
             stmt = c.createStatement();
-            String sql = "INSERT INTO lista_candidatos (id, nomecandidato, categoria,eleicao_id) "
-                    + "VALUES (?,?,?,?);";
+            //String sql = "INSERT INTO lista_candidatos (id, nomecandidato, categoria,eleicao_id) "
+            //        + "VALUES (?,?,?,?);";
+
+            String sql = "INSERT INTO lista_candidatos (nomecandidato, categoria,eleicao_id) "
+                    + "VALUES (?,?,?);";
 
             myStmt = c.prepareStatement(sql);
 
 
-            //
-            myStmt.setInt(1, idCandidato);
+
+            /*myStmt.setInt(1, idCandidato);
             myStmt.setString(2, cand.getNome());
             myStmt.setString(3, cand.getCategoria());
-            myStmt.setInt(4, opcaoEleicao);
+            myStmt.setInt(4, opcaoEleicao);*/
 
-
+            myStmt.setString(1, cand.getNome());
+            myStmt.setString(2, cand.getCategoria());
+            myStmt.setInt(3, opcaoEleicao);
 
             myStmt.executeUpdate();
 
@@ -814,23 +947,24 @@ public class PostgreSQLJDBC {
 
     }
 
-    public void criaVoto(int idVoto, String local, int idEleicao, String num_cc) throws SQLClientInfoException{
+    public void criaVoto(int idVoto, String local, int idEleicao, String num_cc) throws SQLClientInfoException {
         Connection c = connectDB();
         Statement stmt = null;
         PreparedStatement myStmt;
+        Timestamp horaVoto = new Timestamp(System.currentTimeMillis());
         try {
 
             stmt = c.createStatement();
-            String sql = "INSERT INTO voto (id_voto, local_voto, eleicao_id, pessoa_num_cc) "
-                    + "VALUES (?, ?, ?, ?);";
+            String sql = "INSERT INTO voto (id_voto, local_voto, hora_voto, eleicao_id, pessoa_num_cc) "
+                    + "VALUES (?, ?, ?, ?, ?);";
 
             myStmt = c.prepareStatement(sql);
 
             myStmt.setInt(1, idVoto);
             myStmt.setString(2, local);
-            myStmt.setInt(3, idEleicao);
-            myStmt.setString(4, num_cc);
-
+            myStmt.setInt(4, idEleicao);
+            myStmt.setString(5, num_cc);
+            myStmt.setTimestamp(3, horaVoto);
             myStmt.executeUpdate();
 
             myStmt.close();
@@ -838,7 +972,7 @@ public class PostgreSQLJDBC {
             c.commit();
             c.close();
         } catch (Exception e) {
-            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
     }
@@ -907,17 +1041,16 @@ public class PostgreSQLJDBC {
 
             for (int i = 0; i < candidatoNulo.size(); i++){
                 stmt = c.createStatement();
-                String sql = "INSERT INTO lista_candidatos (id, nomecandidato, categoria,eleicao_id) "
-                        + "VALUES (?,?,?,?);";
+                String sql = "INSERT INTO lista_candidatos (nomecandidato, categoria,eleicao_id) "
+                        + "VALUES (?,?,?);";
 
                 myStmt = c.prepareStatement(sql);
                 idCandidato++;
 
                 //
-                myStmt.setInt(1, idCandidato);
-                myStmt.setString(2, candidatoNulo.get(i).getNome());
-                myStmt.setString(3, candidatoNulo.get(i).getCategoria());
-                myStmt.setInt(4, idEleicao);
+                myStmt.setString(1, candidatoNulo.get(i).getNome());
+                myStmt.setString(2, candidatoNulo.get(i).getCategoria());
+                myStmt.setInt(3, idEleicao);
 
                 myStmt.executeUpdate();
                 myStmt.close();
@@ -1091,7 +1224,7 @@ public class PostgreSQLJDBC {
         ResultSet listaVotos = null;
         try {
             stmt = c.createStatement();
-            String sql = "SELECT local_voto, hora_voto, pessoa_num_cc, nome, titulo FROM voto, pessoa, eleicao " +
+            String sql = "SELECT local_voto, hora_voto, pessoa_num_cc, eleicao_id FROM voto, pessoa, eleicao " +
                     "WHERE pessoa_num_cc = num_cc AND eleicao_id = id " +
                     "ORDER BY id_voto, eleicao_id";
 
@@ -1221,7 +1354,9 @@ public class PostgreSQLJDBC {
 
 
             }
-            myStmt.close();
+            if(myStmt != null) {
+                myStmt.close();
+            }
             stmt.close();
             c.commit();
             c.close();
@@ -1259,7 +1394,7 @@ public class PostgreSQLJDBC {
             System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
             System.exit(0);
         }
-        System.out.println("Eleição Criada com sucesso");
+        //System.out.println("Eleição Criada com sucesso");
         return eleicoes;
     }
 
@@ -1284,5 +1419,148 @@ public class PostgreSQLJDBC {
             System.exit(0);
         }
         return numVotos;
+    }
+
+    public Pessoa findPessoaSpring(String num_cc) throws SQLClientInfoException{
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt = null;
+        Pessoa p = null;
+
+        try {
+            stmt = c.createStatement();
+            String sql = "SELECT * " + "FROM pessoa " + "WHERE num_cc = '" + num_cc + "'";
+
+            ResultSet rs = stmt.executeQuery(sql);
+
+            boolean val = rs.next();
+            String[] atributosPessoa = new String[8];
+
+
+            if (!val) return null;
+            else {
+                while (val) {
+                    atributosPessoa[0] = rs.getString("num_cc");
+                    atributosPessoa[1] = rs.getString("nome");
+                    atributosPessoa[2] = rs.getString("password");
+                    atributosPessoa[3] = rs.getString("funcao");
+                    atributosPessoa[4] = rs.getString("departamento");
+                    atributosPessoa[5] = String.valueOf(rs.getInt("num_telefone"));
+                    atributosPessoa[6] = rs.getString("morada");
+                    atributosPessoa[7] = String.valueOf(rs.getTimestamp("data_validade"));
+                    val = rs.next();
+
+                    p = new Pessoa(atributosPessoa[1], atributosPessoa[2], atributosPessoa[3], atributosPessoa[4], Integer.parseInt(atributosPessoa[5]), atributosPessoa[6], atributosPessoa[0], atributosPessoa[7]);
+
+                }
+            }
+            //myStmt.close();
+            //stmt.close();
+            c.commit();
+            c.close();
+
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+            System.exit(0);
+        }
+        return p;
+    }
+
+    public CopyOnWriteArrayList<Candidato> listaTodasCandidaturasSpring(int idEleicao) throws SQLClientInfoException {
+        Connection c = connectDB();
+        Statement stmt = null;
+        PreparedStatement myStmt;
+        CopyOnWriteArrayList<Candidato> listaTodosCandidatos = new CopyOnWriteArrayList<>();
+
+
+        try {
+            //Retorna todas as eleições a decorrer
+            stmt = c.createStatement();
+            //String sqlIDEleicao = "SELECT * FROM lista_candidatos WHERE eleicao_id = '" + idEleicao + "' AND nomecandidato not like 'Branco' AND nomecandidato not like 'Nulo'";
+            String sqlIDEleicao = "SELECT * FROM lista_candidatos WHERE eleicao_id = '" + idEleicao + "'";
+            ResultSet rs = stmt.executeQuery(sqlIDEleicao);
+
+            String nomeCandidato, nomePessoa, categoria;
+            int idCandidato, num_votos;
+            int num_cc;
+
+            String num_ccPessoa;
+
+
+            ArrayList<Integer> listaIDCandidatos = new ArrayList<>();
+            boolean val = rs.next();
+            if (val == false){ //Se retornar FALSE significa que nao ha candidatos
+
+                System.out.println("É NULL");
+                return listaTodosCandidatos;
+            }
+            else{
+                while (val) {
+                    idCandidato = rs.getInt(1);
+                    nomeCandidato = rs.getString("nomecandidato");
+                    num_votos = rs.getInt("num_votos");
+                    categoria = rs.getString("categoria");
+
+                    listaIDCandidatos.add(idCandidato);
+
+                    Candidato cand = new Candidato(nomeCandidato, categoria, null);
+                    cand.setNumVotos(num_votos);
+                    listaTodosCandidatos.add(cand);
+                    val = rs.next();
+
+                }
+
+            }//Ja tenho todos os id's dos candidatos daquela eleicao agr vou buscar as pessoas
+
+            for (int i = 0; i < listaIDCandidatos.size(); i++){
+                ArrayList<Pessoa> listaPessoasCandidatura = new ArrayList<>();
+
+                System.out.println("CANDIDATO: " + listaTodosCandidatos.get(i).getNome() + " " + listaIDCandidatos.get(i));
+                stmt = c.createStatement();
+                System.out.println();
+                String sqlPessoas = "SELECT pessoa_num_cc, nome FROM pessoa_lista_candidatos, pessoa WHERE lista_candidatos_id = " + listaIDCandidatos.get(i)+ " AND pessoa_num_cc = num_cc";
+                rs = stmt.executeQuery(sqlPessoas);
+
+
+                boolean val1 = rs.next();
+                if (val1 == false) {
+                    System.out.println("-> NAO TEM PESSOAS A CANDIDATURA " + listaIDCandidatos.get(i));
+                    listaPessoasCandidatura = null;
+                }
+                else{
+                    while (val1) {
+                        Pessoa p;
+                        num_cc = rs.getInt(1);
+                        nomePessoa = rs.getString("nome");
+
+                        num_ccPessoa = String.valueOf(num_cc);
+
+                        //Encontrar Pessoa pelo num_cc
+                        p = findPessoaSpring(num_ccPessoa);
+                        System.out.println("PESSOA ENCONTRADA: " + p.getNome());
+
+                        //Adicionar Pessoa à lista das pessoas
+                        listaPessoasCandidatura.add(p);
+
+                        System.out.println("\t\t PESSOA: " + nomePessoa + " NUM_CC: " + num_cc);
+
+                        val1 = rs.next();
+
+                        //No fim adicionar à lista dos candidatos a lista das pessoas
+                    }
+                }
+                //AQUI!
+                listaTodosCandidatos.get(i).setLista_pessoas(listaPessoasCandidatura);
+            }
+            c.commit();
+            c.close();
+
+        } catch (Exception ex) {
+            System.err.println( ex.getClass().getName()+": "+ ex.getMessage() );
+            System.exit(0);
+        }
+
+
+        return listaTodosCandidatos;
     }
 }

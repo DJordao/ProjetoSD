@@ -41,20 +41,28 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		mClient.print_on_client("Olá do server");
 	}
 
+	public int getIdPartido(String nomePartido) throws SQLException, RemoteException {
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+
+		int idPartido;
+		idPartido = db.getIdPartido(nomePartido);
+		return idPartido;
+	}
 
 	@Override
-	public Pessoa registaPessoa(Pessoa p) throws RemoteException, SQLClientInfoException {
+	public void registaPessoa(Pessoa p) throws RemoteException, SQLClientInfoException {
 		//Inserir na tabela das pessoas a pessoa recebida
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
 		db.connectDB();
 		db.InsertPessoas(p);
 
-		client.print_on_client("Server: Registo feito com sucesso");
-		return p;
+		//client.print_on_client("Server: Registo feito com sucesso");
+		//return p;
 	}
 
 	@Override
-	public Eleicao criaEleicao(Eleicao e) throws RemoteException, SQLClientInfoException {
+	public void criaEleicao(Eleicao e) throws RemoteException, SQLClientInfoException {
 		//Inserir na tabela das eleições a eleiçao recebida
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
 		db.connectDB();
@@ -62,8 +70,8 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		db.InsertElectionCandidatos(e);
 		db.InsertDepartamentoEleicao(idEleicao, e);
 
-		client.print_on_client("Server: Eleição criada com sucesso");
-		return e;
+		//client.print_on_client("Server: Eleição criada com sucesso");
+		//return e;
 	}
 
 	@Override
@@ -87,6 +95,44 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		}
 
 	}
+
+	@Override
+	public CopyOnWriteArrayList<Object> ListaEleicoesSpring() throws RemoteException, SQLException {
+		//Lista todas as eleicoes a decorrer
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+		ResultSet rs = db.listaEleicoes(); //Retorna a lista de eleições
+		int id;
+		String titulo, tipo, departamento;
+		Timestamp data_inicio;
+
+		CopyOnWriteArrayList<Object> listaEleicoes = new CopyOnWriteArrayList<>();
+		boolean val = rs.next();
+
+		if (val == false) return null;
+		else{
+			while (val) {
+				CopyOnWriteArrayList<String> listaDep = new CopyOnWriteArrayList<>();
+
+				id = rs.getInt(1);
+				titulo = rs.getString("titulo");
+				tipo = rs.getString("tipo");
+				departamento = rs.getString("departamento");
+				data_inicio = rs.getTimestamp("data_inicio");
+				listaDep.add(departamento);
+
+				Eleicao e = new Eleicao(data_inicio.toString(), null, titulo, null, tipo, listaDep, id);
+				//O RESULTADO CORRESPONDE AO ID DA ELEIÇÃO JÁ QUE NAO SE SUA PARA MAIS NADA
+				listaEleicoes.add(e);
+
+				val = rs.next();
+			}
+
+		}
+		return listaEleicoes;
+	}
+
+
 
 	@Override
 	public boolean ListaEleicoesNaoComecadas() throws RemoteException, SQLException {
@@ -115,6 +161,49 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		return true;
 	}
 
+	public CopyOnWriteArrayList<Object> getEleicoesparaVoto(String num_cc) throws SQLException, RemoteException {
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+
+		Pessoa p = findPessoa(num_cc);
+		CopyOnWriteArrayList<Object> listaEleicoesAVotar = new CopyOnWriteArrayList<>();
+
+
+		//Saber quais eleicoes que pode votar
+		ArrayList<Integer> idEleicaoDisponivel = db.getEleicoesparaVotoSpring(p);
+		for (int i = 0; i < idEleicaoDisponivel.size(); i++){
+			Eleicao e = getEleicaoByID(idEleicaoDisponivel.get(i));
+			listaEleicoesAVotar.add(e);
+		}
+		return listaEleicoesAVotar;
+	}
+
+	@Override
+	public CopyOnWriteArrayList<Object> ListaEleicoesNaoComecadasSpring() throws RemoteException, SQLException {
+		//Lista todas as eleicoes que nao começaram
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+		ArrayList<Integer> listaIDEleicao = db.listaEleicoesNaoComecadasSpring(); //Retorna a lista de eleições
+		int id;
+		String titulo, tipo, departamento;
+		Timestamp data_inicio;
+
+		CopyOnWriteArrayList<Object> listaEleicoesNaoComecadas = new CopyOnWriteArrayList<>();
+
+		for (int i = 0; i < listaIDEleicao.size(); i++){
+			CopyOnWriteArrayList <String> listaDepEleicao = new CopyOnWriteArrayList<>();
+
+			Eleicao e = getEleicaoByID(listaIDEleicao.get(i));
+
+			listaDepEleicao = db.getDepEleicao(listaIDEleicao.get(i));
+			e.setDepartamento(listaDepEleicao);
+
+			listaEleicoesNaoComecadas.add(e);
+		}
+
+		return listaEleicoesNaoComecadas;
+	}
+
 	@Override
 	public void ListaEleicoesPassadas() throws RemoteException, SQLException {
 		//Lista todas as eleicoes a decorrer
@@ -136,6 +225,81 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		}
 
 	}
+
+
+	@Override
+	public CopyOnWriteArrayList<Object> ListaEleicoesPassadasSpring() throws RemoteException, SQLException {
+		//Lista todas as eleicoes passadas
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+		ResultSet rs = db.listaEleicoesPassadas(); //Retorna a lista de eleições passadas
+		int id;
+		String titulo, tipo, departamento;
+		Timestamp data_inicio;
+
+		CopyOnWriteArrayList<Object> listaEleicoesPassadas = new CopyOnWriteArrayList<>();
+
+
+		boolean val = rs.next();
+
+		if (val == false) return null;
+		else{
+			while (val) {
+				CopyOnWriteArrayList<String> listaDep = new CopyOnWriteArrayList<>();
+				id = rs.getInt(1);
+				titulo = rs.getString("titulo");
+				tipo = rs.getString("tipo");
+				departamento = rs.getString("departamento");
+				data_inicio = rs.getTimestamp("data_inicio");
+
+				listaDep.add(departamento);
+				Eleicao e = new Eleicao(data_inicio.toString(), null, titulo, null, tipo, listaDep, id);
+				listaEleicoesPassadas.add(e);
+
+				val = rs.next();
+
+			}
+
+		}
+		return listaEleicoesPassadas;
+	}
+
+	@Override
+	public CopyOnWriteArrayList<Object> ListaTodasCandidaturasSpring(String nomeEleicao) throws RemoteException, SQLException {
+		//Lista todas as eleicoes passadas
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+		CopyOnWriteArrayList<Candidato> listaCandidato = new CopyOnWriteArrayList<>();
+
+		int idEleicao = getIdEleicao(nomeEleicao);
+
+
+		listaCandidato = db.listaTodasCandidaturasSpring(idEleicao);
+
+
+		for (int i = 0; i < listaCandidato.size(); i++){
+			System.out.println("-.-.-.-.-.-.-.-.-.-.-.");
+			System.out.println(listaCandidato.get(i).getNome());
+			System.out.println(listaCandidato.get(i).getCategoria());
+			if (listaCandidato.get(i).getLista_pessoas() != null){
+				for (int j = 0; j < listaCandidato.get(i).getLista_pessoas().size(); j++){
+					System.out.println(listaCandidato.get(i).getLista_pessoas().get(j).getNome());
+					System.out.println(listaCandidato.get(i).getLista_pessoas().get(j).getNum_cc());
+					System.out.println("= == == == == == == == == ");
+				}
+			}else{
+				System.out.println("\t Este candidato " + listaCandidato.get(i).getNome() + "noa tem pessoas associadas");
+			}
+		}
+		CopyOnWriteArrayList<Object> aux = new CopyOnWriteArrayList<>();
+		for(int i = 0; i < listaCandidato.size(); i++) {
+			aux.add(listaCandidato.get(i));
+		}
+
+		return aux;
+	}
+
+
 
 	@Override
 	public int maxEleicoes() throws RemoteException, SQLException {
@@ -199,12 +363,12 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	}
 
 	@Override
-	public String[] ListaPessoasParaCandidatura(int opcaoEleicao) throws SQLException, RemoteException {
+	public String[] ListaPessoasParaCandidatura() throws SQLException, RemoteException {
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
 		db.connectDB();
 		String[] numCC_pessoas = new String[10];
 		int i = 0;
-		ResultSet rs = db.listaPessoasParaCandidatura(opcaoEleicao); //Retorna a lista de pessoas que podem ser adicionadas a uma certa candidatura
+		ResultSet rs = db.listaPessoasParaCandidatura(); //Retorna a lista de pessoas que podem ser adicionadas a uma certa candidatura
 
 		String nomeCandidato, num_cc;
 
@@ -215,7 +379,7 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 			numCC_pessoas[i] = num_cc;
 			i++;
 
-			client.displayListaPessoasParaCandidatura(num_cc, nomeCandidato);
+			//client.displayListaPessoasParaCandidatura(num_cc, nomeCandidato);
 		}
 		return numCC_pessoas;
 	}
@@ -247,18 +411,18 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 			dadosElementosCandidatura += num_cc;
 			dadosElementosCandidatura += " ";
 
-			client.displayListaElementosCandidatura(num_cc, nome, nomeCandidato);
+			//client.displayListaElementosCandidatura(num_cc, nome, nomeCandidato);
 		}
 		return dadosElementosCandidatura;
 	}
 
 	@Override
-	public void RemovePessoaCandidatura(String num_cc, String nomeLista) throws RemoteException, SQLException {
+	public void RemovePessoaCandidatura(String num_cc) throws RemoteException, SQLException {
 		//Remove na tabela das lista dos candidatos a pessoa recebida
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
 		db.connectDB();
-		db.RemovePessoaCandidatura(num_cc, nomeLista);
-		client.print_on_client("Pessoa removida com sucesso");
+		db.RemovePessoaCandidatura(num_cc);
+		//client.print_on_client("Pessoa removida com sucesso");
 	}
 
 	@Override
@@ -307,7 +471,7 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
 		db.connectDB();
 		db.UpdatePropriedadesEleicao(opcaoEleicao, tituloAlteracao, descricaoAlteracao, data_inicio, data_fim);
-		client.print_on_client("Update com sucesso\n");
+		//client.print_on_client("Update com sucesso\n");
 	}
 
 	@Override
@@ -510,11 +674,11 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 	}
 
 	@Override
-	public void criaNovoCandidato(int idCandidato, Candidato c, int opcaoEleicao) throws RemoteException, SQLException {
+	public void criaNovoCandidato(Candidato c, int opcaoEleicao) throws RemoteException, SQLException {
 		//Inserir na tabela dos candidatos o novo candidato
 		PostgreSQLJDBC db = new PostgreSQLJDBC();
 		db.connectDB();
-		db.criaNovoCandidato(idCandidato, c, opcaoEleicao);
+		db.criaNovoCandidato(c, opcaoEleicao);
 		System.out.println("Candidato criado com sucesso");
 	}
 
@@ -584,6 +748,47 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 			System.out.println("-> " + listaVotos.get(i).getNum_cc());
 		}
 
+		return listaVotos;
+	}
+
+	@Override
+	public CopyOnWriteArrayList<Object> getListaVotosSpring() throws RemoteException, SQLException {
+		//Retorna a tabela de votos
+		CopyOnWriteArrayList<Object> listaVotos = new CopyOnWriteArrayList<>();
+		PostgreSQLJDBC db = new PostgreSQLJDBC();
+		db.connectDB();
+
+		ResultSet rs = db.getListaVotos();
+		boolean val = rs.next();
+
+		String[] atributosTabelaVotos = new String[5];
+
+		System.out.println("VAL votos: " + val);
+		if (val == false) return null;
+		else {
+			while (val) {
+				System.out.println("entrei");
+				System.out.println("atributos");
+				atributosTabelaVotos[0] = rs.getString("local_voto");
+				atributosTabelaVotos[1] = rs.getString("hora_voto");
+				atributosTabelaVotos[2] = rs.getString("pessoa_num_cc");
+				atributosTabelaVotos[3] = rs.getString("eleicao_id");
+
+				if (atributosTabelaVotos[1] == null) {
+					Voto v = new Voto(atributosTabelaVotos[3], atributosTabelaVotos[2], atributosTabelaVotos[0], null);
+					listaVotos.add(v);
+
+				} else {
+					Voto v = new Voto(atributosTabelaVotos[3], atributosTabelaVotos[2], atributosTabelaVotos[0], Timestamp.valueOf(atributosTabelaVotos[1]));
+					listaVotos.add(v);
+					System.out.println("entrei else");
+				}
+				val = rs.next();
+				System.out.println("fim");
+			}
+		}
+		Voto v = (Voto) listaVotos.get(0);
+		System.out.println("aaa" + v.getNum_cc());
 		return listaVotos;
 	}
 
@@ -745,12 +950,12 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 
 		try {
 			socket = new DatagramSocket();
-			socket.setSoTimeout(3000);
+			socket.setSoTimeout(13000);
 			String heartBeat = "Servidor primário está vivo!";
 			byte[] m = heartBeat.getBytes();
 
 			while (true) {
-				Thread.sleep((3000)); //A cada 3s manda uma mensagem ao  de uma resposta
+				Thread.sleep((13000)); //A cada 3s manda uma mensagem ao  de uma resposta
 				System.out.println(heartBeat);
 
 				InetAddress host = InetAddress.getByName("localhost");
@@ -764,7 +969,7 @@ public class RMI_Server extends UnicastRemoteObject implements RMInterface {
 					socket.receive(reply);
 					System.out.println("Recebeu: " + new String(reply.getData(), 0, reply.getLength()));
 				} catch (SocketTimeoutException s) {
-					System.out.println("Não recebeu resposta...");
+					//System.out.println("Não recebeu resposta...");
 				}
 			}
 

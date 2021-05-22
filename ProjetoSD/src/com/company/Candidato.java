@@ -17,6 +17,8 @@ public class Candidato implements Serializable{
         this.numVotos = 0;
     }
 
+    public Candidato() { this(null, null, null); }
+
     public String getNome() {
         return nome;
     }
